@@ -1,6 +1,6 @@
 import os
 
-from scrapper.base import InstaScrapper
+from scrapper.insta_scrapper import InstaScrapper
 
 BASE_URL = 'https://www.instagram.com'
 
@@ -36,10 +36,6 @@ class InstaBot:
         self.scrapper = scrapper
 
     def start(self):
-        self.init_scraping()
-        self.login()
-
-    def init_scraping(self):
         self.scrapper.reach_website()
 
     def login(self):
@@ -48,8 +44,8 @@ class InstaBot:
     def logout(self):
         self.scrapper.logout()
 
-    def upload_picture(self, image_path):
-        self.scrapper.upload_picture(image_path)
+    def upload_picture(self, image_path, comment):
+        self.scrapper.upload_picture(image_path, comment)
 
     def comment(self):
         pass
@@ -66,4 +62,6 @@ if __name__ == '__main__':
     bot = InstaBot(scrapper, 'discovrar', 'discorvd')
     bot.start()
 
-    bot.upload_picture(IMAGE_TEST_PATH)
+    # actions
+    bot.login()
+    bot.upload_picture(IMAGE_TEST_PATH, '#chiche #bombom #pp')

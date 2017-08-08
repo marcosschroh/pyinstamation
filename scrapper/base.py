@@ -1,3 +1,5 @@
+import time
+
 from selenium import webdriver
 
 
@@ -32,45 +34,17 @@ class BaseScrapper:
         self.wait(3)
 
     def wait(self, sleep_time=SLEEP_TIME):
+        """
+        Implicit wait
+        """
         self.browser.implicitly_wait(sleep_time)
+
+    @staticmethod
+    def wait_explicit(seconds=3):
+        time.sleep(seconds)
 
     def resize_window(self, width, heigth):
         self.browser.set_window_size(width, heigth)
 
     def to_mobile_dimension(self):
         self.resize_window(self.MOBILE_WIDTH, self.MOBILE_HEIGTH)
-
-
-class InstaScrapper(BaseScrapper):
-
-    def login(self, username, password):
-        # self.browser.find_element_by_class_name('_fcn8k').click()
-        self.browser.find_element_by_xpath("//article/div/div/p/a[text()='Log in']").click()
-        self.wait(2)
-
-        username_input = self.browser.find_element_by_xpath("//input[@name='username']")
-        password_input = self.browser.find_element_by_xpath("//input[@name='password']")
-
-        username_input.send_keys(username)
-        password_input.send_keys(password)
-
-        self.browser.implicitly_wait(self.SLEEP_TIME)
-        self.browser.find_element_by_xpath("//form/span/button[text()='Log in']").click()
-
-        print('Welkome... in DUTCH {0}'.format(username))
-
-        self.wait(5)
-
-    def logout(self):
-        self._close_browser()
-
-    def upload_picture(self, image_path):
-        print('uploading picture...', image_path)
-
-        # simulate the click in the Camera Logo
-        image_input = self.browser.find_element_by_class_name('coreSpriteCameraInactive').click()
-        self.wait(5)
-
-        image_input = self.browser.find_element_by_class_name('_loq3v')
-        image_input.send_keys(image_path)
-        self.wait(4)
