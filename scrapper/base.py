@@ -44,7 +44,8 @@ class BaseScrapper:
 class InstaScrapper(BaseScrapper):
 
     def login(self, username, password):
-        self.browser.find_element_by_class_name('_fcn8k').click()
+        # self.browser.find_element_by_class_name('_fcn8k').click()
+        self.browser.find_element_by_xpath("//article/div/div/p/a[text()='Log in']").click()
         self.wait(2)
 
         username_input = self.browser.find_element_by_xpath("//input[@name='username']")
@@ -54,7 +55,7 @@ class InstaScrapper(BaseScrapper):
         password_input.send_keys(password)
 
         self.browser.implicitly_wait(self.SLEEP_TIME)
-        self.browser.find_element_by_class_name('_ah57t').click()
+        self.browser.find_element_by_xpath("//form/span/button[text()='Log in']").click()
 
         print('Welkome... in DUTCH {0}'.format(username))
 

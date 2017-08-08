@@ -63,7 +63,7 @@ class InstaBot:
 
 if __name__ == '__main__':
     scrapper = InstaScrapper(BASE_URL)
-    bot = InstaBot(scrapper, 'username', 'password')
+    bot = InstaBot(scrapper, 'discovrar', 'discorvd')
     bot.start()
 
     bot.upload_picture(IMAGE_TEST_PATH)
