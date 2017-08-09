@@ -46,7 +46,10 @@ class InstaBot:
             self._user_login = True
 
     def logout(self):
-        self.scrapper.logout()
+        if self.user_login:
+            self.scrapper.logout()
+        else:
+            print('login first alsjeblieft')
 
     @property
     def user_login(self):
@@ -73,8 +76,7 @@ if __name__ == '__main__':
         try:
             CONFIG = yaml.load(stream)
         except yaml.YAMLError as exc:
-            print(exc)
-            sys.exit()
+            sys.exit(exc)
 
     scrapper = InstaScrapper(CONFIG.get('site_url'))
     bot = InstaBot(scrapper, CONFIG.get('username'), CONFIG.get('password'))
