@@ -1,4 +1,6 @@
 import os
+import sys
+import yaml
 
 from scrapper.insta_scrapper import InstaScrapper
 
@@ -58,8 +60,15 @@ class InstaBot:
 
 
 if __name__ == '__main__':
+    with open("config.yaml", 'r') as stream:
+        try:
+            CONFIG = yaml.load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+            sys.exit()
+
     scrapper = InstaScrapper(BASE_URL)
-    bot = InstaBot(scrapper, 'discovrar', 'discorvd')
+    bot = InstaBot(scrapper, CONFIG.get('username'), CONFIG.get('password'))
     bot.start()
 
     # actions

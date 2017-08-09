@@ -1,1 +1,2 @@
 selenium==3.4.3
+PyYAML==3.12
