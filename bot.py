@@ -4,8 +4,6 @@ import yaml
 
 from scrapper.insta_scrapper import InstaScrapper
 
-BASE_URL = 'https://www.instagram.com'
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 IMAGE_TEST_PATH = os.path.join(BASE_DIR, 'scrapper', 'chiche.jpg')
@@ -36,18 +34,29 @@ class InstaBot:
         self.username = username
         self.password = password
         self.scrapper = scrapper
+        self._user_login = False
 
-    def start(self):
+        self.reach_website()
+
+    def reach_website(self):
         self.scrapper.reach_website()
 
     def login(self):
-        self.scrapper.login(self.username, self.password)
+        if self.scrapper.login(self.username, self.password):
+            self._user_login = True
 
     def logout(self):
         self.scrapper.logout()
 
+    @property
+    def user_login(self):
+        return self._user_login
+
     def upload_picture(self, image_path, comment):
         self.scrapper.upload_picture(image_path, comment)
+
+    def start(self):
+        pass
 
     def comment(self):
         pass
@@ -67,9 +76,8 @@ if __name__ == '__main__':
             print(exc)
             sys.exit()
 
-    scrapper = InstaScrapper(BASE_URL)
+    scrapper = InstaScrapper(CONFIG.get('site_url'))
     bot = InstaBot(scrapper, CONFIG.get('username'), CONFIG.get('password'))
-    bot.start()
 
     # actions
     bot.login()

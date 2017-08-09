@@ -21,7 +21,11 @@ class InstaScrapper(BaseScrapper):
 
         print('Welkome... in DUTCH {0}'.format(username))
 
-        self.wait(10)
+        self.wait_explicit(10)
+
+        if self.browser.get_cookie('sessionid'):
+            return True
+        return False
 
     def logout(self):
         self._close_browser()
