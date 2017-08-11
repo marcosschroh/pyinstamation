@@ -15,8 +15,6 @@ class BaseScrapper:
         self.website_url = website_url
         self.browser = self._open_mobile_browser()
 
-        self.browser = self._open_mobile_browser()
-
     def _open_browser(self):
         return webdriver.Chrome()
 

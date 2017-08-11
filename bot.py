@@ -35,6 +35,8 @@ class InstaBot:
         self.password = password
         self.scrapper = scrapper
         self._user_login = False
+        self.followers = 0
+        self.following = 0
 
         self.reach_website()
 
@@ -64,10 +66,17 @@ class InstaBot:
     def comment(self):
         pass
 
-    def follow(self, user_id):
-        pass
+    def follow_user(self, username):
+        if self._user_login:
+            if self.scrapper.follow_user(username):
+                self.following += 1
 
-    def unfollow(self, user_id):
+    def unfollow_user(self, username):
+        if self._user_login:
+            if self.scrapper.unfollow_user(username):
+                self.following -= 1
+
+    def follow_user_list(self, usernema_list):
         pass
 
 
@@ -83,4 +92,5 @@ if __name__ == '__main__':
 
     # actions
     bot.login()
-    bot.upload_picture(IMAGE_TEST_PATH, '#chiche #bombom #pp')
+    bot.unfollow_user('woile')
+    # bot.upload_picture(IMAGE_TEST_PATH, '#chiche #bombom #pp')
