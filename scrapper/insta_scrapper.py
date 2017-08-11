@@ -19,7 +19,7 @@ class InstaScrapper(BaseScrapper):
         self.browser.implicitly_wait(self.SLEEP_TIME)
         self.browser.find_element_by_xpath(instagram_const.LOGIN_BUTTON).click()
 
-        print('Welkome... in DUTCH {0}'.format(username))
+        print('Welkome... {0}'.format(username))
 
         self.wait_explicit(10)
 

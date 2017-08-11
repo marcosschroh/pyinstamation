@@ -1,0 +1,20 @@
+#!/bin/bash
+arch=$(getconf LONG_BIT)
+kernel=$(uname)
+
+if [ $kernel == "Darwin" ]; then
+    echo "OSX"
+    curl -o chromedriver.zip -O https://chromedriver.storage.googleapis.com/2.31/chromedriver_mac64.zip
+else
+    if [ $arch == "64" ]; then
+        curl -o chromedriver.zip https://chromedriver.storage.googleapis.com/2.31/chromedriver_linux64.zip
+    else
+        curl -o chromedriver.zip https://chromedriver.storage.googleapis.com/2.31/chromedriver_linux32.zip
+    fi
+fi
+
+unzip chromedriver.zip
+rm chromedriver.zip
+chmod +x chromedriver
+mkdir assets
+mv chromedriver ./assets/chromedriver

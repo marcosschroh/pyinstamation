@@ -2,6 +2,8 @@ import time
 
 from selenium import webdriver
 
+DRIVER_LOCATION = './assets/chromedriver'
+
 
 class BaseScrapper:
 
@@ -23,8 +25,15 @@ class BaseScrapper:
     def _open_mobile_browser(self):
         mobile_emulation = {"deviceName": "Nexus 5"}
         chrome_options = webdriver.ChromeOptions()
+        # chrome_options.add_argument('--dns-prefetch-disable')
+        # chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--lang=es-ES')
         chrome_options.add_experimental_option("mobileEmulation", mobile_emulation)
-        return webdriver.Chrome(desired_capabilities=chrome_options.to_capabilities())
+        # chrome_prefs = {
+        #     'intl.accept_languages': 'en-US'
+        # }
+        # chrome_options.add_experimental_option('prefs', chrome_prefs)
+        return webdriver.Chrome(DRIVER_LOCATION, desired_capabilities=chrome_options.to_capabilities())
 
     def _close_browser(self):
         self.browser.close()

@@ -1,2 +1,4 @@
 *.pyc
+chromedriver
 __pycache__/
+config.yaml
