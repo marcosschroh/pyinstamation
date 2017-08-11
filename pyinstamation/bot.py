@@ -1,8 +1,7 @@
 import os
 import sys
 import yaml
-
-import log
+import logging
 
 from scrapper.insta_scrapper import InstaScrapper
 
@@ -10,7 +9,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 IMAGE_TEST_PATH = os.path.join(BASE_DIR, 'scrapper', 'chiche.jpg')
 
-logger = log.setup_logger('main')
+logger = logging.getLogger(__name__)
 
 
 class InstaBot:
