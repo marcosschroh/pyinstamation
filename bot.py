@@ -2,11 +2,15 @@ import os
 import sys
 import yaml
 
+import log
+
 from scrapper.insta_scrapper import InstaScrapper
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 IMAGE_TEST_PATH = os.path.join(BASE_DIR, 'scrapper', 'chiche.jpg')
+
+logger = log.setup_logger('main')
 
 
 class InstaBot:
@@ -38,10 +42,14 @@ class InstaBot:
         self.followers = 0
         self.following = 0
 
-        self.reach_website()
+        self._configure_log()
+        self._reach_website()
 
-    def reach_website(self):
+    def _reach_website(self):
         self.scrapper.reach_website()
+
+    def _configure_log(self):
+        logger.info('Iniciando bot....')
 
     def login(self):
         if self.scrapper.login(self.username, self.password):
@@ -51,7 +59,7 @@ class InstaBot:
         if self.user_login:
             self.scrapper.logout()
         else:
-            print('login first alsjeblieft')
+            logger.info('login first alsjeblieft')
 
     @property
     def user_login(self):
@@ -76,8 +84,13 @@ class InstaBot:
             if self.scrapper.unfollow_user(username):
                 self.following -= 1
 
-    def follow_user_list(self, usernema_list):
-        pass
+    def follow_multipleuser(self, username_list):
+        for username in username_list:
+            self.follow_user(username)
+
+    def unfollow_multipleuser(self, username_list):
+        for username in username_list:
+            self.unfollow_user(username)
 
 
 if __name__ == '__main__':
@@ -92,5 +105,6 @@ if __name__ == '__main__':
 
     # actions
     bot.login()
-    bot.unfollow_user('woile')
+    # bot.follow_user('woile')
+    # bot.unfollow_user('woile')
     # bot.upload_picture(IMAGE_TEST_PATH, '#chiche #bombom #pp')

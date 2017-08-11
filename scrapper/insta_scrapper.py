@@ -1,6 +1,10 @@
+import logging
+
 from scrapper.base import BaseScrapper
 
 from scrapper import instagram_const
+
+logger = logging.getLogger('main')
 
 
 class InstaScrapper(BaseScrapper):
