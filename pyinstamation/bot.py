@@ -56,9 +56,13 @@ class InstaBot:
 
     def logout(self):
         if self.user_login:
+            self.scrapper._get_my_profile_page()
             self.scrapper.logout()
         else:
             logger.info('login first alsjeblieft')
+
+    def _get_my_profile_page(self):
+        self.scrapper.get_my_profile_page(self.username)
 
     @property
     def user_login(self):
