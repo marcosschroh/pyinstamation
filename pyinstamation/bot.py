@@ -83,11 +83,11 @@ class InstaBot:
             if self.scrapper.unfollow_user(username):
                 self.following -= 1
 
-    def follow_multipleuser(self, username_list):
+    def follow_multiple_users(self, username_list):
         for username in username_list:
             self.follow_user(username)
 
-    def unfollow_multipleuser(self, username_list):
+    def unfollow_multiple_users(self, username_list):
         for username in username_list:
             self.unfollow_user(username)
 
@@ -105,7 +105,7 @@ if __name__ == '__main__':
     # actions
     bot.login()
     # bot.follow_user('woile')
-    # bot.follow_multipleuser(['woile', 'marcosschroh'])
+    # bot.follow_multiple_users(['woile', 'marcosschroh'])
     # bot.unfollow_user('woile')
-    # bot.unfollow_multipleuser(['woile', 'marcosschroh'])
+    # bot.unfollow_muliple_users(['woile', 'marcosschroh'])
     # bot.upload_picture(IMAGE_TEST_PATH, '#chiche #bombom #pp')
