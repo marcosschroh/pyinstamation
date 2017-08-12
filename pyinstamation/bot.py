@@ -113,6 +113,46 @@ class InstaBot:
         if self.scrapper.comment_post(post_link, comment):
             self.commented_post += 1
 
+    def comment_multiple_posts(self, posts_list, default_comment=None):
+        """
+        Expect a list of dictionaries where every dict
+        has the post link and the comment.
+
+        E.g.
+
+        [
+            {
+                'post': 'https://www.instagram.com/p/BXamBMihdBF/'
+                'comment': 'very nice'
+            },
+            {
+                'post': 'https://www.instagram.com/p/BXamBMihkdki9/'
+                'comment': '#awesome #trip'
+            },
+
+            ...
+
+        ]
+
+        If a dict has not the attribute comment it tries to use the 
+        default_comment key. If the default_comment is not present,
+        just skip.
+        """
+
+        current_commented_posts = self.commented_post
+
+        for post_object in posts_list:
+            post = post_object.get('post')
+            comment = post_object.get('post', default_comment)
+
+            if not post or not comment:
+                continue
+
+            self.comment_post(post, comment)
+
+        total_comments_made = self.commented_post - current_commented_posts
+        logger.info('Commented {0} of {1}'.format(total_comments_made, len(posts_list)))
+
 
 if __name__ == '__main__':
     with open("config.yaml", 'r') as stream:
