@@ -29,6 +29,9 @@ class InstaScrapper(BaseScrapper):
     def logout(self):
         self.close_browser()
 
+    def get_my_profile_page(self, my_username):
+        self.get_user_page(my_username)
+
     def upload_picture(self, image_path, comment):
         print('uploading picture...', image_path)
 
