@@ -27,12 +27,6 @@ class InstaBot:
     url_media_detail = 'https://www.instagram.com/p/%s/?__a=1'
     url_user_detail = 'https://www.instagram.com/%s/?__a=1'
 
-    # settings
-    USER_AGENT = ("Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 "
-                  "(KHTML, like Gecko) Chrome/48.0.2564.103 Safari/537.36")
-    ACCEPT_LANGUAGE = 'ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4'
-    SLEEP_TIME = 3
-
     def __init__(self, scrapper, username, password):
         self.username = username
         self.password = password
@@ -41,6 +35,7 @@ class InstaBot:
         self.followers = 0
         self.following = 0
         self.likes_given = 0
+        self.commented_post = 0
 
         self._configure_log()
         self._reach_website()
@@ -113,6 +108,10 @@ class InstaBot:
     def unlike_multiple_posts(self, post_link_list):
         for post in post_link_list:
             self.unlike_post(post)
+
+    def comment_post(self, post_link, comment):
+        if self.scrapper.comment_post(post_link, comment):
+            self.commented_post += 1
 
 
 if __name__ == '__main__':

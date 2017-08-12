@@ -24,3 +24,8 @@ SUCCESS_LIKE_POST_MESSAGE = "Now you like the post: {0}"
 FAIL_LIKE_POST_MESSAGE = "You already like the post: {0}"
 SUCCESS_UNLIKE_POST_MESSAGE = "Now you do not like the post: {0}"
 FAIL_UNLIKE_POST_MESSAGE = "You already do not like the post: {0}"
+
+# COMMENT POST
+REQUEST_NEW_COMMENT_BUTTON = "//a/span[contains(text(), 'Comment')]"
+SEND_COMMENT_BUTTON = "//form/button[contains(text(), 'Post')]"
+COMMENT_TEXTEAREA = "//form/textarea"

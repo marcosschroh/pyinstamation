@@ -139,3 +139,26 @@ class InstaScrapper(BaseScrapper):
             logger.info(fail_message.format(post_link))
             self.wait_explicit(seconds=3)
             return False
+
+    def comment_post(self, post_link, comment):
+        self.get_page(post_link)
+
+        request_comment_button = self.find('xpath', instagram_const.REQUEST_NEW_COMMENT_BUTTON)
+
+        request_comment_button.click()
+        self.wait_explicit(seconds=3)
+
+        textarea_comment = self.find('xpath', instagram_const.COMMENT_TEXTEAREA)
+        textarea_comment.click()
+        self.wait_explicit(seconds=3)
+
+        textarea_comment.send_keys(comment)
+        self.wait_explicit(seconds=5)
+
+        send_comment_button = self.find('xpath', instagram_const.SEND_COMMENT_BUTTON)
+        send_comment_button.click()
+        self.wait_explicit(seconds=3)
+
+        logger.info('Now you has commend the {0} post with {1}'.format(post_link, comment))
+
+        return True
