@@ -106,6 +106,14 @@ class InstaBot:
             if self.scrapper.unlike_post(post_link):
                 self.likes_given -= 1
 
+    def like_multiple_posts(self, post_link_list):
+        for post in post_link_list:
+            self.like_post(post)
+
+    def unlike_multiple_posts(self, post_link_list):
+        for post in post_link_list:
+            self.unlike_post(post)
+
 
 if __name__ == '__main__':
     with open("config.yaml", 'r') as stream:
@@ -123,6 +131,8 @@ if __name__ == '__main__':
     # bot.follow_multiple_users(['woile', 'marcosschroh'])
     # bot.unfollow_user('woile')
     # bot.unfollow_muliple_users(['woile', 'marcosschroh'])
-    # bot.like_post('')
-    # bot.unlike_post('')
+    # bot.like_post('https://www.instagram.com/p/BXamBMihdBF/')
+    # bot.like_multiple_posts(['https://www.instagram.com/p/BXamBMihdBF/'])
+    # bot.unlike_post('https://www.instagram.com/p/BXamBMihdBF/')
+    # bot.like_multiple_posts(['https://www.instagram.com/p/BXamBMihdBF/'])
     # bot.upload_picture(IMAGE_TEST_PATH, '#chiche #bombom #pp')

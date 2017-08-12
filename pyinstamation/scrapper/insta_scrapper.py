@@ -121,13 +121,13 @@ class InstaScrapper(BaseScrapper):
         self.get_page(post_link)
 
         button_text = instagram_const.UNLIKE_BUTTON_TEXT
-        success_message = 'Now you do not like the post: {0}'
-        fail_message = 'You already do not like the post: {0}'
+        success_message = instagram_const.SUCCESS_UNLIKE_POST_MESSAGE
+        fail_message = instagram_const.FAIL_UNLIKE_POST_MESSAGE
 
         if like:
             button_text = instagram_const.LIKE_BUTTON_TEXT
-            success_message = 'Now you like the post: {0}'
-            fail_message = 'You already like the post: {0}'
+            success_message = instagram_const.SUCCESS_LIKE_POST_MESSAGE
+            fail_message = instagram_const.FAIL_LIKE_POST_MESSAGE
 
         try:
             button = self.find('link_text', button_text, sleep_time=2)
@@ -137,5 +137,5 @@ class InstaScrapper(BaseScrapper):
             return True
         except NoSuchElementException:
             logger.info(fail_message.format(post_link))
-            self.wait_explicit(seconds=10)
+            self.wait_explicit(seconds=3)
             return False
