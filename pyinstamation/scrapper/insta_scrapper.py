@@ -35,30 +35,35 @@ class InstaScrapper(BaseScrapper):
         self.get_user_page(my_username)
 
     def upload_picture(self, image_path, comment):
-        print('uploading picture...', image_path)
+        logger.info('uploading picture...', image_path)
 
         # simulate the click in the Camera Logo
-        image_input = self.find('class_name', instagram_const.UPLOAD_PICTURE_CAMARA_CSS_CLASS)
+        image_input = self.find(
+            'class_name', instagram_const.UPLOAD_PICTURE_CAMARA_CSS_CLASS)
         image_input.click()
         # image_input = self.browser.find_element_by_class_name(instagram_const.UPLOAD_PICTURE_CAMARA_CSS_CLASS).click()
         # self.wait(5)
 
-        image_input = self.browser.find_element_by_xpath(instagram_const.UPLOAD_PICTURE_INPUT_FILE)
+        image_input = self.browser.find_element_by_xpath(
+            instagram_const.UPLOAD_PICTURE_INPUT_FILE)
         image_input.send_keys(image_path)
 
         self.wait_explicit()
-        self.browser.find_element_by_xpath(instagram_const.UPLOAD_PICTURE_NEXT_LINK).click()
+        self.browser.find_element_by_xpath(
+            instagram_const.UPLOAD_PICTURE_NEXT_LINK).click()
 
         # Set the comment
         self.wait_explicit(seconds=6)
-        comment_input = self.browser.find_element_by_xpath(instagram_const.UPLOAD_PICTURE_TEXTAREA_COMMENT)
+        comment_input = self.browser.find_element_by_xpath(
+            instagram_const.UPLOAD_PICTURE_TEXTAREA_COMMENT)
         comment_input.click()
 
         self.wait_explicit()
         comment_input.send_keys(comment)
 
         self.wait_explicit()
-        self.browser.find_element_by_xpath(instagram_const.UPLOAD_PICTURE_SHARE_LINK).click()
+        self.browser.find_element_by_xpath(
+            instagram_const.UPLOAD_PICTURE_SHARE_LINK).click()
 
     def get_user_page(self, username):
         url = "{0}/{1}".format(self.website_url, username)
@@ -88,18 +93,18 @@ class InstaScrapper(BaseScrapper):
                 self.wait_explicit(seconds=3)
                 return True
 
-            print('---> {} is already followed'.format(username))
+            logger.info('---> {} is already followed'.format(username))
             self.wait_explicit(seconds=10)
             return False
 
         # try to unfollow the suer
         if follow_button.text == 'Following':
             follow_button.click()
-            print('---> Now Unfollowing: {}'.format(username))
+            logger.info('---> Now Unfollowing: {}'.format(username))
             self.wait_explicit(seconds=3)
             return True
 
-        print('---> {} is already Unfollowed'.format(username))
+        logger.info('---> {} is already Unfollowed'.format(username))
         self.wait_explicit(seconds=10)
         return False
 

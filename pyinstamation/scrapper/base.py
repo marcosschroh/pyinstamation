@@ -36,8 +36,9 @@ class BaseScrapper:
             'intl.accept_languages': 'en-US'
         }
         chrome_options.add_experimental_option('prefs', chrome_prefs)
-        return webdriver.Chrome(DRIVER_LOCATION,
-                                desired_capabilities=chrome_options.to_capabilities())
+        return webdriver.Chrome(
+            DRIVER_LOCATION,
+            desired_capabilities=chrome_options.to_capabilities())
 
     def close_browser(self):
         logger.info('Closing...')
