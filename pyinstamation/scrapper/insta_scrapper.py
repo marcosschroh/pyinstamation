@@ -1,5 +1,7 @@
 import logging
 
+from selenium.common.exceptions import NoSuchElementException
+
 from .base import BaseScrapper
 
 from . import instagram_const
@@ -12,7 +14,7 @@ class InstaScrapper(BaseScrapper):
 
     def login(self, username, password):
         logger.info('[LOGIN] Starting...')
-        self.find('xpath', instagram_const.LOGIN_LINK, wait=False).click()
+        self.find('xpath', instagram_const.LOGIN_LINK).click()
 
         username_input = self.find('xpath', instagram_const.LOGIN_INPUT_USERNAME, wait=False)
         password_input = self.find('xpath', instagram_const.LOGIN_INPUT_PASSWORD, wait=False)
@@ -100,3 +102,35 @@ class InstaScrapper(BaseScrapper):
         print('---> {} is already Unfollowed'.format(username))
         self.wait_explicit(seconds=10)
         return False
+
+    def like_post(self, post_link):
+        self._like_unlike_process(post_link)
+
+    def unlike_post(self, post_link):
+        self._like_unlike_process(post_link, like=False)
+
+    def _like_unlike_process(self, post_link, like=True):
+        """
+        By default try to like a post.
+        """
+        self.get_page(post_link)
+
+        button_text = instagram_const.UNLIKE_BUTTON_TEXT
+        success_message = 'Now you do not like the post: {0}'
+        fail_message = 'You already do not like the post: {0}'
+
+        if like:
+            button_text = instagram_const.LIKE_BUTTON_TEXT
+            success_message = 'Now you like the post: {0}'
+            fail_message = 'You already like the post: {0}'
+
+        try:
+            button = self.find('link_text', button_text, sleep_time=2)
+            button.click()
+            logger.info(success_message.format(post_link))
+            self.wait_explicit(seconds=3)
+            return True
+        except NoSuchElementException:
+            logger.info(fail_message.format(post_link))
+            self.wait_explicit(seconds=10)
+            return False

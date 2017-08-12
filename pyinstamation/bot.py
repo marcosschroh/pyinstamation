@@ -40,6 +40,7 @@ class InstaBot:
         self._user_login = False
         self.followers = 0
         self.following = 0
+        self.likes_given = 0
 
         self._configure_log()
         self._reach_website()
@@ -95,6 +96,16 @@ class InstaBot:
         for username in username_list:
             self.unfollow_user(username)
 
+    def like_post(self, post_link):
+        if self.user_login:
+            if self.scrapper.like_post(post_link):
+                self.likes_given += 1
+
+    def unlike_post(self, post_link):
+        if self.user_login:
+            if self.scrapper.unlike_post(post_link):
+                self.likes_given -= 1
+
 
 if __name__ == '__main__':
     with open("config.yaml", 'r') as stream:
@@ -112,4 +123,6 @@ if __name__ == '__main__':
     # bot.follow_multiple_users(['woile', 'marcosschroh'])
     # bot.unfollow_user('woile')
     # bot.unfollow_muliple_users(['woile', 'marcosschroh'])
+    # bot.like_post('')
+    # bot.unlike_post('')
     # bot.upload_picture(IMAGE_TEST_PATH, '#chiche #bombom #pp')

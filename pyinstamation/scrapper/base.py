@@ -51,8 +51,11 @@ class BaseScrapper:
         return _find(selector, **kwargs)
 
     def reach_website(self):
-        self.browser.get(self.website_url)
-        self.wait(3)
+        self.get_page(self.website_url)
+
+    def get_page(self, url):
+        self.browser.get(url)
+        self.wait(sleep_time=3, explicit=True)
 
     def wait(self, sleep_time=None, explicit=False):
         """
