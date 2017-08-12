@@ -1,45 +1,42 @@
 import logging
 
-from scrapper.base import BaseScrapper
+from .base import BaseScrapper
 
-from scrapper import instagram_const
+from . import instagram_const
 
-logger = logging.getLogger('main')
+
+logger = logging.getLogger(__name__)
 
 
 class InstaScrapper(BaseScrapper):
 
     def login(self, username, password):
-        self.browser.find_element_by_xpath(instagram_const.LOGIN_LINK).click()
-        self.wait(2)
+        logger.info('[LOGIN] Starting...')
+        self.find('xpath', instagram_const.LOGIN_LINK, wait=False).click()
 
-        username_input = self.browser.find_element_by_xpath(instagram_const.LOGIN_INPUT_USERNAME)
-        password_input = self.browser.find_element_by_xpath(instagram_const.LOGIN_INPUT_PASSWORD)
+        username_input = self.find('xpath', instagram_const.LOGIN_INPUT_USERNAME, wait=False)
+        password_input = self.find('xpath', instagram_const.LOGIN_INPUT_PASSWORD, wait=False)
 
         username_input.send_keys(username)
-        self.wait_explicit()
         password_input.send_keys(password)
-
-        self.browser.implicitly_wait(self.SLEEP_TIME)
+        self.wait()
         self.browser.find_element_by_xpath(instagram_const.LOGIN_BUTTON).click()
+        self.wait(explicit=True)
 
-        print('Welkome... {0}'.format(username))
-
-        self.wait_explicit(10)
-
-        if self.browser.get_cookie('sessionid'):
-            return True
-        return False
+        logger.info('[LOGIN] Success for user: %s', username)
+        return bool(self.browser.get_cookie('sessionid'))
 
     def logout(self):
-        self._close_browser()
+        self.close_browser()
 
     def upload_picture(self, image_path, comment):
         print('uploading picture...', image_path)
 
         # simulate the click in the Camera Logo
-        image_input = self.browser.find_element_by_class_name(instagram_const.UPLOAD_PICTURE_CAMARA_CSS_CLASS).click()
-        self.wait(5)
+        image_input = self.find('class_name', instagram_const.UPLOAD_PICTURE_CAMARA_CSS_CLASS)
+        image_input.click()
+        # image_input = self.browser.find_element_by_class_name(instagram_const.UPLOAD_PICTURE_CAMARA_CSS_CLASS).click()
+        # self.wait(5)
 
         image_input = self.browser.find_element_by_xpath(instagram_const.UPLOAD_PICTURE_INPUT_FILE)
         image_input.send_keys(image_path)

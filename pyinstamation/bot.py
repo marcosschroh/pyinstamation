@@ -3,7 +3,7 @@ import sys
 import yaml
 import logging
 
-from scrapper.insta_scrapper import InstaScrapper
+from .scrapper.insta_scrapper import InstaScrapper
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 

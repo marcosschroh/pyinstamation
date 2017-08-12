@@ -1,10 +1,13 @@
 import logging
-
 import time
 
+from random import randrange
 from selenium import webdriver
 
+
 DRIVER_LOCATION = './assets/chromedriver'
+
+logger = logging.getLogger(__name__)
 
 
 class BaseScrapper:
@@ -33,20 +36,38 @@ class BaseScrapper:
             'intl.accept_languages': 'en-US'
         }
         chrome_options.add_experimental_option('prefs', chrome_prefs)
-        return webdriver.Chrome(DRIVER_LOCATION, desired_capabilities=chrome_options.to_capabilities())
+        return webdriver.Chrome(DRIVER_LOCATION,
+                                desired_capabilities=chrome_options.to_capabilities())
 
-    def _close_browser(self):
+    def close_browser(self):
+        logger.info('Closing...')
         self.browser.close()
+
+    def find(self, method, selector, wait=True, explicit=True, sleep_time=None, **kwargs):
+        if wait:
+            self.wait(sleep_time=sleep_time, explicit=explicit)
+
+        _find = getattr(self.browser, 'find_element_by_%s' % method)
+        return _find(selector, **kwargs)
 
     def reach_website(self):
         self.browser.get(self.website_url)
         self.wait(3)
 
-    def wait(self, sleep_time=SLEEP_TIME):
+    def wait(self, sleep_time=None, explicit=False):
         """
         Implicit wait
         """
-        self.browser.implicitly_wait(sleep_time)
+        if sleep_time is None:
+            sleep_time = self.random_seconds()
+        if explicit:
+            time.sleep(sleep_time)
+        else:
+            self.browser.implicitly_wait(sleep_time)
+
+    @staticmethod
+    def random_seconds():
+        return randrange(1, 10)
 
     @staticmethod
     def wait_explicit(seconds=3):
