@@ -31,6 +31,27 @@ class InstaScrapper(BaseScrapper):
     def logout(self):
         self.close_browser()
 
+    def get_user_info(self, username):
+        self.get_user_page(username)
+
+        total_following = self.find(
+            'xpath', instagram_const.USER_FOLLOWING.format(username)).text
+
+        total_followers = self.find(
+            'xpath', instagram_const.USER_FOLLOWERS.format(username)).text
+
+        # Maybe we should check that it can be cast to int...
+        total_following = int(total_following)
+        total_followers = int(total_followers)
+
+        # TODO: get friends/following list
+
+        return {
+            'total_following': total_following,
+            'total_followers': total_followers,
+            'following': []
+        }
+
     def get_my_profile_page(self, my_username):
         self.get_user_page(my_username)
 

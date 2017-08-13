@@ -21,6 +21,7 @@ class BaseScrapper:
 
     def __init__(self, website_url=pyinstamation.CONFIG['site_url']):
         self.website_url = website_url
+        self.browser = self.open_mobile_browser()
 
     def _open_browser(self):
         return webdriver.Chrome()
