@@ -3,6 +3,7 @@ import time
 
 from random import randrange
 from selenium import webdriver
+import pyinstamation
 
 
 DRIVER_LOCATION = './assets/chromedriver'
@@ -18,14 +19,13 @@ class BaseScrapper:
     MOBILE_WIDTH = 375
     MOBILE_HEIGTH = 667
 
-    def __init__(self, website_url):
+    def __init__(self, website_url=pyinstamation.CONFIG['site_url']):
         self.website_url = website_url
-        self.browser = self._open_mobile_browser()
 
     def _open_browser(self):
         return webdriver.Chrome()
 
-    def _open_mobile_browser(self):
+    def open_mobile_browser(self):
         mobile_emulation = {"deviceName": "Nexus 5"}
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument('--dns-prefetch-disable')

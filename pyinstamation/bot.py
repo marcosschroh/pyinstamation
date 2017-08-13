@@ -3,7 +3,9 @@ import sys
 import yaml
 import logging
 
-from .scrapper.insta_scrapper import InstaScrapper
+from .scrapper import InstaScrapper
+from pyinstamation import config
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -33,13 +35,15 @@ class InstaBot:
     ACCEPT_LANGUAGE = 'ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4'
     SLEEP_TIME = 3
 
-    def __init__(self, scrapper, username, password):
+    scrapper = InstaScrapper()
+
+    def __init__(self, username, password):
         self.username = username
         self.password = password
-        self.scrapper = scrapper
         self._user_login = False
         self.followers = 0
         self.following = 0
+        self.scrapper.open_mobile_browser()
 
         self._configure_log()
         self._reach_website()
@@ -103,8 +107,7 @@ if __name__ == '__main__':
         except yaml.YAMLError as exc:
             sys.exit(exc)
 
-    scrapper = InstaScrapper(CONFIG.get('site_url'))
-    bot = InstaBot(scrapper, CONFIG.get('username'), CONFIG.get('password'))
+    bot = InstaBot(CONFIG.get('username'), CONFIG.get('password'))
 
     # actions
     bot.login()
