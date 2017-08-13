@@ -1,3 +1,5 @@
+TOTAL_MAX_FOLLOWERS = 7000
+
 LOGIN_LINK = "//article/div/div/p/a[text()='Log in']"
 LOGIN_BUTTON = "//form/span/button[text()='Log in']"
 LOGIN_INPUT_USERNAME = "//input[@name='username']"

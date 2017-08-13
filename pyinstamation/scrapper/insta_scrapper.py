@@ -90,7 +90,7 @@ class InstaScrapper(BaseScrapper):
         url = "{0}/{1}".format(self.website_url, username)
         self.browser.get(url)
 
-    def follow_user(self, username):
+    def follow_user(self, username, min_followers=None, max_followers=None):
         """Follows a given user."""
         return self._follow_unfollow_process(username)
 
@@ -102,15 +102,15 @@ class InstaScrapper(BaseScrapper):
         By default try to follow the user
         """
         self.get_user_page(username)
-        follow_button = self.browser.find_element_by_xpath(
-            instagram_const.FOLLOW_UNFOLLOW_BUTTON)
-
-        self.wait_explicit(seconds=10)
+        
+        follow_button = self.browser.find(
+            'xpath', instagram_const.FOLLOW_UNFOLLOW_BUTTON)
 
         if follow_user:
             if follow_button.text == instagram_const.FOLLOW_BUTTON_TEXT:
+                
                 follow_button.click()
-                print('---> Now following: {}'.format(username))
+                logger.info('---> Now following: {}'.format(username))
                 self.wait_explicit(seconds=3)
                 return True
 
@@ -164,19 +164,22 @@ class InstaScrapper(BaseScrapper):
     def comment_post(self, post_link, comment):
         self.get_page(post_link)
 
-        request_comment_button = self.find('xpath', instagram_const.REQUEST_NEW_COMMENT_BUTTON)
+        request_comment_button = self.find(
+            'xpath', instagram_const.REQUEST_NEW_COMMENT_BUTTON)
 
         request_comment_button.click()
         self.wait_explicit(seconds=3)
 
-        textarea_comment = self.find('xpath', instagram_const.COMMENT_TEXTEAREA)
+        textarea_comment = self.find(
+            'xpath', instagram_const.COMMENT_TEXTEAREA)
         textarea_comment.click()
         self.wait_explicit(seconds=3)
 
         textarea_comment.send_keys(comment)
         self.wait_explicit(seconds=5)
 
-        send_comment_button = self.find('xpath', instagram_const.SEND_COMMENT_BUTTON)
+        send_comment_button = self.find(
+            'xpath', instagram_const.SEND_COMMENT_BUTTON)
         send_comment_button.click()
         self.wait_explicit(seconds=3)
 

@@ -3,8 +3,7 @@ import sys
 import yaml
 import logging
 
-from .scrapper import InstaScrapper
-
+from .scrapper import InstaScrapper, instagram_const
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -77,34 +76,44 @@ class InstaBot:
     def start(self):
         pass
 
-    def comment(self):
-        pass
-
-    def follow_user(self, username):
+    def follow_user(self, username, min_followers=0, max_followers=0):
         if self._user_login:
+
+            if min_followers or max_followers:
+                user_info = self.get_user_info(username)
+
+                user_followers = user_info.get('total_followers', 0)
+
+                if not max_followers:
+                    max_followers = instagram_const.TOTAL_MAX_FOLLOWERS
+
+                if not (min_followers <= user_followers <= max_followers):
+                    return False
+
             if self.scrapper.follow_user(username):
                 self.total_following += 1
+
+    def follow_multiple_users(self, username_list, min_followers=None, max_followers=None):
+        for username in username_list:
+            self.follow_user(
+                username, min_followers=min_followers, max_followers=max_followers)
 
     def unfollow_user(self, username):
         if self._user_login:
             if self.scrapper.unfollow_user(username):
                 self.total_following -= 1
-
-    def follow_multiple_users(self, username_list):
-        for username in username_list:
-            self.follow_user(username)
-
+    
     def unfollow_multiple_users(self, username_list):
         for username in username_list:
             self.unfollow_user(username)
 
     def like_post(self, post_link):
-        if self.user_login:
+        if self._user_login:
             if self.scrapper.like_post(post_link):
                 self.likes_given += 1
 
     def unlike_post(self, post_link):
-        if self.user_login:
+        if self._user_login:
             if self.scrapper.unlike_post(post_link):
                 self.likes_given -= 1
 
@@ -161,11 +170,11 @@ class InstaBot:
         logger.info('Commented {0} of {1}'.format(total_comments_made, len(posts_list)))
 
     def get_user_info(self, username):
-        if self.user_login:
+        if self._user_login:
             return self.scrapper.get_user_info(username)
 
     def get_my_profile_info(self):
-        if self.user_login:
+        if self._user_login:
             my_profile = self.get_user_info(self.username)
             self.total_followers = my_profile.get('total_followers')
             self.total_following = my_profile.get('total_following')
@@ -184,7 +193,7 @@ if __name__ == '__main__':
     bot.login()
     # bot.get_user_info('woile')
     # bot.get_my_profile_info()
-    # bot.follow_user('woile')
+    # bot.follow_user('woile', min_followers=0, max_followers=0)
     # bot.follow_multiple_users(['woile', 'marcosschroh'])
     # bot.unfollow_user('woile')
     # bot.unfollow_muliple_users(['woile', 'marcosschroh'])
