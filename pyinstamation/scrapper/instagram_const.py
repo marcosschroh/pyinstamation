@@ -29,3 +29,7 @@ FAIL_UNLIKE_POST_MESSAGE = "You already do not like the post: {0}"
 REQUEST_NEW_COMMENT_BUTTON = "//a/span[contains(text(), 'Comment')]"
 SEND_COMMENT_BUTTON = "//form/button[contains(text(), 'Post')]"
 COMMENT_TEXTEAREA = "//form/textarea"
+
+# PROFILE PAGE
+USER_FOLLOWING = "//a[@href='/{0}/following/']/span"
+USER_FOLLOWERS = "//a[@href='/{0}/followers/']/span"

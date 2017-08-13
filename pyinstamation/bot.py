@@ -34,19 +34,16 @@ class InstaBot:
     ACCEPT_LANGUAGE = 'ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4'
     SLEEP_TIME = 3
 
-    scrapper = InstaScrapper()
-
     def __init__(self, username, password):
         self.username = username
         self.password = password
         self._user_login = False
-        self.followers = 0
-        self.following = 0
+        self.total_followers = 0
+        self.total_following = 0
         self.likes_given = 0
         self.commented_post = 0
+        self.scrapper = InstaScrapper()
 
-
-        self.scrapper.open_mobile_browser()
         self._configure_log()
         self._reach_website()
 
@@ -86,12 +83,12 @@ class InstaBot:
     def follow_user(self, username):
         if self._user_login:
             if self.scrapper.follow_user(username):
-                self.following += 1
+                self.total_following += 1
 
     def unfollow_user(self, username):
         if self._user_login:
             if self.scrapper.unfollow_user(username):
-                self.following -= 1
+                self.total_following -= 1
 
     def follow_multiple_users(self, username_list):
         for username in username_list:
@@ -162,6 +159,13 @@ class InstaBot:
 
         total_comments_made = self.commented_post - current_commented_posts
         logger.info('Commented {0} of {1}'.format(total_comments_made, len(posts_list)))
+
+    def get_user_info(self):
+        if self.user_login:
+            user_info = self.scrapper.get_user_info(self.username)
+
+            self.total_followers = user_info.get('total_followers')
+            self.total_following = user_info.get('total_following')
 
 
 if __name__ == '__main__':
