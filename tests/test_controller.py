@@ -1,5 +1,6 @@
 import unittest
 import datetime
+from collections import namedtuple
 from pyinstamation.models import User, Follower
 from pyinstamation.controller import Controller
 from tests import DBTestCase
