@@ -36,4 +36,4 @@ class Follower(BaseModel):
     username = orm.CharField()
     unfollow_date = orm.DateTimeField(default=future_rand_date)
     following = orm.BooleanField(default=True)
-    times_followed = orm.IntegerField(default=0)
+    times_followed = orm.IntegerField(default=1)
