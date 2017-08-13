@@ -160,12 +160,15 @@ class InstaBot:
         total_comments_made = self.commented_post - current_commented_posts
         logger.info('Commented {0} of {1}'.format(total_comments_made, len(posts_list)))
 
-    def get_user_info(self):
+    def get_user_info(self, username):
         if self.user_login:
-            user_info = self.scrapper.get_user_info(self.username)
+            return self.scrapper.get_user_info(username)
 
-            self.total_followers = user_info.get('total_followers')
-            self.total_following = user_info.get('total_following')
+    def get_my_profile_info(self):
+        if self.user_login:
+            my_profile = self.get_user_info(self.username)
+            self.total_followers = my_profile.get('total_followers')
+            self.total_following = my_profile.get('total_following')
 
 
 if __name__ == '__main__':
@@ -179,6 +182,8 @@ if __name__ == '__main__':
 
     # actions
     bot.login()
+    # bot.get_user_info('woile')
+    # bot.get_my_profile_info()
     # bot.follow_user('woile')
     # bot.follow_multiple_users(['woile', 'marcosschroh'])
     # bot.unfollow_user('woile')
@@ -186,5 +191,5 @@ if __name__ == '__main__':
     # bot.like_post('https://www.instagram.com/p/BXamBMihdBF/')
     # bot.like_multiple_posts(['https://www.instagram.com/p/BXamBMihdBF/'])
     # bot.unlike_post('https://www.instagram.com/p/BXamBMihdBF/')
-    # bot.like_multiple_posts(['https://www.instagram.com/p/BXamBMihdBF/'])
+    # bot.unlike_multiple_posts(['https://www.instagram.com/p/BXamBMihdBF/'])
     # bot.upload_picture(IMAGE_TEST_PATH, '#chiche #bombom #pp')
