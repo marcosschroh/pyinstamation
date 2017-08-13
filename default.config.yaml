@@ -1,0 +1,18 @@
+site_url: https://www.instagram.com
+username: discovrar
+password: discorvd
+
+post:
+  ignore_tags: got, house, php
+  comment: true
+  likes: 100
+  comment_generator: true
+  custom_comments:
+
+followers:
+  min_followers: null
+  max_followers: null
+  follow: 10
+  unfollow: 10
+  ignore_friends: true
+  ignore_list: []
