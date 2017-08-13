@@ -4,7 +4,6 @@ import yaml
 import logging
 
 from .scrapper import InstaScrapper
-from pyinstamation import config
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -43,8 +42,11 @@ class InstaBot:
         self._user_login = False
         self.followers = 0
         self.following = 0
-        self.scrapper.open_mobile_browser()
+        self.likes_given = 0
+        self.commented_post = 0
 
+
+        self.scrapper.open_mobile_browser()
         self._configure_log()
         self._reach_website()
 
@@ -99,6 +101,68 @@ class InstaBot:
         for username in username_list:
             self.unfollow_user(username)
 
+    def like_post(self, post_link):
+        if self.user_login:
+            if self.scrapper.like_post(post_link):
+                self.likes_given += 1
+
+    def unlike_post(self, post_link):
+        if self.user_login:
+            if self.scrapper.unlike_post(post_link):
+                self.likes_given -= 1
+
+    def like_multiple_posts(self, post_link_list):
+        for post in post_link_list:
+            self.like_post(post)
+
+    def unlike_multiple_posts(self, post_link_list):
+        for post in post_link_list:
+            self.unlike_post(post)
+
+    def comment_post(self, post_link, comment):
+        if self.scrapper.comment_post(post_link, comment):
+            self.commented_post += 1
+
+    def comment_multiple_posts(self, posts_list, default_comment=None):
+        """
+        Expect a list of dictionaries where every dict
+        has the post link and the comment.
+
+        E.g.
+
+        [
+            {
+                'post': 'https://www.instagram.com/p/BXamBMihdBF/'
+                'comment': 'very nice'
+            },
+            {
+                'post': 'https://www.instagram.com/p/BXamBMihkdki9/'
+                'comment': '#awesome #trip'
+            },
+
+            ...
+
+        ]
+
+        If a dict has not the attribute comment it tries to use the
+        default_comment key. If the default_comment is not present,
+        just skip.
+        """
+
+        current_commented_posts = self.commented_post
+
+        for post_object in posts_list:
+            post = post_object.get('post')
+            comment = post_object.get('post', default_comment)
+
+            if not post or not comment:
+                continue
+
+            self.comment_post(post, comment)
+
+        total_comments_made = self.commented_post - current_commented_posts
+        logger.info('Commented {0} of {1}'.format(total_comments_made, len(posts_list)))
+
 
 if __name__ == '__main__':
     with open("config.yaml", 'r') as stream:
@@ -115,4 +179,8 @@ if __name__ == '__main__':
     # bot.follow_multiple_users(['woile', 'marcosschroh'])
     # bot.unfollow_user('woile')
     # bot.unfollow_muliple_users(['woile', 'marcosschroh'])
+    # bot.like_post('https://www.instagram.com/p/BXamBMihdBF/')
+    # bot.like_multiple_posts(['https://www.instagram.com/p/BXamBMihdBF/'])
+    # bot.unlike_post('https://www.instagram.com/p/BXamBMihdBF/')
+    # bot.like_multiple_posts(['https://www.instagram.com/p/BXamBMihdBF/'])
     # bot.upload_picture(IMAGE_TEST_PATH, '#chiche #bombom #pp')

@@ -36,8 +36,9 @@ class BaseScrapper:
             'intl.accept_languages': 'en-US'
         }
         chrome_options.add_experimental_option('prefs', chrome_prefs)
-        return webdriver.Chrome(DRIVER_LOCATION,
-                                desired_capabilities=chrome_options.to_capabilities())
+        return webdriver.Chrome(
+            DRIVER_LOCATION,
+            desired_capabilities=chrome_options.to_capabilities())
 
     def close_browser(self):
         logger.info('Closing...')
@@ -51,8 +52,11 @@ class BaseScrapper:
         return _find(selector, **kwargs)
 
     def reach_website(self):
-        self.browser.get(self.website_url)
-        self.wait(3)
+        self.get_page(self.website_url)
+
+    def get_page(self, url):
+        self.browser.get(url)
+        self.wait(sleep_time=3, explicit=True)
 
     def wait(self, sleep_time=None, explicit=False):
         """
