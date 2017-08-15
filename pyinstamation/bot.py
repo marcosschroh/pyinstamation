@@ -2,6 +2,7 @@ import os
 import sys
 import yaml
 import logging
+from collections import namedtuple
 
 from .scrapper import InstaScrapper, instagram_const
 
@@ -10,6 +11,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 IMAGE_TEST_PATH = os.path.join(BASE_DIR, 'scrapper', 'chiche.jpg')
 
 logger = logging.getLogger(__name__)
+
+FollowedUser = namedtuple('FollowedUser', ['username', 'follow_date'])
 
 
 class InstaBot:
@@ -39,10 +42,11 @@ class InstaBot:
         self._user_login = False
         self.total_followers = 0
         self.total_following = 0
-        self.likes_given = 0
+        self.likes_given_with_bot = 0
         self.commented_post = 0
-        self.scrapper = InstaScrapper()
+        self.users_followed_with_bot = []
 
+        self.scrapper = InstaScrapper()
         self._configure_log()
         self._reach_website()
 
@@ -91,6 +95,9 @@ class InstaBot:
                     return False
 
             if self.scrapper.follow_user(username):
+                self.users_followed_with_bot.append('hola'
+                    # TODO: FollowedUser()
+                )
                 self.total_following += 1
 
     def follow_multiple_users(self, username_list, min_followers=None, max_followers=None):
@@ -110,12 +117,12 @@ class InstaBot:
     def like_post(self, post_link):
         if self._user_login:
             if self.scrapper.like_post(post_link):
-                self.likes_given += 1
+                self.likes_given_with_bot += 1
 
     def unlike_post(self, post_link):
         if self._user_login:
             if self.scrapper.unlike_post(post_link):
-                self.likes_given -= 1
+                self.likes_given_with_bot -= 1
 
     def like_multiple_posts(self, post_link_list):
         for post in post_link_list:
