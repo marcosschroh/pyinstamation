@@ -2,6 +2,7 @@ import os
 import sys
 import yaml
 import logging
+from datetime import datetime
 from collections import namedtuple
 
 from .scrapper import InstaScrapper, instagram_const
@@ -44,7 +45,8 @@ class InstaBot:
         self.total_following = 0
         self.likes_given_with_bot = 0
         self.commented_post = 0
-        self.users_followed_with_bot = []
+        self.users_followed_by_bot = []
+        self.users_unfollowed_by_bot = []
 
         self.scrapper = InstaScrapper()
         self._configure_log()
@@ -95,8 +97,11 @@ class InstaBot:
                     return False
 
             if self.scrapper.follow_user(username):
-                self.users_followed_with_bot.append('hola'
-                    # TODO: FollowedUser()
+                self.users_followed_by_bot.append(
+                    FollowedUser(
+                        username=username,
+                        follow_date= datetime.utcnow()
+                    )
                 )
                 self.total_following += 1
 
@@ -108,6 +113,12 @@ class InstaBot:
     def unfollow_user(self, username):
         if self._user_login:
             if self.scrapper.unfollow_user(username):
+                self.users_unfollowed_by_bot.append(
+                    FollowedUser(
+                        username=username,
+                        follow_date= datetime.utcnow()
+                    )
+                )
                 self.total_following -= 1
     
     def unfollow_multiple_users(self, username_list):
