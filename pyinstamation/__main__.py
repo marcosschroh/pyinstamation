@@ -3,6 +3,10 @@ from pyinstamation.bot import InstaBot
 from pyinstamation.controller import Controller
 
 
+def parse_args():
+    pass
+
+
 if __name__ == '__main__':
     print("running nain")
     bot = InstaBot(CONFIG.get('username'), CONFIG.get('password'))

@@ -103,7 +103,7 @@ class InstaScrapper(BaseScrapper):
         """
         self.get_user_page(username)
         
-        follow_button = self.browser.find(
+        follow_button = self.find(
             'xpath', instagram_const.FOLLOW_UNFOLLOW_BUTTON)
 
         if follow_user:
