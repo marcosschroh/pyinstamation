@@ -16,6 +16,12 @@ class Controller:
         self.user = user
         self.is_new = is_new
 
+    def get_users_to_unfollow(self):
+        _users_to_unfollow = self.user.follower_set.select(
+            Follower.username, Follower.following).where(
+            Follower.following == True, Follower.unfollow_date < datetime.datetime.now())
+        return _users_to_unfollow
+
     def set_users_followed(self, users):
         """
         :type users: list(namedtuple)
@@ -28,7 +34,9 @@ class Controller:
             except peewee.IntegrityError:
                 logger.exception('%s is already present in following list', user.username)
 
-    def get_users_to_unfollow(self):
-        _users_to_unfollow = self.user.follower_set.select().where(
-            Follower.following == True, Follower.unfollow_date < datetime.datetime.now())
-        return _users_to_unfollow
+    def set_user_stats(self, likes=0, comments=0, followed=0, unfollowed=0):
+        self.user.likes += likes
+        self.user.commented += comments
+        self.user.followed += followed
+        self.user.unfollowed += unfollowed
+        self.user.save()

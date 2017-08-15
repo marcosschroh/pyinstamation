@@ -12,7 +12,6 @@ post:
 followers:
   min_followers: null
   max_followers: null
-  follow: 10
-  unfollow: 10
+  follow_per_day: 10
   ignore_friends: true
   ignore_list: []
