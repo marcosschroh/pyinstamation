@@ -1,5 +1,6 @@
 from pyinstamation import CONFIG
 from pyinstamation.bot import InstaBot
+from pyinstamation.controller import Controller
 
 
 if __name__ == '__main__':

@@ -2,16 +2,19 @@ site_url: https://www.instagram.com
 username: discovrar
 password: discorvd
 
-post:
-  ignore_tags: got, house, php
-  comment: true
+posts:
+  search_tags: films, movies
+  ignore_pics_with_tags: got, house, php
   likes: 100
+  comment: true
   comment_generator: true
-  custom_comments:
+  custom_comments: []
 
 followers:
+  follow_enable: true
   min_followers: null
   max_followers: null
   follow_per_day: 10
+  unfollow_followed_users: true
   ignore_friends: true
-  ignore_list: []
+  ignore_users: []

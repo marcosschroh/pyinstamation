@@ -4,15 +4,23 @@ import yaml
 import logging
 from collections import namedtuple
 
+from pyinstamation.config import CONFIG
+
 from .scrapper import InstaScrapper, instagram_const
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
 IMAGE_TEST_PATH = os.path.join(BASE_DIR, 'scrapper', 'chiche.jpg')
-
+FollowedUser = namedtuple('FollowedUser', ['username', 'follow_date'])
 logger = logging.getLogger(__name__)
 
-FollowedUser = namedtuple('FollowedUser', ['username', 'follow_date'])
+
+def parse_tags(tags):
+    """From a given string remove hashtags and spaces.
+    :rtype list:
+    """
+    if tags is None:
+        return []
+    return tags.replace('#', '').replace(' ', '').split(',')
 
 
 class InstaBot:
@@ -36,14 +44,45 @@ class InstaBot:
     ACCEPT_LANGUAGE = 'ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4'
     SLEEP_TIME = 3
 
-    def __init__(self, username, password):
+    def __init__(self, username=None, password=None, is_new=True):
+        if username is None:
+            username = CONFIG.get('username', None)
+        if password is None:
+            password = CONFIG.get('password', None)
+
+        assert username is not None, 'A username must be provided'
+        assert password is not None, 'A password must be provided'
+
+        # Configure bot and set default values
         self.username = username
         self.password = password
+        self.is_new = is_new
+
+        _posts = CONFIG.get('posts', {})
+        self.likes = _posts.get('likes', 0)
+        self.comment = _posts.get('comment', False)
+        self.search_tags = parse_tags(_posts.get('search_tags', None))
+        self.custom_comments = _posts.get('custom_comments', [])
+        self.comment_generator = _posts.get('comment_generator', False)
+        self.ignore_pics_with_tags = parse_tags(_posts.get('ignore_pics_with_tags', None))
+
+        _followers = CONFIG.get('followers', {})
+        self.ignore_users = _followers.get('ignore_users', [])
+        self.follow_enable = _followers.get('follow_enable', False)
+        self.min_followers = _followers.get('min_followers', 0)
+        self.max_followers = _followers.get('max_followers', 0)
+        self.follow_per_day = _followers.get('follow_per_day', 10)
+        self.ignore_friends = _followers.get('ignore_friends', True)
+        # End configuration
+
+        # Bot internal states
         self._user_login = False
+
+        # Bot statistics
+        self.commented_post = 0
         self.total_followers = 0
         self.total_following = 0
         self.likes_given_with_bot = 0
-        self.commented_post = 0
         self.users_followed_with_bot = []
 
         self.scrapper = InstaScrapper()
@@ -109,7 +148,7 @@ class InstaBot:
         if self._user_login:
             if self.scrapper.unfollow_user(username):
                 self.total_following -= 1
-    
+
     def unfollow_multiple_users(self, username_list):
         for username in username_list:
             self.unfollow_user(username)

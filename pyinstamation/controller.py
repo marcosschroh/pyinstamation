@@ -40,3 +40,7 @@ class Controller:
         self.user.followed += followed
         self.user.unfollowed += unfollowed
         self.user.save()
+
+    def run(self, password):
+        bot = InstaBot(username=self.user.username, password=password)
+        bot.run()
