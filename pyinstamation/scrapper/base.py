@@ -55,9 +55,9 @@ class BaseScrapper:
     def reach_website(self):
         self.get_page(self.website_url)
 
-    def get_page(self, url):
+    def get_page(self, url, sleep_time=3):
         self.browser.get(url)
-        self.wait(sleep_time=3, explicit=True)
+        self.wait(sleep_time=sleep_time, explicit=True)
 
     def wait(self, sleep_time=None, explicit=False):
         """

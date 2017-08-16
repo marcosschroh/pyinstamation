@@ -27,10 +27,11 @@ FAIL_LIKE_POST_MESSAGE = "You already like the post: {0}"
 SUCCESS_UNLIKE_POST_MESSAGE = "Now you do not like the post: {0}"
 FAIL_UNLIKE_POST_MESSAGE = "You already do not like the post: {0}"
 
-# COMMENT POST
+# POST PAGE
 REQUEST_NEW_COMMENT_BUTTON = "//a/span[contains(text(), 'Comment')]"
 SEND_COMMENT_BUTTON = "//form/button[contains(text(), 'Post')]"
 COMMENT_TEXTEAREA = "//form/textarea"
+USERNAME_IN_POST_PAGE = "//article/header/a"
 
 # PROFILE PAGE
 USER_FOLLOWING = "//a[@href='/{0}/following/']/span"
