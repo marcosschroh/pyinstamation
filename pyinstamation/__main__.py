@@ -1,5 +1,10 @@
 from pyinstamation import CONFIG
 from pyinstamation.bot import InstaBot
+from pyinstamation.controller import Controller
+
+
+def parse_args():
+    pass
 
 
 if __name__ == '__main__':
