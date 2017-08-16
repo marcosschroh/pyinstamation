@@ -39,12 +39,15 @@ logging.config.dictConfig(LOGGING)
 CONFIG = {}
 
 
-def load_config():
+def load_config(filepath=None):
     global CONFIG
 
-    if CONFIG:
+    if CONFIG and filepath is None:
         return
-    with open('./config.yaml', 'r') as stream:
+    if filepath is None:
+        filepath = './config.yaml'
+
+    with open(filepath, 'r') as stream:
         try:
             CONFIG.update(yaml.load(stream))
         except yaml.YAMLError as exc:

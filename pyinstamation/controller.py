@@ -12,6 +12,8 @@ logger = logging.getLogger(__name__)
 class Controller:
 
     def __init__(self, username):
+        assert username is not None, 'username must be provided'
+
         user, is_new = User.get_or_create(username=username)
         self.user = user
         self.is_new = is_new

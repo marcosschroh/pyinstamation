@@ -6,8 +6,8 @@ from datetime import datetime
 from collections import namedtuple
 
 from pyinstamation.config import CONFIG
+from pyinstamation.scrapper import InstaScrapper, instagram_const
 
-from .scrapper import InstaScrapper, instagram_const
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 IMAGE_TEST_PATH = os.path.join(BASE_DIR, 'scrapper', 'chiche.jpg')
