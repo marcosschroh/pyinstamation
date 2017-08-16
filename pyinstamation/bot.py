@@ -178,7 +178,8 @@ class InstaBot:
             logger.info('No posts were found for HASHTAG {0}'.format(hashtag))
             return
 
-        for i, post in enumerate(posts, 1):
+        users_followed = 0
+        for post in posts:
             # if there is a posts there is a code....
             post_code = post.get('code')
             post_url = self.scrapper.generate_post_link_by_code(post_code)
@@ -186,11 +187,57 @@ class InstaBot:
 
             if self._check_follow_conditions(username, min_followers=min_followers):
                 self.like_post(post_url)
-                self.follow_user(username)
+                if self.follow_user(username):
+                    users_followed += 1
 
-            if i == total_to_follow:
+            if total_to_follow <= users_followed:
                 break
-                
+    
+    def follow_users_by_multiple_hashtags(self, hashtags, min_followers=None, total_to_follow=1):
+        """
+        @hashtags: list of dictionaries where every dict
+        contains:
+            @hashtag: str that represent the hashtag
+            @total_to_follow: int that represent total of user to follow
+            @min_followers: only follow the user if has at least
+            min_followers
+
+        Important: Do not include # in every hashtag
+
+        E.g.
+
+        List of dictionaries:
+        [
+            {
+                'hashtag': 'haarlem',
+                'min_followers': 20,
+                'total_to_follow': 10
+            },
+            {
+                'hashtag': 'python',
+                'min_followers': 20,
+                'total_to_follow': '15'
+            },
+            {
+                'hashtag': 'flask',
+                'min_followers': 60,
+                'total_to_follow': 1
+            }
+
+            ...
+        ]
+        
+        If you do not provide a min_followers or total_to_follow
+        per each dict it will try to use the min_followers and
+        total_to_follow parameters.
+        """
+
+        for hashtag_data in hashtags:
+            hashtag = hashtag_data.get('hashtag')
+            min_followers = hashtag_data.get('min_followers', min_followers)
+            total_to_follow = hashtag_data.get('total_to_follow', total_to_follow)
+            self.follow_users_by_hashtag(hashtag, min_followers, total_to_follow)
+
     def like_post(self, post_link):
         if self._user_login:
             if self.scrapper.like_post(post_link):
@@ -253,11 +300,7 @@ class InstaBot:
         total_comments_made = self.commented_post - current_commented_posts
         logger.info('Commented {0} of {1}'.format(total_comments_made, len(posts_list)))
 
-    def find_by_hashtag(self, hashtag):
-        if self._user_login:
-            self.scrapper.find_by_hashtag(hashtag)
-
-
+    
 if __name__ == '__main__':
     with open("config.yaml", 'r') as stream:
         try:
@@ -281,3 +324,4 @@ if __name__ == '__main__':
     # bot.unlike_multiple_posts(['https://www.instagram.com/p/BXamBMihdBF/'])
     # bot.upload_picture(IMAGE_TEST_PATH, '#chiche #bombom #pp')
     # bot.follow_users_by_hashtag('haarlem', min_followers=None, total_to_follow=1)
+    # bot.follow_users_by_multiple_hashtags({'hashtag': 'haarlem'}, min_followers=50, total_to_follow=10)
