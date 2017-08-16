@@ -1,4 +1,5 @@
 import logging
+import requests
 
 from selenium.common.exceptions import NoSuchElementException
 
@@ -11,6 +12,19 @@ logger = logging.getLogger(__name__)
 
 
 class InstaScrapper(BaseScrapper):
+
+    # urls
+    URL_TAG = 'https://www.instagram.com/explore/tags/{0}/{1}'
+    url_likes = 'https://www.instagram.com/web/likes/%s/like/'
+    url_unlike = 'https://www.instagram.com/web/likes/%s/unlike/'
+    url_comment = 'https://www.instagram.com/web/comments/%s/add/'
+    url_follow = 'https://www.instagram.com/web/friendships/%s/follow/'
+    url_unfollow = 'https://www.instagram.com/web/friendships/%s/unfollow/'
+    # LOGIN_URL = '{0}{1}'.format(BASE_URL, '/accounts/login/ajax/')
+    # https://www.instagram.com/accounts/login/ajax/?hl=es
+    url_logout = 'https://www.instagram.com/accounts/logout/'
+    URL_MEDIA_DETAIL = 'https://www.instagram.com/p/{0}/{1}'
+    URL_USER_DETAIL = 'https://www.instagram.com/{0}/{1}'
 
     def login(self, username, password):
         logger.info('[LOGIN] Starting...')
@@ -32,6 +46,23 @@ class InstaScrapper(BaseScrapper):
         self.close_browser()
 
     def get_user_info(self, username):
+        url = self.URL_USER_DETAIL.format(username, '?__a=1')
+
+        # get the response
+        r = requests.get(url)
+        user = {}
+
+        if r.status_code.ok:
+            # parse json
+            json_content = r.json()
+            user = json_content.get('user', {})
+
+        return {
+            'total_followers': user.get('followed_by', {}).get('count', 0),
+            'total_following': user.get('follows', {}).get('count', 0)
+        }
+
+    def get_user_info_in_post_page(self, username):
         self.get_user_page(username)
 
         total_following = self.find(
@@ -49,7 +80,6 @@ class InstaScrapper(BaseScrapper):
         return {
             'total_following': total_following,
             'total_followers': total_followers,
-            'following': []
         }
 
     def get_my_profile_page(self, my_username):
@@ -62,8 +92,6 @@ class InstaScrapper(BaseScrapper):
         image_input = self.find(
             'class_name', instagram_const.UPLOAD_PICTURE_CAMARA_CSS_CLASS)
         image_input.click()
-        # image_input = self.browser.find_element_by_class_name(instagram_const.UPLOAD_PICTURE_CAMARA_CSS_CLASS).click()
-        # self.wait(5)
 
         image_input = self.browser.find_element_by_xpath(
             instagram_const.UPLOAD_PICTURE_INPUT_FILE)
@@ -87,8 +115,8 @@ class InstaScrapper(BaseScrapper):
             instagram_const.UPLOAD_PICTURE_SHARE_LINK).click()
 
     def get_user_page(self, username):
-        url = "{0}/{1}".format(self.website_url, username)
-        self.browser.get(url)
+        url = self.URL_USER_DETAIL.format(username, '')
+        self.get_page(url)
 
     def follow_user(self, username, min_followers=None, max_followers=None):
         """Follows a given user."""
@@ -186,3 +214,35 @@ class InstaScrapper(BaseScrapper):
         logger.info('Now you has commend the {0} post with {1}'.format(post_link, comment))
 
         return True
+
+    def get_username_in_post_page(self, post_url):
+        self.get_page(post_url)
+        web_element = self.find('xpath', instagram_const.USERNAME_IN_POST_PAGE)
+        user_page_link = web_element.get_attribute('href')
+
+        # we expect always a format like.. 'https://www.instagram.com/voetbal_in_haarlem/'
+        return user_page_link.split('/')[-2]
+
+    def generate_post_link_by_code(self, post_code):
+        return self.URL_MEDIA_DETAIL.format(post_code, '')
+
+    def get_hashtag_page(self, hashtag):
+        url = self.URL_TAG.format(hashtag, '')
+        self.get_page(url, sleep_time=5)
+
+    def get_posts_by_hashtag(self, hashtag):
+        url = self.URL_TAG.format(hashtag, '?__a=1')
+
+        # get the response
+        r = requests.get(url)
+
+        if r.ok:
+            # parse json
+            json_content = r.json()
+            return json_content.get('tag', {}).get('media', {}).get('nodes', [])
+            # possible order
+            # posts = sorted(n, key=lambda post: post.get('likes').get('count'))
+        return []
+
+    def find_by_hashtag(self, hashtag):
+        self.get_hashtag_page(hashtag)

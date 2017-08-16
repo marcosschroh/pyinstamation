@@ -18,26 +18,7 @@ FollowedUser = namedtuple('FollowedUser', ['username', 'follow_date'])
 
 class InstaBot:
 
-    # urls
-    url_tag = 'https://www.instagram.com/explore/tags/%s/?__a=1'
-    url_likes = 'https://www.instagram.com/web/likes/%s/like/'
-    url_unlike = 'https://www.instagram.com/web/likes/%s/unlike/'
-    url_comment = 'https://www.instagram.com/web/comments/%s/add/'
-    url_follow = 'https://www.instagram.com/web/friendships/%s/follow/'
-    url_unfollow = 'https://www.instagram.com/web/friendships/%s/unfollow/'
-    # LOGIN_URL = '{0}{1}'.format(BASE_URL, '/accounts/login/ajax/')
-    # https://www.instagram.com/accounts/login/ajax/?hl=es
-    url_logout = 'https://www.instagram.com/accounts/logout/'
-    url_media_detail = 'https://www.instagram.com/p/%s/?__a=1'
-    url_user_detail = 'https://www.instagram.com/%s/?__a=1'
-
-    # settings
-    USER_AGENT = ("Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 "
-                  "(KHTML, like Gecko) Chrome/48.0.2564.103 Safari/537.36")
-    ACCEPT_LANGUAGE = 'ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4'
-    SLEEP_TIME = 3
-
-    def __init__(self, username, password):
+    def __init__(self, username, password, min_followers_for_a_new_follow=100):
         self.username = username
         self.password = password
         self._user_login = False
@@ -45,6 +26,7 @@ class InstaBot:
         self.total_following = 0
         self.likes_given_with_bot = 0
         self.commented_post = 0
+        self.min_followers_for_a_new_follow = min_followers_for_a_new_follow
         self.users_followed_by_bot = []
         self.users_unfollowed_by_bot = []
 
@@ -56,7 +38,7 @@ class InstaBot:
         self.scrapper.reach_website()
 
     def _configure_log(self):
-        logger.info('Iniciando bot....')
+        logger.info('Hiiiii bot....')
 
     def login(self):
         if self.scrapper.login(self.username, self.password):
@@ -82,20 +64,13 @@ class InstaBot:
     def start(self):
         pass
 
-    def follow_user(self, username, min_followers=0, max_followers=0):
+    def follow_user(self, username, conditions_checked=True, min_followers=None, max_followers=None):
         if self._user_login:
 
-            if min_followers or max_followers:
-                user_info = self.get_user_info(username)
-
-                user_followers = user_info.get('total_followers', 0)
-
-                if not max_followers:
-                    max_followers = instagram_const.TOTAL_MAX_FOLLOWERS
-
-                if not (min_followers <= user_followers <= max_followers):
+            if not conditions_checked:
+                if not self._check_follow_conditions(username, min_followers=min_followers, max_followers=max_followers):
                     return False
-
+            
             if self.scrapper.follow_user(username):
                 self.users_followed_by_bot.append(
                     FollowedUser(
@@ -104,11 +79,18 @@ class InstaBot:
                     )
                 )
                 self.total_following += 1
+                return True
+
+        return False
 
     def follow_multiple_users(self, username_list, min_followers=None, max_followers=None):
         for username in username_list:
             self.follow_user(
-                username, min_followers=min_followers, max_followers=max_followers)
+                username, 
+                conditions_checked=False,
+                min_followers=min_followers, 
+                max_followers=max_followers
+            )
 
     def unfollow_user(self, username):
         if self._user_login:
@@ -125,6 +107,50 @@ class InstaBot:
         for username in username_list:
             self.unfollow_user(username)
 
+    def get_user_info(self, username):
+        if self._user_login:
+            return self.scrapper.get_user_info(username)
+
+    def _check_follow_conditions(self, username, min_followers=None, max_followers=None): 
+        if min_followers or max_followers:
+            user_info = self.get_user_info(username)
+            user_followers = user_info.get('total_followers', 0)
+
+            if not max_followers:
+                max_followers = instagram_const.TOTAL_MAX_FOLLOWERS
+
+            if not (min_followers <= user_followers <= max_followers):
+                return False
+
+        return True
+
+    def get_my_profile_info(self):
+        if self._user_login:
+            my_profile = self.get_user_info(self.username)
+            self.total_followers = my_profile.get('total_followers')
+            self.total_following = my_profile.get('total_following')
+
+    def follow_users_by_hashtag(self, hashtag, min_followers=None, total_to_follow=1):
+        self.scrapper.get_hashtag_page(hashtag)
+        posts = self.scrapper.get_posts_by_hashtag(hashtag)
+
+        if not posts:
+            logger.info('No posts were found for HASHTAG {0}'.format(hashtag))
+            return
+
+        for i, post in enumerate(posts, 1):
+            # if there is a posts there is a code....
+            post_code = post.get('code')
+            post_url = self.scrapper.generate_post_link_by_code(post_code)
+            username = self.scrapper.get_username_in_post_page(post_url)
+
+            if self._check_follow_conditions(username, min_followers=min_followers):
+                self.like_post(post_url)
+                self.follow_user(username)
+
+            if i == total_to_follow:
+                break
+                
     def like_post(self, post_link):
         if self._user_login:
             if self.scrapper.like_post(post_link):
@@ -187,15 +213,9 @@ class InstaBot:
         total_comments_made = self.commented_post - current_commented_posts
         logger.info('Commented {0} of {1}'.format(total_comments_made, len(posts_list)))
 
-    def get_user_info(self, username):
+    def find_by_hashtag(self, hashtag):
         if self._user_login:
-            return self.scrapper.get_user_info(username)
-
-    def get_my_profile_info(self):
-        if self._user_login:
-            my_profile = self.get_user_info(self.username)
-            self.total_followers = my_profile.get('total_followers')
-            self.total_following = my_profile.get('total_following')
+            self.scrapper.find_by_hashtag(hashtag)
 
 
 if __name__ == '__main__':
@@ -220,3 +240,4 @@ if __name__ == '__main__':
     # bot.unlike_post('https://www.instagram.com/p/BXamBMihdBF/')
     # bot.unlike_multiple_posts(['https://www.instagram.com/p/BXamBMihdBF/'])
     # bot.upload_picture(IMAGE_TEST_PATH, '#chiche #bombom #pp')
+    # bot.follow_users_by_hashtag('haarlem', min_followers=None, total_to_follow=1)
