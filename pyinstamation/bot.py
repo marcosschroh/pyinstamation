@@ -26,11 +26,14 @@ def parse_tags(tags):
 
 class InstaBot:
 
-    def __init__(self, username=None, password=None, is_new=True,  min_followers_for_a_new_follow=100):
+    def __init__(self, username=None, password=None, is_new=True, unfollow_users=None,
+                 min_followers_for_a_new_follow=100):
         if username is None:
             username = CONFIG.get('username', None)
         if password is None:
             password = CONFIG.get('password', None)
+        if unfollow_users is None:
+            unfollow_users = []
 
         assert username is not None, 'A username must be provided'
         assert password is not None, 'A password must be provided'
@@ -39,6 +42,7 @@ class InstaBot:
         self.username = username
         self.password = password
         self.is_new = is_new
+        self.unfollow_users = unfollow_users
 
         _posts = CONFIG.get('posts', {})
         self.likes = _posts.get('likes', 0)
@@ -65,7 +69,6 @@ class InstaBot:
         self.total_followers = 0
         self.total_following = 0
         self.likes_given_with_bot = 0
-        self.commented_post = 0
         self.min_followers_for_a_new_follow = min_followers_for_a_new_follow
         self.users_followed_by_bot = []
         self.users_unfollowed_by_bot = []
@@ -105,12 +108,12 @@ class InstaBot:
         pass
 
     def follow_user(self, username, conditions_checked=True, min_followers=None, max_followers=None):
-        if self._user_login:
+        if self.user_login:
 
             if not conditions_checked:
                 if not self._check_follow_conditions(username, min_followers=min_followers, max_followers=max_followers):
                     return False
-            
+
             if self.scrapper.follow_user(username):
                 self.users_followed_by_bot.append(
                     FollowedUser(
@@ -126,9 +129,9 @@ class InstaBot:
     def follow_multiple_users(self, username_list, min_followers=None, max_followers=None):
         for username in username_list:
             self.follow_user(
-                username, 
+                username,
                 conditions_checked=False,
-                min_followers=min_followers, 
+                min_followers=min_followers,
                 max_followers=max_followers
             )
 
@@ -151,7 +154,7 @@ class InstaBot:
         if self._user_login:
             return self.scrapper.get_user_info(username)
 
-    def _check_follow_conditions(self, username, min_followers=None, max_followers=None): 
+    def _check_follow_conditions(self, username, min_followers=None, max_followers=None):
         if min_followers or max_followers:
             user_info = self.get_user_info(username)
             user_followers = user_info.get('total_followers', 0)
@@ -190,7 +193,7 @@ class InstaBot:
 
             if i == total_to_follow:
                 break
-                
+
     def like_post(self, post_link):
         if self._user_login:
             if self.scrapper.like_post(post_link):
@@ -256,6 +259,9 @@ class InstaBot:
     def find_by_hashtag(self, hashtag):
         if self._user_login:
             self.scrapper.find_by_hashtag(hashtag)
+
+    def run(self):
+        pass
 
 
 if __name__ == '__main__':

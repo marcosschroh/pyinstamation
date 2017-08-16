@@ -1,7 +1,7 @@
 import datetime
 import logging
 import peewee
-from pyinstamation.models import User, Follower, future_rand_date
+from pyinstamation.models import User, Follower, future_rand_date, db
 from pyinstamation import CONFIG
 from pyinstamation.bot import InstaBot
 
@@ -9,11 +9,16 @@ from pyinstamation.bot import InstaBot
 logger = logging.getLogger(__name__)
 
 
+def create_tables(database):
+    database.connect()
+    database.create_tables([User, Follower], safe=True)
+
+
 class Controller:
 
     def __init__(self, username):
         assert username is not None, 'username must be provided'
-
+        create_tables(db)
         user, is_new = User.get_or_create(username=username)
         self.user = user
         self.is_new = is_new
@@ -44,5 +49,12 @@ class Controller:
         self.user.save()
 
     def run(self, password):
-        bot = InstaBot(username=self.user.username, password=password)
+        unfollow_users = self.get_users_to_unfollow()
+        bot = InstaBot(username=self.user.username, password=password, unfollow_users=unfollow_users)
         bot.run()
+        self.set_user_stats(likes=bot.likes_given_with_bot,
+                            comments=bot.commented_post,
+                            followed=len(bot.users_followed_by_bot),
+                            unfollowed=len(bot.users_unfollowed_by_bot))
+        self.set_users_followed(bot.users_followed_by_bot)
+        db.close()

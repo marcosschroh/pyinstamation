@@ -19,8 +19,8 @@ LOGGING = {
             'class': 'logging.StreamHandler',
         },
         'file_handler': {
-            'level': 'ERROR',
-            'filename': '/tmp/api.log',
+            'level': 'INFO',
+            'filename': './pyinstamation.log',
             'class': 'logging.FileHandler',
             'formatter': 'standard'
         }

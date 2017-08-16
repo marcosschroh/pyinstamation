@@ -1,5 +1,5 @@
 import argparse
-from pyinstamation import CONFIG
+from pyinstamation.config import CONFIG, load_config
 from pyinstamation.bot import InstaBot
 from pyinstamation.controller import Controller
 
@@ -25,7 +25,10 @@ def get_arguments():
 
 def main():
     args = get_arguments()
-    print(args)
+    if args.config is not None:
+        load_config(filepath=args.config)
+    c = Controller(username=args.username)
+    c.run(password=args.password)
 
 
 if __name__ == '__main__':
