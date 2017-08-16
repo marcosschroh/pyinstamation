@@ -52,7 +52,7 @@ class InstaScrapper(BaseScrapper):
         r = requests.get(url)
         user = {}
 
-        if r.status_code.ok:
+        if r.ok:
             # parse json
             json_content = r.json()
             user = json_content.get('user', {})
@@ -240,9 +240,4 @@ class InstaScrapper(BaseScrapper):
             # parse json
             json_content = r.json()
             return json_content.get('tag', {}).get('media', {}).get('nodes', [])
-            # possible order
-            # posts = sorted(n, key=lambda post: post.get('likes').get('count'))
         return []
-
-    def find_by_hashtag(self, hashtag):
-        self.get_hashtag_page(hashtag)
