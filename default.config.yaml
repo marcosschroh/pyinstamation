@@ -14,7 +14,15 @@ followers:
   follow_enable: true
   min_followers: null
   max_followers: null
-  follow_per_day: 10
-  unfollow_followed_users: true
-  ignore_friends: true
   ignore_users: []
+  follow_per_day: 10
+  ignore_friends: true
+  unfollow_followed_users: true
+
+pics:
+  upload: true
+  files:
+    - path: '/home/santiago/projects/instagram/nn/sorted_pics/47__30_brussels.JPG'
+      datetime: '2017-08-18 18:00'
+    - path: '/home/santiago/projects/instagram/nn/sorted_pics/48__20_santander_friends.JPG'
+      datetime: '2017-08-19 19:10'
