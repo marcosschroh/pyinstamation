@@ -5,10 +5,12 @@ password: discorvd
 posts:
   search_tags: films, movies
   ignore_tags: got, house, php
+  posts_per_hashtag: 2
   likes_per_day: 100
-  comment: true
+  comment_enabled: true
   comment_generator: true
   custom_comments: []
+  total_to_follow_per_post: 1
 
 followers:
   follow_enable: true

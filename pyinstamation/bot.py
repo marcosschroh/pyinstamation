@@ -46,11 +46,13 @@ class InstaBot:
 
         _posts = CONFIG.get('posts', {})
         self.likes_per_day = _posts.get('likes_per_day', 0)
-        self.comment = _posts.get('comment', False)
-        self.search_tags = parse_tags(_posts.get('search_tags', None))
+        self.comment_enabled = _posts.get('comment', False)
+        self.search_tags = parse_tags(_posts.get('search_tags', []))
         self.custom_comments = _posts.get('custom_comments', [])
         self.comment_generator = _posts.get('comment_generator', False)
         self.ignore_tags = parse_tags(_posts.get('ignore_tags', None))
+        self.total_to_follow_per_post = _posts.get('total_to_follow_per_post')
+        self.posts_per_hashtag = _posts.get('posts_per_hashtag', 2)
 
         _followers = CONFIG.get('followers', {})
         self.ignore_users = _followers.get('ignore_users', [])
@@ -74,10 +76,11 @@ class InstaBot:
         self.commented_post = 0
         self.total_followers = 0
         self.total_following = 0
-        self.likes_given_with_bot = 0
+        self.likes_given_by_bot = 0
         self.min_followers_for_a_new_follow = min_followers_for_a_new_follow
         self.users_followed_by_bot = []
         self.users_unfollowed_by_bot = []
+        self.total_user_followed_by_bot = 0
 
         self.scrapper = InstaScrapper()
         self._configure_log()
@@ -148,6 +151,7 @@ class InstaBot:
                     )
                 )
                 self.total_following += 1
+                self.total_user_followed_by_bot += 1
                 return True
 
         return False
@@ -180,7 +184,7 @@ class InstaBot:
         if self._user_login:
             return self.scrapper.get_user_info(username)
 
-    def _check_follow_conditions(self, username, min_followers=None, max_followers=None):
+    def _check_follow_conditions(self, username, min_followers=None, max_followers=None, ignore_users=None):
         if min_followers or max_followers:
             user_info = self.get_user_info(username)
             user_followers = user_info.get('total_followers', 0)
@@ -191,6 +195,9 @@ class InstaBot:
             if not (min_followers <= user_followers <= max_followers):
                 return False
 
+            if ignore_users and username in ignore_users:
+                return False
+
         return True
 
     def get_my_profile_info(self):
@@ -199,7 +206,7 @@ class InstaBot:
             self.total_followers = my_profile.get('total_followers')
             self.total_following = my_profile.get('total_following')
 
-    def follow_users_by_hashtag(self, hashtag, min_followers=None, total_to_follow=1):
+    def follow_users_by_hashtag(self, hashtag, min_followers=None, total_to_follow=1, ignore_users=None, posts_per_hashtag=None):
         self.scrapper.get_hashtag_page(hashtag)
         posts = self.scrapper.get_posts_by_hashtag(hashtag)
 
@@ -207,22 +214,34 @@ class InstaBot:
             logger.info('No posts were found for HASHTAG {0}'.format(hashtag))
             return
 
-        users_followed = 0
-        for post in posts:
+        users_followed_by_hashtag = 0
+        for i, post in enumerate(posts, 1):
             # if there is a posts there is a code....
             post_code = post.get('code')
             post_url = self.scrapper.generate_post_link_by_code(post_code)
+            
+            self.scrapper.wait(sleep_time=3)
             username = self.scrapper.get_username_in_post_page(post_url)
 
-            if self._check_follow_conditions(username, min_followers=min_followers):
+            if self.likes_given_by_bot < self.likes_per_day:
                 self.like_post(post_url)
-                if self.follow_user(username):
-                    users_followed += 1
 
-            if total_to_follow <= users_followed:
+            if self.comment_enabled:
+                # think aboit the comment generator and comment per post...
+                # self.commented_post(post_url)
+                pass
+
+            if self.follow_enable and self.total_user_followed_by_bot < self.follow_per_day \
+                    and users_followed_by_hashtag < total_to_follow:
+
+                if self._check_follow_conditions(username, min_followers=min_followers, ignore_users=ignore_users):
+                    if self.follow_user(username):
+                        users_followed_by_hashtag += 1
+
+            if posts_per_hashtag and posts_per_hashtag <= i:
                 break
 
-    def follow_users_by_multiple_hashtags(self, hashtags, min_followers=None, total_to_follow=1):
+    def follow_users_by_multiple_hashtags(self, hashtags, min_followers=None, total_to_follow=1, ignore_users=None, posts_per_hashtag=None):
         """
         @hashtags: list of dictionaries where every dict
         contains:
@@ -262,20 +281,29 @@ class InstaBot:
         """
 
         for hashtag_data in hashtags:
-            hashtag = hashtag_data.get('hashtag')
-            min_followers = hashtag_data.get('min_followers', min_followers)
-            total_to_follow = hashtag_data.get('total_to_follow', total_to_follow)
-            self.follow_users_by_hashtag(hashtag, min_followers, total_to_follow)
+            hashtag = hashtag_data
+            if type(hashtag_data) is dict:
+                hashtag = hashtag_data.get('hashtag')
+                min_followers = hashtag_data.get('min_followers', min_followers)
+                total_to_follow = hashtag_data.get('total_to_follow', total_to_follow)
+    
+            self.follow_users_by_hashtag(
+                hashtag, 
+                min_followers=min_followers,
+                total_to_follow=total_to_follow,
+                ignore_users=ignore_users,
+                posts_per_hashtag=posts_per_hashtag
+            )
 
     def like_post(self, post_link):
         if self._user_login:
             if self.scrapper.like_post(post_link):
-                self.likes_given_with_bot += 1
+                self.likes_given_by_bot += 1
 
     def unlike_post(self, post_link):
         if self._user_login:
             if self.scrapper.unlike_post(post_link):
-                self.likes_given_with_bot -= 1
+                self.likes_given_by_bot -= 1
 
     def like_multiple_posts(self, post_link_list):
         for post in post_link_list:
@@ -344,20 +372,29 @@ class InstaBot:
         """
         Start the real step.
 
-        1. Search by hashtags,
+        1. Search by hashtags
+
         """
-        pass
+        self.follow_users_by_multiple_hashtags(
+            self.search_tags,
+            min_followers=self.min_followers_for_a_new_follow,
+            total_to_follow=self.total_to_follow_per_post,
+            ignore_users=self.ignore_users,
+            posts_per_hashtag=self.posts_per_hashtag
+        )
 
     def run(self):
         """
-        1. pics
-        2. unfollow users
-        3. follow process
+        1. login
+        2. pics
+        3. unfollow users
+        4. follow process
             per post
             me gusta
             comment probability
             follow probability
         """
+        self.login()
         self.picture_step()
         self.unfollow_users_step()
         self.follow_users_step()
