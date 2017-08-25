@@ -10,7 +10,7 @@ posts:
   comment_enabled: true
   comment_generator: true
   custom_comments: []
-  total_to_follow_per_post: 1
+  total_to_follow_per_hashtag: 1
 
 followers:
   follow_enable: true

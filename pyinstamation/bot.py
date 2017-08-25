@@ -51,7 +51,7 @@ class InstaBot:
         self.custom_comments = _posts.get('custom_comments', [])
         self.comment_generator = _posts.get('comment_generator', False)
         self.ignore_tags = parse_tags(_posts.get('ignore_tags', None))
-        self.total_to_follow_per_post = _posts.get('total_to_follow_per_post')
+        self.total_to_follow_per_hashtag = _posts.get('total_to_follow_per_hashtag')
         self.posts_per_hashtag = _posts.get('posts_per_hashtag', 2)
 
         _followers = CONFIG.get('followers', {})
@@ -131,7 +131,8 @@ class InstaBot:
         ]
         """
         for picture in pictures_list:
-            pic = picture.get('file')
+            pic = picture.get('path')
+            print(pic)
             comment = picture.get('comment', None)
             self.upload_picture(pic, comment)
             self.pictures_uploaded += 1
@@ -378,7 +379,7 @@ class InstaBot:
         self.follow_users_by_multiple_hashtags(
             self.search_tags,
             min_followers=self.min_followers_for_a_new_follow,
-            total_to_follow=self.total_to_follow_per_post,
+            total_to_follow=self.total_to_follow_per_hashtag,
             ignore_users=self.ignore_users,
             posts_per_hashtag=self.posts_per_hashtag
         )
