@@ -26,14 +26,14 @@ def parse_tags(tags):
 
 class InstaBot:
 
-    def __init__(self, username=None, password=None, is_new=True, unfollow_users=None,
+    def __init__(self, username=None, password=None, is_new=True, users_to_unfollow=None,
                  min_followers_for_a_new_follow=100):
         if username is None:
             username = CONFIG.get('username', None)
         if password is None:
             password = CONFIG.get('password', None)
-        if unfollow_users is None:
-            unfollow_users = []
+        if users_to_unfollow is None:
+            users_to_unfollow = []
 
         assert username is not None, 'A username must be provided'
         assert password is not None, 'A password must be provided'
@@ -42,15 +42,15 @@ class InstaBot:
         self.username = username
         self.password = password
         self.is_new = is_new
-        self.unfollow_users = unfollow_users
+        self.users_to_unfollow = users_to_unfollow
 
         _posts = CONFIG.get('posts', {})
-        self.likes = _posts.get('likes', 0)
+        self.likes_per_day = _posts.get('likes_per_day', 0)
         self.comment = _posts.get('comment', False)
         self.search_tags = parse_tags(_posts.get('search_tags', None))
         self.custom_comments = _posts.get('custom_comments', [])
         self.comment_generator = _posts.get('comment_generator', False)
-        self.ignore_pics_with_tags = parse_tags(_posts.get('ignore_pics_with_tags', None))
+        self.ignore_tags = parse_tags(_posts.get('ignore_tags', None))
 
         _followers = CONFIG.get('followers', {})
         self.ignore_users = _followers.get('ignore_users', [])
@@ -59,6 +59,12 @@ class InstaBot:
         self.max_followers = _followers.get('max_followers', 0)
         self.follow_per_day = _followers.get('follow_per_day', 10)
         self.ignore_friends = _followers.get('ignore_friends', True)
+        
+        _pictures_config = CONFIG.get('pics', {})
+        self.upload = _pictures_config.get('upload', False)
+        self.pictures = _pictures_config.get('files', [])
+        self.pictures_uploaded = 0
+
         # End configuration
 
         # Bot internal states
@@ -101,11 +107,31 @@ class InstaBot:
     def user_login(self):
         return self._user_login
 
-    def upload_picture(self, image_path, comment):
+    def upload_picture(self, image_path, comment=None):
         self.scrapper.upload_picture(image_path, comment)
 
-    def start(self):
-        pass
+    def upload_multiple_pictures(self, pictures_list):
+        """
+        @pictures_list: list of dictionaries, where each dictionary
+        represent an image to upload.
+
+        [
+            {
+                'file': 'path to file',
+                'comment': '#nice',
+            },
+            {
+                'hashtag': 'path to another file'
+            }
+
+            ...
+        ]
+        """
+        for picture in pictures_list:
+            pic = picture.get('file')
+            comment = picture.get('comment', None)
+            self.upload_picture(pic, comment)
+            self.pictures_uploaded += 1
 
     def follow_user(self, username, conditions_checked=True, min_followers=None, max_followers=None):
         if self.user_login:
@@ -307,30 +333,33 @@ class InstaBot:
         if self._user_login:
             self.scrapper.find_by_hashtag(hashtag)
 
-    def run(self):
+    def picture_step(self):
+        if self.upload:
+            self.upload_multiple_pictures(self.pictures)
+
+    def unfollow_users_step(self):
+        self.unfollow_multiple_users(self.users_to_unfollow)
+
+    def follow_users_step(self):
+        """
+        Start the real step.
+
+        1. Search by hashtags,
+        """
         pass
 
-if __name__ == '__main__':
-    with open("config.yaml", 'r') as stream:
-        try:
-            CONFIG = yaml.load(stream)
-        except yaml.YAMLError as exc:
-            sys.exit(exc)
+    def run(self):
+        """
+        1. pics
+        2. unfollow users
+        3. follow process
+            per post
+            me gusta
+            comment probability
+            follow probability
+        """
+        self.picture_step()
+        self.unfollow_users_step()
+        self.follow_users_step()
 
-    bot = InstaBot(CONFIG.get('username'), CONFIG.get('password'))
-
-    # actions
-    bot.login()
-    # bot.get_user_info('woile')
-    # bot.get_my_profile_info()
-    # bot.follow_user('woile', min_followers=0, max_followers=0)
-    # bot.follow_multiple_users(['woile', 'marcosschroh'])
-    # bot.unfollow_user('woile')
-    # bot.unfollow_muliple_users(['woile', 'marcosschroh'])
-    # bot.like_post('https://www.instagram.com/p/BXamBMihdBF/')
-    # bot.like_multiple_posts(['https://www.instagram.com/p/BXamBMihdBF/'])
-    # bot.unlike_post('https://www.instagram.com/p/BXamBMihdBF/')
-    # bot.unlike_multiple_posts(['https://www.instagram.com/p/BXamBMihdBF/'])
-    # bot.upload_picture(IMAGE_TEST_PATH, '#chiche #bombom #pp')
-    # bot.follow_users_by_hashtag('haarlem', min_followers=None, total_to_follow=1)
-    # bot.follow_users_by_multiple_hashtags({'hashtag': 'haarlem'}, min_followers=50, total_to_follow=10)
+        

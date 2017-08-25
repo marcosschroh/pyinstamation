@@ -85,7 +85,7 @@ class InstaScrapper(BaseScrapper):
     def get_my_profile_page(self, my_username):
         self.get_user_page(my_username)
 
-    def upload_picture(self, image_path, comment):
+    def upload_picture(self, image_path, comment=None):
         logger.info('uploading picture...', image_path)
 
         # simulate the click in the Camera Logo
@@ -108,7 +108,9 @@ class InstaScrapper(BaseScrapper):
         comment_input.click()
 
         self.wait_explicit()
-        comment_input.send_keys(comment)
+
+        if comment:
+            comment_input.send_keys(comment)
 
         self.wait_explicit()
         self.browser.find_element_by_xpath(

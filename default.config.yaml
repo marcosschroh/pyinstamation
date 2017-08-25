@@ -4,8 +4,8 @@ password: discorvd
 
 posts:
   search_tags: films, movies
-  ignore_pics_with_tags: got, house, php
-  likes: 100
+  ignore_tags: got, house, php
+  likes_per_day: 100
   comment: true
   comment_generator: true
   custom_comments: []
@@ -24,5 +24,7 @@ pics:
   files:
     - path: '/home/santiago/projects/instagram/nn/sorted_pics/47__30_brussels.JPG'
       datetime: '2017-08-18 18:00'
+      comment: '#awesome #belgium'
     - path: '/home/santiago/projects/instagram/nn/sorted_pics/48__20_santander_friends.JPG'
       datetime: '2017-08-19 19:10'
+

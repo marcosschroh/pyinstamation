@@ -50,7 +50,7 @@ class Controller:
 
     def run(self, password):
         unfollow_users = self.get_users_to_unfollow()
-        bot = InstaBot(username=self.user.username, password=password, unfollow_users=unfollow_users)
+        bot = InstaBot(username=self.user.username, password=password, users_to_unfollow=unfollow_users)
         bot.run()
         self.set_user_stats(likes=bot.likes_given_with_bot,
                             comments=bot.commented_post,
