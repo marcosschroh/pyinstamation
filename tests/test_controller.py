@@ -14,10 +14,9 @@ class ControllerTest(DBTestCase):
 
     def setUp(self):
         self.user = User.create(username='darude')
-        self.followers = []
-        for username in ['user1', 'user2', 'user3']:
-            f = Follower.create(user=self.user, username=username)
-            self.followers.append(f)
+        self.followers = ['user1', 'user2', 'user3']
+        for username in self.followers:
+            Follower.create(user=self.user, username=username)
 
     def test_controller_create_user(self):
         c = Controller(username='pepe')
@@ -55,6 +54,17 @@ class ControllerTest(DBTestCase):
         self.assertEqual(c.user.commented, 3)
         self.assertEqual(c.user.followed, 2)
         self.assertEqual(c.user.unfollowed, 1)
+
+    def test_set_users_unfollowed(self):
+        c = Controller(username='pepe')
+        unfollowed = [
+            FollowedUser('user1', datetime.datetime.now()),
+            FollowedUser('user2', datetime.datetime.now()),
+            FollowedUser('user3', datetime.datetime.now())
+        ]
+        c.set_users_unfollowed(unfollowed)
+        assert c.user.follower_set.select(Follower.following==False).count() == 0
+
 
 
 if __name__ == '__main__':

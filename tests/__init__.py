@@ -1,7 +1,11 @@
+import logging
 import unittest
 import peewee
 from playhouse.test_utils import test_database
 from pyinstamation import models
+
+
+logging.disable(logging.CRITICAL)
 
 
 class DBTestCase(unittest.TestCase):

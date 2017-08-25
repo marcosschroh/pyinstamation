@@ -14,11 +14,14 @@ def create_tables(database):
     database.create_tables([User, Follower], safe=True)
 
 
+create_tables(db)
+
+
 class Controller:
 
     def __init__(self, username):
         assert username is not None, 'username must be provided'
-        create_tables(db)
+
         user, is_new = User.get_or_create(username=username)
         self.user = user
         self.is_new = is_new
@@ -34,12 +37,24 @@ class Controller:
         :type users: list(namedtuple)
         """
         assert type(users) is list, 'users is not a list'
+
         for user in users:
             unfollow_date = future_rand_date(date=user.follow_date)
             try:
                 Follower.create(user=self.user, username=user.username, unfollow_date=unfollow_date)
             except peewee.IntegrityError:
                 logger.exception('%s is already present in following list', user.username)
+
+    def set_users_unfollowed(self, users):
+        """
+        :type users: list(namedtuple)
+        """
+        assert type(users) is list, 'users is not a list'
+
+        usernames = [user.username for user in users]
+        query = Follower.update(following=False).where(Follower.username in usernames)
+        modified_rows = query.execute()
+        logger.debug("Users unfollowed %s", modified_rows)
 
     def set_user_stats(self, likes=0, comments=0, followed=0, unfollowed=0):
         self.user.likes += likes
@@ -57,4 +72,5 @@ class Controller:
                             followed=len(bot.users_followed_by_bot),
                             unfollowed=len(bot.users_unfollowed_by_bot))
         self.set_users_followed(bot.users_followed_by_bot)
+        self.set_users_unfollowed(bot.users_unfollowed_by_bot)
         db.close()
