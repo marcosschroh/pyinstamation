@@ -86,7 +86,7 @@ class InstaScrapper(BaseScrapper):
         self.get_user_page(my_username)
 
     def upload_picture(self, image_path, comment=None):
-        logger.info('uploading picture...', image_path)
+        logger.info('uploading picture...{0}'.format(image_path))
 
         # simulate the click in the Camera Logo
         image_input = self.find(
