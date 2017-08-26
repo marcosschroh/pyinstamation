@@ -2,8 +2,6 @@ import datetime
 import logging
 import peewee
 from pyinstamation.models import User, Follower, future_rand_date, db
-from pyinstamation import CONFIG
-from pyinstamation.bot import InstaBot
 
 
 logger = logging.getLogger(__name__)
@@ -65,17 +63,17 @@ class Controller:
         self.user.unfollowed += unfollowed
         self.user.save()
 
-    def run(self, password):
-        unfollow_users = self.get_users_to_unfollow()
-        bot = InstaBot(username=self.user.username,
-                       password=password,
-                       users_to_unfollow=unfollow_users)
-        bot.run()
-
+    def set_stats(self, bot):
         self.set_users_followed(bot.users_followed_by_bot)
         self.set_users_unfollowed(bot.users_unfollowed_by_bot)
         self.set_user_stats(likes=bot.likes_given_by_bot,
                             comments=bot.commented_post,
                             followed=len(bot.users_followed_by_bot),
                             unfollowed=len(bot.users_unfollowed_by_bot))
+
+    def run(self, bot):
+        unfollow_users = self.get_users_to_unfollow()
+        bot.run(users_to_unfollow=unfollow_users)
+
+        self.set_stats(bot)
         db.close()

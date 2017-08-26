@@ -1,7 +1,15 @@
+import sys
+import signal
 import argparse
+import logging
+from functools import partial
+
 from pyinstamation.config import CONFIG, load_config
-from pyinstamation.bot import InstaBot
 from pyinstamation.controller import Controller
+from pyinstamation.bot import InstaBot
+from pyinstamation.scrapper import InstaScrapper
+
+logger = logging.getLogger(__name__)
 
 
 def get_arguments():
@@ -23,12 +31,24 @@ def get_arguments():
     return parser.parse_args()
 
 
+def signal_handler(bot, controller, signal, frame):
+        logger.info('You pressed Ctrl+C!')
+
+        controller.set_stats(bot)
+        logger.info('Saving stats.......!')
+        sys.exit(0)
+
+
 def main():
     args = get_arguments()
     if args.config is not None:
         load_config(filepath=args.config)
+
+    scrapper = InstaScrapper()
+    bot = InstaBot(scrapper, username=args.username, password=args.password)
     c = Controller(username=args.username)
-    c.run(password=args.password)
+    signal.signal(signal.SIGINT, partial(signal_handler, bot, c))
+    c.run(bot)
 
 
 if __name__ == '__main__':

@@ -1,12 +1,10 @@
 import os
-import sys
-import yaml
 import logging
 from datetime import datetime
 from collections import namedtuple
 
 from pyinstamation.config import CONFIG
-from pyinstamation.scrapper import InstaScrapper, instagram_const
+from pyinstamation.scrapper import instagram_const
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -17,8 +15,8 @@ logger = logging.getLogger(__name__)
 
 class InstaBot:
 
-    def __init__(self, username=None, password=None, is_new=True, users_to_unfollow=None,
-                 min_followers_for_a_new_follow=100):
+    def __init__(self, scrapper, username=None, password=None, is_new=True,
+                 users_to_unfollow=None, min_followers_for_a_new_follow=100):
         if username is None:
             username = CONFIG.get('username', None)
         if password is None:
@@ -72,9 +70,8 @@ class InstaBot:
         self.users_unfollowed_by_bot = []
         self.total_user_followed_by_bot = 0
 
-        self.scrapper = InstaScrapper()
+        self.scrapper = scrapper
         self._configure_log()
-        self._reach_website()
 
     @staticmethod
     def parse_tags(tags):
@@ -93,7 +90,7 @@ class InstaBot:
             (filter(lambda h: h.startswith("#"), caption.split(' ')))
         )
 
-    def _reach_website(self):
+    def reach_website(self):
         self.scrapper.reach_website()
 
     def _configure_log(self):
@@ -403,12 +400,16 @@ class InstaBot:
         if self._user_login:
             self.scrapper.find_by_hashtag(hashtag)
 
+    def start_browser(self):
+        self.scrapper.open_browser()
+
     def picture_step(self):
         if self.upload:
             self.upload_multiple_pictures(self.pictures)
 
-    def unfollow_users_step(self):
-        self.unfollow_multiple_users(self.users_to_unfollow)
+    def unfollow_users_step(self, users_to_unfollow=None):
+        if users_to_unfollow:
+            self.unfollow_multiple_users(self.users_to_unfollow)
 
     def follow_users_step(self):
         """
@@ -426,7 +427,7 @@ class InstaBot:
             ignore_tags=self.ignore_tags
         )
 
-    def run(self):
+    def run(self, users_to_unfollow=None):
         """
         1. login
         2. pics
@@ -437,7 +438,9 @@ class InstaBot:
             comment probability
             follow probability
         """
+        self.start_browser()
+        self.reach_website()
         self.login()
         self.picture_step()
-        self.unfollow_users_step()
+        self.unfollow_users_step(users_to_unfollow=users_to_unfollow)
         self.follow_users_step()

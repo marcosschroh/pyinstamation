@@ -20,9 +20,12 @@ class BaseScrapper:
 
     def __init__(self, website_url=pyinstamation.CONFIG['site_url']):
         self.website_url = website_url
-        self.browser = self.open_mobile_browser()
+        self.browser = None
 
-    def open_mobile_browser(self):
+    def open_browser(self):
+        self.browser = self._open_mobile_browser()
+
+    def _open_mobile_browser(self):
         mobile_emulation = {"deviceName": "Nexus 5"}
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument('--dns-prefetch-disable')
