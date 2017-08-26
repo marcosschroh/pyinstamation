@@ -31,8 +31,10 @@ class ControllerTest(DBTestCase):
     def test_get_users_to_unfollow(self):
         c = Controller(username='pepe')
         yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
+
         Follower.create(user=c.user, username='fulanito', unfollow_date=yesterday)
         Follower.create(user=c.user, username='noUnfoll', following=False, unfollow_date=yesterday)
+
         users = c.get_users_to_unfollow()
         self.assertEqual(users.count(), 1)
 
@@ -58,13 +60,12 @@ class ControllerTest(DBTestCase):
     def test_set_users_unfollowed(self):
         c = Controller(username='pepe')
         unfollowed = [
-            FollowedUser('user1', datetime.datetime.now()),
-            FollowedUser('user2', datetime.datetime.now()),
-            FollowedUser('user3', datetime.datetime.now())
+            FollowedUser('user1', None),
+            FollowedUser('user2', None),
+            FollowedUser('user3', None)
         ]
         c.set_users_unfollowed(unfollowed)
-        assert c.user.follower_set.select(Follower.following==False).count() == 0
-
+        self.assertEqual(c.user.follower_set.select(Follower.following == False).count(), 0)  # noqa
 
 
 if __name__ == '__main__':

@@ -40,6 +40,7 @@ class BaseScrapper:
     def close_browser(self):
         logger.debug('Closing browser...')
         self.browser.close()
+        self.browser = None
 
     def find(self, method, selector, wait=True, explicit=True, sleep_time=None, **kwargs):
         if wait:
@@ -65,6 +66,7 @@ class BaseScrapper:
             time.sleep(sleep_time)
         else:
             self.browser.implicitly_wait(sleep_time)
+        return sleep_time
 
     @staticmethod
     def random_seconds():

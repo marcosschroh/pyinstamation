@@ -27,9 +27,10 @@ class Controller:
         self.is_new = is_new
 
     def get_users_to_unfollow(self):
-        _users_to_unfollow = self.user.follower_set.select(
-            Follower.username, Follower.following).where(
-            Follower.following == True, Follower.unfollow_date < datetime.datetime.now())
+        _users_to_unfollow = (self.user.follower_set
+                                  .select(Follower.username, Follower.following)
+                                  .where(Follower.following == True,  # noqa
+                                         Follower.unfollow_date < datetime.datetime.now()))
         return _users_to_unfollow
 
     def set_users_followed(self, users):
@@ -50,7 +51,10 @@ class Controller:
         """
 
         usernames = [user.username for user in users]
-        query = Follower.update(following=False).where(Follower.username in usernames)
+        query = (Follower.update(following=False)
+                         .where(Follower.username in usernames,
+                                Follower.following == True,
+                                Follower.user == self.user.id))
         modified_rows = query.execute()
         logger.debug("Users unfollowed %s", modified_rows)
 
