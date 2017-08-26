@@ -61,7 +61,7 @@ class InstaBot:
         self.max_followers = _followers.get('max_followers', 0)
         self.follow_per_day = _followers.get('follow_per_day', 10)
         self.ignore_friends = _followers.get('ignore_friends', True)
-        
+
         _pictures_config = CONFIG.get('pics', {})
         self.upload = _pictures_config.get('upload', False)
         self.pictures = _pictures_config.get('files', [])
@@ -137,11 +137,13 @@ class InstaBot:
             self.upload_picture(pic, comment)
             self.pictures_uploaded += 1
 
-    def follow_user(self, username, conditions_checked=True, min_followers=None, max_followers=None):
+    def follow_user(self, username, conditions_checked=True, min_followers=None,
+                    max_followers=None):
         if self.user_login:
 
             if not conditions_checked:
-                if not self._check_follow_conditions(username, min_followers=min_followers, max_followers=max_followers):
+                if not self._check_follow_conditions(username, min_followers=min_followers,
+                                                     max_followers=max_followers):
                     return False
 
             if self.scrapper.follow_user(username):
@@ -185,7 +187,9 @@ class InstaBot:
         if self._user_login:
             return self.scrapper.get_user_info(username)
 
-    def _check_follow_conditions(self, username, min_followers=None, max_followers=None, ignore_users=None):
+    def _check_follow_conditions(self, username, min_followers=None, max_followers=None,
+                                 ignore_users=None):
+
         if min_followers or max_followers:
             user_info = self.get_user_info(username)
             user_followers = user_info.get('total_followers', 0)
@@ -207,7 +211,9 @@ class InstaBot:
             self.total_followers = my_profile.get('total_followers')
             self.total_following = my_profile.get('total_following')
 
-    def follow_users_by_hashtag(self, hashtag, min_followers=None, total_to_follow=1, ignore_users=None, posts_per_hashtag=None):
+    def follow_users_by_hashtag(self, hashtag, min_followers=None, total_to_follow=1,
+                                ignore_users=None, posts_per_hashtag=None):
+
         self.scrapper.get_hashtag_page(hashtag)
         posts = self.scrapper.get_posts_by_hashtag(hashtag)
 
@@ -220,7 +226,7 @@ class InstaBot:
             # if there is a posts there is a code....
             post_code = post.get('code')
             post_url = self.scrapper.generate_post_link_by_code(post_code)
-            
+
             self.scrapper.wait(sleep_time=3)
             username = self.scrapper.get_username_in_post_page(post_url)
 
@@ -235,14 +241,16 @@ class InstaBot:
             if self.follow_enable and self.total_user_followed_by_bot < self.follow_per_day \
                     and users_followed_by_hashtag < total_to_follow:
 
-                if self._check_follow_conditions(username, min_followers=min_followers, ignore_users=ignore_users):
+                if self._check_follow_conditions(username, min_followers=min_followers,
+                                                 ignore_users=ignore_users):
                     if self.follow_user(username):
                         users_followed_by_hashtag += 1
 
             if posts_per_hashtag and posts_per_hashtag <= i:
                 break
 
-    def follow_users_by_multiple_hashtags(self, hashtags, min_followers=None, total_to_follow=1, ignore_users=None, posts_per_hashtag=None):
+    def follow_users_by_multiple_hashtags(self, hashtags, min_followers=None, total_to_follow=1,
+                                          ignore_users=None, posts_per_hashtag=None):
         """
         @hashtags: list of dictionaries where every dict
         contains:
@@ -287,9 +295,9 @@ class InstaBot:
                 hashtag = hashtag_data.get('hashtag')
                 min_followers = hashtag_data.get('min_followers', min_followers)
                 total_to_follow = hashtag_data.get('total_to_follow', total_to_follow)
-    
+
             self.follow_users_by_hashtag(
-                hashtag, 
+                hashtag,
                 min_followers=min_followers,
                 total_to_follow=total_to_follow,
                 ignore_users=ignore_users,
@@ -399,5 +407,3 @@ class InstaBot:
         self.picture_step()
         self.unfollow_users_step()
         self.follow_users_step()
-
-        
