@@ -36,7 +36,6 @@ class Controller:
         """
         :type users: list(namedtuple)
         """
-        assert type(users) is list, 'users is not a list'
 
         for user in users:
             unfollow_date = future_rand_date(date=user.follow_date)
@@ -49,7 +48,6 @@ class Controller:
         """
         :type users: list(namedtuple)
         """
-        assert type(users) is list, 'users is not a list'
 
         usernames = [user.username for user in users]
         query = Follower.update(following=False).where(Follower.username in usernames)
@@ -65,12 +63,15 @@ class Controller:
 
     def run(self, password):
         unfollow_users = self.get_users_to_unfollow()
-        bot = InstaBot(username=self.user.username, password=password, users_to_unfollow=unfollow_users)
+        bot = InstaBot(username=self.user.username,
+                       password=password,
+                       users_to_unfollow=unfollow_users)
         bot.run()
+
+        self.set_users_followed(bot.users_followed_by_bot)
+        self.set_users_unfollowed(bot.users_unfollowed_by_bot)
         self.set_user_stats(likes=bot.likes_given_by_bot,
                             comments=bot.commented_post,
                             followed=len(bot.users_followed_by_bot),
                             unfollowed=len(bot.users_unfollowed_by_bot))
-        self.set_users_followed(bot.users_followed_by_bot)
-        self.set_users_unfollowed(bot.users_unfollowed_by_bot)
         db.close()
