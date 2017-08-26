@@ -57,7 +57,6 @@ class InstaBot:
         self.upload = _pictures_config.get('upload', False)
         self.pictures = _pictures_config.get('files', [])
         self.pictures_uploaded = 0
-
         # End configuration
 
         # Bot internal states
@@ -87,7 +86,8 @@ class InstaBot:
             return []
         return tags.replace('#', '').replace(' ', '').split(',')
 
-    def parse_caption(self, caption):
+    @staticmethod
+    def parse_caption(caption):
         return map(
             lambda x: x.replace('#', ''),
             (filter(lambda h: h.startswith("#"), caption.split(' ')))
@@ -139,9 +139,9 @@ class InstaBot:
         """
         for picture in pictures_list:
             date_time_str = picture.get('datetime')
-            
+
             if date_time_str:
-                date_time = datetime.strptime(date_time_str, "%Y-%m-%dT%H:%M:%S")  
+                date_time = datetime.strptime(date_time_str, "%Y-%m-%dT%H:%M:%S")
                 if datetime.utcnow().date() != date_time.date():
                     logger.info('Image datetime is different than today')
                     continue
@@ -164,7 +164,7 @@ class InstaBot:
                 self.users_followed_by_bot.append(
                     FollowedUser(
                         username=username,
-                        follow_date= datetime.utcnow()
+                        follow_date=datetime.utcnow()
                     )
                 )
                 self.total_following += 1
@@ -251,7 +251,7 @@ class InstaBot:
         for i, post in enumerate(posts, 1):
 
             # if there is a posts there is a code....
-            post_code = post.get('code')    
+            post_code = post.get('code')
             post_url = self.scrapper.generate_post_link_by_code(post_code)
             if not self._check_post_conditions(post, ignore_tags=ignore_tags):
                 msg = 'Ignoring the post {0}. Has at least one hashtag of {1}'.format(post_url, ignore_tags)

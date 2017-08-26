@@ -1,12 +1,11 @@
 import logging
 import time
-
 from random import randrange
 from selenium import webdriver
+
 import pyinstamation
+from pyinstamation.scrapper.instagram_const import DRIVER_LOCATION
 
-
-DRIVER_LOCATION = './assets/chromedriver'
 
 logger = logging.getLogger(__name__)
 
@@ -22,9 +21,6 @@ class BaseScrapper:
     def __init__(self, website_url=pyinstamation.CONFIG['site_url']):
         self.website_url = website_url
         self.browser = self.open_mobile_browser()
-
-    def _open_browser(self):
-        return webdriver.Chrome()
 
     def open_mobile_browser(self):
         mobile_emulation = {"deviceName": "Nexus 5"}
@@ -42,7 +38,7 @@ class BaseScrapper:
             desired_capabilities=chrome_options.to_capabilities())
 
     def close_browser(self):
-        logger.info('Closing...')
+        logger.debug('Closing browser...')
         self.browser.close()
 
     def find(self, method, selector, wait=True, explicit=True, sleep_time=None, **kwargs):
