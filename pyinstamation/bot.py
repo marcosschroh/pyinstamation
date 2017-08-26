@@ -15,15 +15,6 @@ FollowedUser = namedtuple('FollowedUser', ['username', 'follow_date'])
 logger = logging.getLogger(__name__)
 
 
-def parse_tags(tags):
-    """From a given string remove hashtags and spaces.
-    :rtype list:
-    """
-    if tags is None:
-        return []
-    return tags.replace('#', '').replace(' ', '').split(',')
-
-
 class InstaBot:
 
     def __init__(self, username=None, password=None, is_new=True, users_to_unfollow=None,
@@ -47,10 +38,10 @@ class InstaBot:
         _posts = CONFIG.get('posts', {})
         self.likes_per_day = _posts.get('likes_per_day', 0)
         self.comment_enabled = _posts.get('comment', False)
-        self.search_tags = parse_tags(_posts.get('search_tags', []))
+        self.search_tags = self.parse_tags(_posts.get('search_tags', []))
         self.custom_comments = _posts.get('custom_comments', [])
         self.comment_generator = _posts.get('comment_generator', False)
-        self.ignore_tags = parse_tags(_posts.get('ignore_tags', None))
+        self.ignore_tags = self.parse_tags(_posts.get('ignore_tags', None))
         self.total_to_follow_per_hashtag = _posts.get('total_to_follow_per_hashtag')
         self.posts_per_hashtag = _posts.get('posts_per_hashtag', 2)
 
@@ -85,6 +76,16 @@ class InstaBot:
         self.scrapper = InstaScrapper()
         self._configure_log()
         self._reach_website()
+
+    @staticmethod
+    def parse_tags(tags):
+        """
+        From a given string remove hashtags and spaces.
+        :rtype list:
+        """
+        if tags is None:
+            return []
+        return tags.replace('#', '').replace(' ', '').split(',')
 
     def _reach_website(self):
         self.scrapper.reach_website()
@@ -131,8 +132,15 @@ class InstaBot:
         ]
         """
         for picture in pictures_list:
+            date_time_str = picture.get('datetime')
+            
+            if date_time_str:
+                date_time = datetime.strptime(date_time_str, "%Y-%m-%dT%H:%M:%S")  
+                if datetime.utcnow().date() != date_time.date():
+                    logger.info('Image datetime is different than today')
+                    continue
+
             pic = picture.get('path')
-            print(pic)
             comment = picture.get('comment', None)
             self.upload_picture(pic, comment)
             self.pictures_uploaded += 1
@@ -295,6 +303,8 @@ class InstaBot:
                 hashtag = hashtag_data.get('hashtag')
                 min_followers = hashtag_data.get('min_followers', min_followers)
                 total_to_follow = hashtag_data.get('total_to_follow', total_to_follow)
+
+            logger.info('Processing the hashtag {0}'.format(hashtag))
 
             self.follow_users_by_hashtag(
                 hashtag,
