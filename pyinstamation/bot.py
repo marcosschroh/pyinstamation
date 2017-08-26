@@ -87,6 +87,12 @@ class InstaBot:
             return []
         return tags.replace('#', '').replace(' ', '').split(',')
 
+    def parse_caption(self, caption):
+        return map(
+            lambda x: x.replace('#', ''),
+            (filter(lambda h: h.startswith("#"), caption.split(' ')))
+        )
+
     def _reach_website(self):
         self.scrapper.reach_website()
 
@@ -213,6 +219,18 @@ class InstaBot:
 
         return True
 
+    def _check_post_conditions(self, post, ignore_tags=None):
+        if not ignore_tags:
+            return True
+
+        caption = post.get('caption')
+        tags_in_post = self.parse_caption(caption)
+
+        for t in ignore_tags:
+            if t in tags_in_post:
+                return False
+        return True
+
     def get_my_profile_info(self):
         if self._user_login:
             my_profile = self.get_user_info(self.username)
@@ -220,7 +238,7 @@ class InstaBot:
             self.total_following = my_profile.get('total_following')
 
     def follow_users_by_hashtag(self, hashtag, min_followers=None, total_to_follow=1,
-                                ignore_users=None, posts_per_hashtag=None):
+                                ignore_users=None, posts_per_hashtag=None, ignore_tags=None):
 
         self.scrapper.get_hashtag_page(hashtag)
         posts = self.scrapper.get_posts_by_hashtag(hashtag)
@@ -231,9 +249,13 @@ class InstaBot:
 
         users_followed_by_hashtag = 0
         for i, post in enumerate(posts, 1):
+
             # if there is a posts there is a code....
-            post_code = post.get('code')
+            post_code = post.get('code')    
             post_url = self.scrapper.generate_post_link_by_code(post_code)
+            if not self._check_post_conditions(post, ignore_tags=ignore_tags):
+                msg = 'Ignoring the post {0}. Has at least one hashtag of {1}'.format(post_url, ignore_tags)
+                logger.info(msg)
 
             self.scrapper.wait(sleep_time=3)
             username = self.scrapper.get_username_in_post_page(post_url)
@@ -258,7 +280,7 @@ class InstaBot:
                 break
 
     def follow_users_by_multiple_hashtags(self, hashtags, min_followers=None, total_to_follow=1,
-                                          ignore_users=None, posts_per_hashtag=None):
+                                          ignore_users=None, posts_per_hashtag=None, ignore_tags=None):
         """
         @hashtags: list of dictionaries where every dict
         contains:
@@ -304,14 +326,15 @@ class InstaBot:
                 min_followers = hashtag_data.get('min_followers', min_followers)
                 total_to_follow = hashtag_data.get('total_to_follow', total_to_follow)
 
-            logger.info('Processing the hashtag {0}'.format(hashtag))
+            logger.info('Processing hashtag {0}'.format(hashtag))
 
             self.follow_users_by_hashtag(
                 hashtag,
                 min_followers=min_followers,
                 total_to_follow=total_to_follow,
                 ignore_users=ignore_users,
-                posts_per_hashtag=posts_per_hashtag
+                posts_per_hashtag=posts_per_hashtag,
+                ignore_tags=ignore_tags
             )
 
     def like_post(self, post_link):
@@ -399,7 +422,8 @@ class InstaBot:
             min_followers=self.min_followers_for_a_new_follow,
             total_to_follow=self.total_to_follow_per_hashtag,
             ignore_users=self.ignore_users,
-            posts_per_hashtag=self.posts_per_hashtag
+            posts_per_hashtag=self.posts_per_hashtag,
+            ignore_tags=self.ignore_tags
         )
 
     def run(self):

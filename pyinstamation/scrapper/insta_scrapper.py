@@ -237,7 +237,6 @@ class InstaScrapper(BaseScrapper):
         r = requests.get(url)
 
         if r.ok:
-            # parse json
             json_content = r.json()
             return json_content.get('tag', {}).get('media', {}).get('nodes', [])
         return []
