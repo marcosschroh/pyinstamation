@@ -1,9 +1,14 @@
-run-tests:
-	python -m unittest discover tests
+webdriver:
+	./scripts/get-driver
 
-test-coverage:
+start-conf:
+	cp ./default.config.yaml ./config.yaml
+
+run-bot:
+	python -m pyinstamation
+
+run-tests-coverage:
 	coverage run --source=. -m unittest discover -s tests/
 	coverage report -m
 
-webdriver:
-	./scripts/get-driver
+init: webdriver start-conf

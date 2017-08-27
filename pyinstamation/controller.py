@@ -51,7 +51,7 @@ class Controller:
         usernames = [user.username for user in users]
         query = (Follower.update(following=False)
                          .where(Follower.username in usernames,
-                                Follower.following == True,
+                                Follower.following == True,  # noqa
                                 Follower.user == self.user.id))
         modified_rows = query.execute()
         logger.debug("Users unfollowed %s", modified_rows)

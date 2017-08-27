@@ -6,9 +6,17 @@
 ## Features
 
 * Upload pictures
-* Follow/unfollow
-* Like, comment by tags
+* Farm followers with the follow/unfollow technique
+* Like and comment by tags
+* Metrics persisted in sqlite
 
+
+## Supported OS
+
+```
+Linux (Tested in debian)
+OS X
+```
 
 ## Requirements
 
@@ -16,6 +24,7 @@
 python 3
 ```
 
+Remember to create a [virtualenv](https://virtualenv.pypa.io/en/stable/installation/)
 
 ## Instalation
 
@@ -24,14 +33,15 @@ python 3
 
 ## Configuration
 
-Provide credentials in the `config.yaml`.
-
-Edit variables in `config.py`
+Provide credentials in the `config.yaml` and tune it at will.
 
 
 ## Usage
 
-`./insta_cli.py`
+| Command | Description |
+| --- | --- |
+| `make init` | Initializes webdriver and creates a new conf based on the default one |
+| `make run-bot` | Starts runing bot |
 
 
 We told you it was easy.

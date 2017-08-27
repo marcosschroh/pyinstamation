@@ -1,6 +1,7 @@
 import logging
 import time
-from random import randrange
+import random
+
 from selenium import webdriver
 
 import pyinstamation
@@ -73,11 +74,7 @@ class BaseScrapper:
 
     @staticmethod
     def random_seconds():
-        return randrange(1, 10)
-
-    @staticmethod
-    def wait_explicit(seconds=3):
-        time.sleep(seconds)
+        return random.randrange(1, 10)
 
     def resize_window(self, width, heigth):
         self.browser.set_window_size(width, heigth)
