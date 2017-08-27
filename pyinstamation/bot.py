@@ -1,5 +1,6 @@
 import os
 import logging
+import random
 from datetime import datetime
 from collections import namedtuple
 
@@ -35,6 +36,7 @@ class InstaBot:
 
         _posts = CONFIG.get('posts', {})
         self.likes_per_day = _posts.get('likes_per_day', 0)
+        self.like_probability = _posts.get('like_probability', 0.5)
         self.comment_enabled = _posts.get('comment', False)
         self.search_tags = self.parse_tags(_posts.get('search_tags', []))
         self.custom_comments = _posts.get('custom_comments', [])
@@ -50,6 +52,7 @@ class InstaBot:
         self.max_followers = _followers.get('max_followers', 0)
         self.follow_per_day = _followers.get('follow_per_day', 10)
         self.ignore_friends = _followers.get('ignore_friends', True)
+        self.follow_probability = _followers.get('follow_probability', 0.5)
 
         _pictures_config = CONFIG.get('pics', {})
         self.upload = _pictures_config.get('upload', False)
@@ -89,6 +92,17 @@ class InstaBot:
             lambda x: x.replace('#', ''),
             (filter(lambda h: h.startswith("#"), caption.split(' ')))
         )
+
+    @staticmethod
+    def probability_of_occurrence(probability):
+        """
+        :type threshold: float
+        """
+        r = random.uniform(0, 1)
+        msg = 'Random obtained: {0}. Probability: {1}'
+        logger.info(msg.format(r, probability))
+
+        return r <= probability
 
     def reach_website(self):
         self.scrapper.reach_website()
@@ -214,6 +228,10 @@ class InstaBot:
             if ignore_users and username in ignore_users:
                 return False
 
+            if not self.probability_of_occurrence(self.follow_probability):
+                logger.info('Not follow because obtained a lower probability')
+                return False
+
         return True
 
     def _check_post_conditions(self, post, ignore_tags=None):
@@ -226,6 +244,17 @@ class InstaBot:
         for t in ignore_tags:
             if t in tags_in_post:
                 return False
+        return True
+
+    def _check_like_conditions(self):
+        if not self.likes_given_by_bot < self.likes_per_day:
+            logger.info('do not give a like because has exceeded likes per day')
+            return False
+
+        if not self.probability_of_occurrence(self.like_probability):
+            logger.info('Not like because obtained a lower probability')
+            return False
+
         return True
 
     def get_my_profile_info(self):
@@ -251,13 +280,13 @@ class InstaBot:
             post_code = post.get('code')
             post_url = self.scrapper.generate_post_link_by_code(post_code)
             if not self._check_post_conditions(post, ignore_tags=ignore_tags):
-                msg = 'Ignoring the post {0}. Has at least one hashtag of {1}'.format(post_url, ignore_tags)
-                logger.info(msg)
+                msg = 'Ignoring the post {0}. Has at least one hashtag of {1}'
+                logger.info(msg.format(post_url, ignore_tags))
 
             self.scrapper.wait(sleep_time=3)
             username = self.scrapper.get_username_in_post_page(post_url)
 
-            if self.likes_given_by_bot < self.likes_per_day:
+            if self._check_like_conditions():
                 self.like_post(post_url)
 
             if self.comment_enabled:
