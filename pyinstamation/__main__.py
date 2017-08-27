@@ -32,11 +32,11 @@ def get_arguments():
 
 
 def signal_handler(bot, controller, signal, frame):
-        logger.info('You pressed Ctrl+C!')
+    logger.info('You pressed Ctrl+C!')
 
-        controller.set_stats(bot)
-        logger.info('Saving stats.......!')
-        sys.exit(0)
+    controller.set_stats(bot)
+    logger.info('Saving stats.......!')
+    sys.exit(0)
 
 
 def main():
