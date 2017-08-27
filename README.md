@@ -2,6 +2,7 @@
 
 > Easy to use instagram bot written in python 3
 
+![](./docs/demo.gif)
 
 ## Features
 
