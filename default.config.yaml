@@ -19,8 +19,7 @@ followers:
   max_followers: null
   follow_probability: 0.5
   ignore_users: []
-  follow_per_day: 10
-  ignore_friends: true
+  follow_per_day: 50
   unfollow_followed_users: true
 
 pics:

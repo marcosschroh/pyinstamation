@@ -5,10 +5,25 @@
 
 ## Features
 
-* Upload pictures
-* Farm followers with the follow/unfollow technique
-* Like and comment by tags
-* Metrics persisted in sqlite
+- [x] Upload pictures
+- [x] Farm followers with the follow/unfollow technique
+- [x] Like and comment by tags
+- [x] Metrics persisted in db
+- [x] Logging
+- [ ] Comment generator
+- [ ] Daemonize and upload pics/vids at exact time
+- [ ] Support for plugins
+- [ ] Web with graphs and statistics
+- [ ] Dockerization
+
+
+## TODO
+
+These will be removed once completed
+
+- [ ] Gather more posts to like (currently it does not reach the max likes to give )
+- [ ] Ignore post of users already followed
+- [ ] Finish tests
 
 
 ## Supported OS
@@ -18,6 +33,7 @@ Linux (Tested in debian)
 OS X
 ```
 
+
 ## Requirements
 
 ```
@@ -25,6 +41,7 @@ python 3
 ```
 
 Remember to create a [virtualenv](https://virtualenv.pypa.io/en/stable/installation/)
+
 
 ## Instalation
 
