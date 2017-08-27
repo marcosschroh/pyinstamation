@@ -94,15 +94,15 @@ class InstaBot:
         )
 
     @staticmethod
-    def probability_of_occurrence(threshold):
+    def probability_of_occurrence(probability):
         """
         :type threshold: float
         """
-        p = random.uniform(0, 1)
-        msg = 'Probability obtained: {0}. Threshold: {1}'
-        logger.info(msg.format(p, threshold))
+        r = random.uniform(0, 1)
+        msg = 'Random obtained: {0}. Probability: {1}'
+        logger.info(msg.format(r, probability))
 
-        return threshold < p
+        return r <= probability
 
     def reach_website(self):
         self.scrapper.reach_website()
