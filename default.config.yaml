@@ -7,6 +7,7 @@ posts:
   ignore_tags: got, house, php
   posts_per_hashtag: 2
   likes_per_day: 100
+  like_probability: 0.5
   comment_enabled: true
   comment_generator: true
   custom_comments: []
@@ -16,6 +17,7 @@ followers:
   follow_enable: true
   min_followers: null
   max_followers: null
+  follow_probability: 0.5
   ignore_users: []
   follow_per_day: 10
   ignore_friends: true
