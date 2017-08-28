@@ -42,19 +42,19 @@ class InstaBot:
         self.search_tags = self.parse_tags(_posts.get('search_tags', []))
         self.custom_comments = _posts.get('custom_comments', [])
         self.ignore_tags = self.parse_tags(_posts.get('ignore_tags', None))
-        self.total_to_follow_per_hashtag = _posts.get('total_to_follow_per_hashtag')
-        self.posts_per_hashtag = _posts.get('posts_per_hashtag', 2)
+        self.total_to_follow_per_hashtag = _posts.get('total_to_follow_per_hashtag', 10)
+        self.posts_per_hashtag = _posts.get('posts_per_hashtag', )
 
         _followers = CONFIG.get('followers', {})
         self.ignore_users = _followers.get('ignore_users', [])
         self.follow_enable = _followers.get('follow_enable', False)
         self.min_followers = _followers.get('min_followers', 0)
         self.max_followers = _followers.get('max_followers', 0)
-        self.follow_per_day = _followers.get('follow_per_day', 10)
+        self.follow_per_day = _followers.get('follow_per_day', 50)
         self.ignore_friends = _followers.get('ignore_friends', True)
         self.follow_probability = _followers.get('follow_probability', 0.5)
 
-        _pictures_config = CONFIG.get('pics', {})
+        _pictures_config = CONFIG.get('picture_step', {})
         self.upload = _pictures_config.get('upload', False)
         self.pictures = _pictures_config.get('files', [])
         self.pictures_uploaded = 0
