@@ -29,13 +29,26 @@ PHRASE_OPTIONS = [
 ]
 
 
-def symbol_generator():
-    symbols = ['', '.', '!', ':)', ':D']
-    symbol = random.choice(symbols)
+def symbol_generator(symbol=None):
+    """Appends to the end of a word.
+
+    :returns: ' !' or '!!' or ':D', note that some have an space
+    :rtype: str
+    """
+    if symbol is None:
+        symbols = ['', '.', '!', ':)', ':D']
+        symbol = random.choice(symbols)
     return (' ' * random.choice([0, 1])) + (symbol * random.randrange(1, 4))
 
 
 def letter_repetition(word, probability=0.2):
+    """ Repeats a random letter of word
+
+    :type word: str
+    :probability: between 0 and 1
+    :type probability: float
+    :rtype: str
+    """
     if random.random() > probability:
         return word
     letter_pos = random.choice(range(len(word)))
@@ -47,8 +60,13 @@ def letter_repetition(word, probability=0.2):
     return ''.join(repeated_word)
 
 
-def generate(post_type='other'):
-    if post_type != 'other':
+def comment(post_type=None):
+    """Generates a trivial random comment.
+
+    :type post_type: str or None
+    :rtype: str
+    """
+    if post_type is not None:
         _posts_type = POST_TYPES[post_type] + POST_TYPES['other']
     else:
         _posts_type = POST_TYPES['other']
