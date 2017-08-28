@@ -1,6 +1,6 @@
 # PYINSTAMATION
 
-> Easy to use instagram bot written in python 3
+> Easy to use, config oriented, instagram bot, written in python 3
 
 ![](./docs/demo.gif)
 
@@ -53,13 +53,13 @@ Remember to create a [virtualenv](https://virtualenv.pypa.io/en/stable/installat
 
 | Command | Description |
 | --- | --- |
-| `make init` | Initializes webdriver and creates a new conf based on the default one |
-| `make run-bot` | Starts running bot |
+| `make init` | Downloads webdriver and creates a new conf based on the default one |
+| `make run-bot` | Starts running the bot (remember to at least set the username and password) |
 
 
 ## Configuration
 
-Create a `config.yaml` and tune it at will, `make init` will create one based on the default.
+Create a `config.yaml` and tune it at will, or use `make init`.
 The options are divided in different sections.
 
 | Option | Type | Description |
@@ -67,8 +67,9 @@ The options are divided in different sections.
 | username * | str | instagram username to operate with |
 | password ** | str | username's password |
 
-*  Required
-** Not necesary to specify in the config, the bot can be launched with `-p [PASSWORD]`
+\*  Required
+
+** Required unless the bot is launched with `-p [PASSWORD]`
 
 
 ### Posts
@@ -109,7 +110,7 @@ The options are divided in different sections.
 | Option | Type | Description |
 | --- | --- | --- |
 | `path` | str | absolute path to the file location |
-| `datetime` | str | format: '%Y-%m-%d %H:%M' eg: '2017-08-18 18:00'. For now time is ignored, but the idea is to take it into account |
+| `datetime` | str | format: `%Y-%m-%d %H:%M` eg: `2017-08-18 18:00`. For now, time is ignored, but the idea is to take it into account |
 | `comment` | str |  |
 
 For config template check [default.config.yaml](./default.config.yaml)
