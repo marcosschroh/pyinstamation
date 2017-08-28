@@ -110,7 +110,7 @@ The options are divided in different sections.
 | Option | Type | Description |
 | --- | --- | --- |
 | `path` | str | absolute path to the file location |
-| `datetime` | str | format: `%Y-%m-%d %H:%M` eg: `2017-08-18 18:00`. For now, time is ignored, but the idea is to take it into account |
+| `datetime` | str | format ISO 8061: `%Y-%m-%dT%H:%M:%S` eg: `2017-08-18T18:00:00`. For now, time is ignored, but the idea is to take it into account |
 | `comment` | str |  |
 
 For config template check [default.config.yaml](./default.config.yaml)
