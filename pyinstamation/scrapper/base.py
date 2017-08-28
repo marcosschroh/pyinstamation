@@ -1,10 +1,7 @@
 import logging
 import time
 import random
-
 from selenium import webdriver
-
-import pyinstamation
 from pyinstamation.scrapper.instagram_const import DRIVER_LOCATION
 
 
@@ -19,7 +16,7 @@ class BaseScrapper:
     MOBILE_WIDTH = 375
     MOBILE_HEIGTH = 667
 
-    def __init__(self, website_url=pyinstamation.CONFIG['site_url']):
+    def __init__(self, website_url='https://www.instagram.com'):
         self.website_url = website_url
         self.browser = None
 
