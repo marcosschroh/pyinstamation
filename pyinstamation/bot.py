@@ -6,7 +6,7 @@ from collections import namedtuple
 
 from pyinstamation.config import CONFIG
 from pyinstamation.scrapper import instagram_const
-
+from pyinstamation import comments
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 IMAGE_TEST_PATH = os.path.join(BASE_DIR, 'scrapper', 'chiche.jpg')
@@ -37,10 +37,10 @@ class InstaBot:
         _posts = CONFIG.get('posts', {})
         self.likes_per_day = _posts.get('likes_per_day', 0)
         self.like_probability = _posts.get('like_probability', 0.5)
-        self.comment_enabled = _posts.get('comment', False)
+        self.comment_enabled = _posts.get('comment_enabled', False)
+        self.comment_generator = _posts.get('comment_generator', False)
         self.search_tags = self.parse_tags(_posts.get('search_tags', []))
         self.custom_comments = _posts.get('custom_comments', [])
-        self.comment_generator = _posts.get('comment_generator', False)
         self.ignore_tags = self.parse_tags(_posts.get('ignore_tags', None))
         self.total_to_follow_per_hashtag = _posts.get('total_to_follow_per_hashtag')
         self.posts_per_hashtag = _posts.get('posts_per_hashtag', 2)
@@ -103,9 +103,6 @@ class InstaBot:
         logger.info(msg.format(r, probability))
 
         return r <= probability
-
-    def reach_website(self):
-        self.scrapper.reach_website()
 
     def _configure_log(self):
         logger.info('Hiiiii bot....')
@@ -290,9 +287,14 @@ class InstaBot:
                 self.like_post(post_url)
 
             if self.comment_enabled:
-                # think aboit the comment generator and comment per post...
-                # self.commented_post(post_url)
-                pass
+                if self.comment_generator:
+                    comment = comments.generate_comment()
+                elif self.custom_comments:
+                    comment = random.choice(self.custom_comments)
+
+                if comment:
+                    self.comment_post(post_url, comment)
+                    logger.info('Comment to post: {0}'.format(comment))
 
             if self.follow_enable and self.total_user_followed_by_bot < self.follow_per_day \
                     and users_followed_by_hashtag < total_to_follow:
@@ -468,7 +470,6 @@ class InstaBot:
             follow probability
         """
         self.start_browser()
-        self.reach_website()
         self.login()
         self.picture_step()
         self.unfollow_users_step(users_to_unfollow=users_to_unfollow)

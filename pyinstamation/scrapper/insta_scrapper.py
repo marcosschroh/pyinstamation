@@ -27,6 +27,8 @@ class InstaScrapper(BaseScrapper):
     URL_USER_DETAIL = 'https://www.instagram.com/{0}/{1}'
 
     def login(self, username, password):
+        self.get_page(self.website_url)
+
         logger.info('[LOGIN] Starting...')
         self.find('xpath', cnst.LOGIN_LINK).click()
 
