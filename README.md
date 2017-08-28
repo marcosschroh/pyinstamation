@@ -11,7 +11,7 @@
 - [x] Like and comment by tags
 - [x] Metrics persisted in db
 - [x] Logging
-- [ ] Comment generator
+- [x] Comment generator
 - [ ] Daemonize and upload pics/vids at exact time
 - [ ] Support for plugins
 - [ ] Web with graphs and statistics
@@ -49,17 +49,57 @@ Remember to create a [virtualenv](https://virtualenv.pypa.io/en/stable/installat
 `pip install -r requirements.txt`
 
 
-## Configuration
-
-Provide credentials in the `config.yaml` and tune it at will.
-
-
 ## Usage
 
 | Command | Description |
 | --- | --- |
 | `make init` | Initializes webdriver and creates a new conf based on the default one |
 | `make run-bot` | Starts runing bot |
+
+
+## Configuration
+
+Provide credentials in the `config.yaml` and tune it at will. The options are divided in sections.
+
+### Posts
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `search_tags` | str | comma separated tags to search for |
+| `ignore_tags` | str | comma separated tags to ignore if a post contains them while searching |
+| `posts_per_hashtag` | int | |
+| `likes_per_day` | int | maximum likes given in a day |
+| `like_probability` | float | probability to give a like |
+| `comment_enabled` | bool| bot will comment in the searched posts |
+| `comment_generator` | bool | bot will generate a random generic comment |
+| `custom_comments` | array | in case you don't want random comments, you can provide them |
+| `total_to_follow_per_hashtag` | int | |
+
+### Followers
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `follow_enable` | bool | while searching the bot will also follow people |
+| `min_followers` | int |  |
+| `max_followers` | int |  |
+| `follow_probability` | float | chance to follow someone while searching, between 0 and 1 |
+| `ignore_users` | array | users not to follow |
+| `follow_per_day` | int | max number of users to follow |
+| `unfollow_followed_users` | bool | after a few days the bot will stop following the users followed |
+
+### Pics
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `upload` | bool | when enabled attempts to upload a picture if there is one to upload |
+| `files` | collection | the contents of the files to upload are below |
+
+#### Pics > files
+| Option | Type | Description |
+| --- | --- | --- |
+| `path` | str | absolute path to the file location |
+| `datetime` | str | format: '%Y-%m-%d %H:%M' eg: '2017-08-18 18:00'. For now time is ignored, but the idea is to take it into account |
+| `comment` | str |  |
 
 
 We told you it was easy.
