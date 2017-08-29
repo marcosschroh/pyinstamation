@@ -16,10 +16,10 @@ class BaseScrapper:
     MOBILE_WIDTH = 375
     MOBILE_HEIGTH = 667
 
-    def __init__(self, website_url='https://www.instagram.com'):
+    def __init__(self, website_url='https://www.instagram.com', hide_browser=False):
         self.website_url = website_url
         self.browser = None
-        self.hide_browser = CONFIG.get('hide_browser', False)
+        self.hide_browser = CONFIG.get('hide_browser', hide_browser)
 
     def open_browser(self):
         if self.hide_browser:
