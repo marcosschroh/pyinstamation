@@ -4,3 +4,4 @@ peewee==2.10.1
 requests==2.18.3
 coverage==4.4.1
 pyvirtualdisplay==0.2.1
+codecov==2.0.9

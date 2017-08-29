@@ -16,7 +16,7 @@
 - [ ] Support for plugins
 - [ ] Web with graphs and statistics
 - [ ] Dockerization
-
+- [ ] Auto update user's description
 
 ## TODO
 
