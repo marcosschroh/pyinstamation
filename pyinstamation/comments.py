@@ -60,7 +60,7 @@ def letter_repetition(word, probability=0.2):
     return ''.join(repeated_word)
 
 
-def comment(post_type=None):
+def generate_comment(post_type=None):
     """Generates a trivial random comment.
 
     :type post_type: str or None

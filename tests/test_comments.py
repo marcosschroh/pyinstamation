@@ -28,13 +28,13 @@ class CommentTestCase(unittest.TestCase):
         self.assertEqual(word, 'awesssome')
 
     def test_comment_no_type(self):
-        comment = comments.comment()
+        comment = comments.generate_comment()
         self.assertEqual(comment, 'this shot is awesome')
 
     def test_comment_type_photo(self):
-        comment = comments.comment(post_type='photo')
+        comment = comments.generate_comment(post_type='photo')
         self.assertEqual(comment, 'this photo is awesome')
 
     def test_comment_type_video(self):
-        comment = comments.comment(post_type='video')
+        comment = comments.generate_comment (post_type='video')
         self.assertEqual(comment, 'this vid is awesome')
