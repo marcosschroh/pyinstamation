@@ -25,11 +25,19 @@ class Controller:
         self.is_new = is_new
 
     def get_users_to_unfollow(self):
-        _users_to_unfollow = (self.user.follower_set
-                                  .select(Follower.username, Follower.following)
-                                  .where(Follower.following == True,  # noqa
-                                         Follower.unfollow_date < datetime.datetime.now()))
-        return _users_to_unfollow
+        return (
+            self.user.follower_set.select(
+                Follower.username, Follower.following).where(
+                Follower.following == True,  # noqa
+                Follower.unfollow_date < datetime.datetime.now())
+            )
+
+    def get_users_following(self):
+        return (
+            self.user.follower_set.select(
+                Follower.username, Follower.following).where(
+                Follower.following == True) # noqa
+            )
 
     def set_users_followed(self, users):
         """
@@ -73,7 +81,8 @@ class Controller:
 
     def run(self, bot):
         unfollow_users = self.get_users_to_unfollow()
-        bot.run(users_to_unfollow=unfollow_users)
+        users_following = self.get_users_following()
+        bot.run(users_to_unfollow=unfollow_users, users_following=users_following)
 
         self.set_stats(bot)
         db.close()

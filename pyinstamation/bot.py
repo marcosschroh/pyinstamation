@@ -17,13 +17,11 @@ logger = logging.getLogger(__name__)
 class InstaBot:
 
     def __init__(self, scrapper, username=None, password=None, is_new=True,
-                 users_to_unfollow=None, min_followers_for_a_new_follow=100):
+                 min_followers_for_a_new_follow=100):
         if username is None:
             username = CONFIG.get('username', None)
         if password is None:
             password = CONFIG.get('password', None)
-        if users_to_unfollow is None:
-            users_to_unfollow = []
 
         assert username is not None, 'A username must be provided'
         assert password is not None, 'A password must be provided'
@@ -32,7 +30,7 @@ class InstaBot:
         self.username = username
         self.password = password
         self.is_new = is_new
-        self.users_to_unfollow = users_to_unfollow
+        self.users_to_unfollow = None
 
         _posts = CONFIG.get('posts', {})
         self.likes_per_day = _posts.get('likes_per_day', 0)
@@ -201,9 +199,12 @@ class InstaBot:
                 )
                 self.total_following -= 1
 
-    def unfollow_multiple_users(self, username_list):
-        for username in username_list:
-            self.unfollow_user(username)
+    def unfollow_multiple_users(self, users_list):
+        """
+        :user_list type: iter(Followers)
+        """
+        for user in users_list:
+            self.unfollow_user(user.username)
 
     def get_user_info(self, username):
         if self._user_login:
@@ -460,7 +461,7 @@ class InstaBot:
             ignore_tags=self.ignore_tags
         )
 
-    def run(self, users_to_unfollow=None):
+    def run(self, users_to_unfollow=None, users_following=None):
         """
         1. login
         2. pics
