@@ -38,3 +38,13 @@ USERNAME_IN_POST_PAGE = "//article/header//a"
 # PROFILE PAGE
 USER_FOLLOWING = "//a[@href='/{0}/following/']/span"
 USER_FOLLOWERS = "//a[@href='/{0}/followers/']/span"
+
+
+# URLS
+HOSTNAME = 'https://www.instagram.com/'
+
+URL_USER_DETAIL = HOSTNAME + '{0}/{1}'
+URL_LOGIN = HOSTNAME + 'accounts/login/'
+URL_MEDIA_DETAIL = HOSTNAME + 'p/{0}/{1}'
+URL_LOGOUT = HOSTNAME + 'accounts/logout/'
+URL_TAG = HOSTNAME + 'explore/tags/{0}/{1}'

@@ -27,7 +27,7 @@ def get_arguments():
                         help='instagram username')
     parser.add_argument('-p', '--password', help='instagram user password')
     parser.add_argument('-c', '--config', help='configuration file path')
-    parser.add_argument('-h', '--hide_browser', action="store_true", default=False,
+    parser.add_argument('-H', '--hide_browser', action="store_true", default=False,
                         help='do not show the browser, useful to run in servers')
     return parser.parse_args()
 

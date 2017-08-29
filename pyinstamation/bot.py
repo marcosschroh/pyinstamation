@@ -284,7 +284,7 @@ class InstaBot:
             username = self.scrapper.get_username_in_post_page(post_url)
 
             if self._check_like_conditions():
-                self.like_post(post_url)
+                self.like(post_url)
 
             if self.comment_enabled:
                 if self.comment_generator:
@@ -293,7 +293,7 @@ class InstaBot:
                     comment = random.choice(self.custom_comments)
 
                 if comment:
-                    self.comment_post(post_url, comment)
+                    self.comment(post_url, comment)
                     logger.info('Comment to post: {0}'.format(comment))
 
             if self.follow_enable and self.total_user_followed_by_bot < self.follow_per_day \
@@ -307,16 +307,18 @@ class InstaBot:
             if posts_per_hashtag and posts_per_hashtag <= i:
                 break
 
-    def follow_users_by_multiple_hashtags(self, hashtags, min_followers=None, total_to_follow=1,
-                                          ignore_users=None, posts_per_hashtag=None, ignore_tags=None):
+    def follow_users_by_multiple_hashtags(self, hashtags,
+                                          min_followers=None,
+                                          total_to_follow=1,
+                                          ignore_users=None,
+                                          posts_per_hashtag=None,
+                                          ignore_tags=None):
         """
-        @hashtags: list of dictionaries where every dict
-        contains:
-            @hashtag: str that represent the hashtag
-            @total_to_follow: int that represent total of user to follow
-            @min_followers: only follow the user if has at least
-            min_followers
-
+        :hashtags: collection with the following info:
+            :hashtag: str that represent the hashtag
+            :total_to_follow: int that represent total of user to follow
+            :min_followers: only follow the user if has at least min_followers
+        :type hashtags: list
         Important: Do not include # in every hashtag
 
         E.g.
@@ -365,26 +367,26 @@ class InstaBot:
                 ignore_tags=ignore_tags
             )
 
-    def like_post(self, post_link):
+    def like(self, post_link):
         if self._user_login:
-            if self.scrapper.like_post(post_link):
+            if self.scrapper.like(post_link):
                 self.likes_given_by_bot += 1
 
-    def unlike_post(self, post_link):
+    def unlike(self, post_link):
         if self._user_login:
-            if self.scrapper.unlike_post(post_link):
+            if self.scrapper.unlike(post_link):
                 self.likes_given_by_bot -= 1
 
     def like_multiple_posts(self, post_link_list):
         for post in post_link_list:
-            self.like_post(post)
+            self.like(post)
 
     def unlike_multiple_posts(self, post_link_list):
         for post in post_link_list:
-            self.unlike_post(post)
+            self.unlike(post)
 
-    def comment_post(self, post_link, comment):
-        if self.scrapper.comment_post(post_link, comment):
+    def comment(self, post_link, comment):
+        if self.scrapper.comment(post_link, comment):
             self.commented_post += 1
 
     def comment_multiple_posts(self, posts_list, default_comment=None):
@@ -422,7 +424,7 @@ class InstaBot:
             if not post or not comment:
                 continue
 
-            self.comment_post(post, comment)
+            self.comment(post, comment)
 
         total_comments_made = self.commented_post - current_commented_posts
         logger.info('Commented {0} of {1}'.format(total_comments_made, len(posts_list)))
