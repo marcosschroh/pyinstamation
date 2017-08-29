@@ -66,6 +66,7 @@ The options are divided in different sections.
 | --- | --- | --- |
 | username * | str | instagram username to operate with |
 | password ** | str | username's password |
+| `hide_browser` | bool | does not display the browser |
 
 \*  Required
 
