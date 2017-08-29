@@ -2,7 +2,9 @@ import logging
 import time
 import random
 from selenium import webdriver
+from pyvirtualdisplay import Display
 from pyinstamation.scrapper.instagram_const import DRIVER_LOCATION
+from pyinstamation import CONFIG
 
 
 logger = logging.getLogger(__name__)
@@ -10,17 +12,19 @@ logger = logging.getLogger(__name__)
 
 class BaseScrapper:
 
-    SLEEP_TIME = 3
-
     # Base on Iphone 6
     MOBILE_WIDTH = 375
     MOBILE_HEIGTH = 667
 
-    def __init__(self, website_url='https://www.instagram.com'):
+    def __init__(self, website_url='https://www.instagram.com', hide_browser=False):
         self.website_url = website_url
         self.browser = None
+        self.hide_browser = CONFIG.get('hide_browser', hide_browser)
 
     def open_browser(self):
+        if self.hide_browser:
+            self.display = Display(visible=0, size=(self.MOBILE_WIDTH, self.MOBILE_HEIGTH))
+            self.display.start()
         self.browser = self._open_mobile_browser()
 
     def _open_mobile_browser(self):
@@ -41,6 +45,8 @@ class BaseScrapper:
     def close_browser(self):
         logger.debug('Closing browser...')
         self.browser.close()
+        if self.hide_browser:
+            self.display.stop()
         self.browser = None
 
     def find(self, method, selector, wait=True, explicit=True, sleep_time=None, **kwargs):

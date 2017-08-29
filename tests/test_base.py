@@ -1,24 +1,11 @@
 import unittest
 from unittest.mock import patch
 from pyinstamation.scrapper.base import BaseScrapper
+from pyinstamation import CONFIG
 
 
 SLEEP = 1
 URL_TO_GET = 'https://www.instagram.com/'
-
-
-class MockResponse:
-    code = 200
-    headers = []
-
-    def read(self):
-        return b"{}"
-
-    def close(self):
-        pass
-
-    def getheader(self, *args, **kwargs):
-        pass
 
 
 class BaseScrapperTest(unittest.TestCase):
@@ -26,6 +13,7 @@ class BaseScrapperTest(unittest.TestCase):
     def setUp(self):
         self.base = BaseScrapper()
         self.base.open_browser()
+        CONFIG.update({'hide_browser': True})
 
     def tearDown(self):
         if self.base.browser is not None:

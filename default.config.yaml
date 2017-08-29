@@ -1,5 +1,6 @@
 username: discovrar
 password: discorvd
+hide_browser: false
 
 posts:
   search_tags: []
