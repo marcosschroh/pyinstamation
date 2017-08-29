@@ -29,6 +29,9 @@ These will be removed once completed
 - [ ] Gather more posts to like (currently it does not reach the max likes to give )
 - [ ] Ignore post of users already followed
 - [ ] Finish tests
+- [ ] Do not like or comment users already followed (controller should provide them)
+
+Note: The internal API of `bot.py` is still changing.
 
 
 ## Supported OS
