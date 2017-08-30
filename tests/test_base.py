@@ -52,8 +52,8 @@ class BaseScrapperTest(unittest.TestCase):
         self.assertEqual(waited, SLEEP)
 
     def test_get_page(self):
-        self.base.get_page(instagram_const.HOSTNAME + '/users')
+        self.base.get_page(instagram_const.HOSTNAME + 'users')
         print(instagram_const.HOSTNAME)
-        print(self.base.source())
+        print(self.base.page_source)
         # time.sleep(20)
         assert True is True

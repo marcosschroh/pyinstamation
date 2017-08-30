@@ -282,16 +282,12 @@ class InstaBot:
             self.scrapper.wait(sleep_time=3)
             username = self.scrapper.get_username_in_post_page(post_url)
 
-<<<<<<< HEAD
-            if self._should_like():
-=======
             if any(user.username == username for user in self.users_following_to_ignore):
                 msg = 'Skip because already following the user {0}'.format(username)
                 logger.info(msg)
                 continue
 
-            if self._check_like_conditions():
->>>>>>> 0468f1f4523f650136abdea2a40653482849064f
+            if self._should_like():
                 self.like(post_url)
 
             if self._should_comment():
