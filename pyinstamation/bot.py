@@ -35,8 +35,10 @@ class InstaBot:
         _posts = CONFIG.get('posts', {})
         self.likes_per_day = _posts.get('likes_per_day', 0)
         self.like_probability = _posts.get('like_probability', 0.5)
+        self.comments_per_day = _posts.get('comments_per_day', 0)
         self.comment_enabled = _posts.get('comment_enabled', False)
         self.comment_generator = _posts.get('comment_generator', False)
+        self.comment_probability = _posts.get('comment_probability', 0.5)
         self.search_tags = self.parse_tags(_posts.get('search_tags', []))
         self.custom_comments = _posts.get('custom_comments', [])
         self.ignore_tags = self.parse_tags(_posts.get('ignore_tags', None))
@@ -72,7 +74,6 @@ class InstaBot:
         self.total_user_followed_by_bot = 0
 
         self.scrapper = scrapper
-        self._configure_log()
 
     @staticmethod
     def parse_tags(tags):
@@ -97,13 +98,9 @@ class InstaBot:
         :type threshold: float
         """
         r = random.uniform(0, 1)
-        msg = 'Random obtained: {0}. Probability: {1}'
+        msg = 'Random {0} should be lower than probability {1}'
         logger.info(msg.format(r, probability))
-
         return r <= probability
-
-    def _configure_log(self):
-        logger.info('Hiiiii bot....')
 
     def login(self):
         if self.scrapper.login(self.username, self.password):
@@ -162,8 +159,8 @@ class InstaBot:
         if self.user_login:
 
             if not conditions_checked:
-                if not self._check_follow_conditions(username, min_followers=min_followers,
-                                                     max_followers=max_followers):
+                if not self._should_follow(username, min_followers=min_followers,
+                                           max_followers=max_followers):
                     return False
 
             if self.scrapper.follow_user(username):
@@ -192,10 +189,7 @@ class InstaBot:
         if self._user_login:
             if self.scrapper.unfollow_user(username):
                 self.users_unfollowed_by_bot.append(
-                    FollowedUser(
-                        username=username,
-                        follow_date= datetime.utcnow()
-                    )
+                    FollowedUser(username=username, follow_date=datetime.utcnow())
                 )
                 self.total_following -= 1
 
@@ -210,8 +204,19 @@ class InstaBot:
         if self._user_login:
             return self.scrapper.get_user_info(username)
 
-    def _check_follow_conditions(self, username, min_followers=None, max_followers=None,
-                                 ignore_users=None):
+    def _validate_post(self, post, ignore_tags=None):
+        if not ignore_tags:
+            return True
+
+        caption = post.get('caption')
+        tags_in_post = self.parse_caption(caption)
+
+        for t in ignore_tags:
+            if t in tags_in_post:
+                return False
+        return True
+
+    def _should_follow(self, username, min_followers=None, max_followers=None, ignore_users=None):
 
         if min_followers or max_followers:
             user_info = self.get_user_info(username)
@@ -226,34 +231,24 @@ class InstaBot:
             if ignore_users and username in ignore_users:
                 return False
 
-            if not self.probability_of_occurrence(self.follow_probability):
-                logger.info('Not follow because obtained a lower probability')
-                return False
+        return self.probability_of_occurrence(self.follow_probability)
 
-        return True
-
-    def _check_post_conditions(self, post, ignore_tags=None):
-        if not ignore_tags:
-            return True
-
-        caption = post.get('caption')
-        tags_in_post = self.parse_caption(caption)
-
-        for t in ignore_tags:
-            if t in tags_in_post:
-                return False
-        return True
-
-    def _check_like_conditions(self):
+    def _should_like(self):
         if not self.likes_given_by_bot < self.likes_per_day:
-            logger.info('do not give a like because has exceeded likes per day')
+            logger.info('Likes per day exceeded.')
             return False
 
-        if not self.probability_of_occurrence(self.like_probability):
-            logger.info('Not like because obtained a lower probability')
+        return self.probability_of_occurrence(self.like_probability)
+
+    def _should_comment(self):
+        if self.commented_post < self.comments_per_day:
+            logger.info('Comments per day exceeded.')
             return False
 
-        return True
+        if not self.comment_enabled:
+            return False
+
+        return self.probability_of_occurrence(self.comment_probability)
 
     def get_my_profile_info(self):
         if self._user_login:
@@ -277,17 +272,17 @@ class InstaBot:
             # if there is a posts there is a code....
             post_code = post.get('code')
             post_url = self.scrapper.generate_post_link_by_code(post_code)
-            if not self._check_post_conditions(post, ignore_tags=ignore_tags):
+            if not self._validate_post(post, ignore_tags=ignore_tags):
                 msg = 'Ignoring the post {0}. Has at least one hashtag of {1}'
                 logger.info(msg.format(post_url, ignore_tags))
 
             self.scrapper.wait(sleep_time=3)
             username = self.scrapper.get_username_in_post_page(post_url)
 
-            if self._check_like_conditions():
+            if self._should_like():
                 self.like(post_url)
 
-            if self.comment_enabled:
+            if self._should_comment():
                 if self.comment_generator:
                     comment = comments.generate_comment()
                 elif self.custom_comments:
@@ -300,15 +295,15 @@ class InstaBot:
             if self.follow_enable and self.total_user_followed_by_bot < self.follow_per_day \
                     and users_followed_by_hashtag < total_to_follow:
 
-                if self._check_follow_conditions(username, min_followers=min_followers,
-                                                 ignore_users=ignore_users):
+                if self._should_follow(username, min_followers=min_followers,
+                                       ignore_users=ignore_users):
                     if self.follow_user(username):
                         users_followed_by_hashtag += 1
 
             if posts_per_hashtag and posts_per_hashtag <= i:
                 break
 
-    def follow_users_by_multiple_hashtags(self, hashtags,
+    def explore_tags_by_multiple_hashtags(self, hashtags,
                                           min_followers=None,
                                           total_to_follow=1,
                                           ignore_users=None,
@@ -445,14 +440,14 @@ class InstaBot:
         if users_to_unfollow:
             self.unfollow_multiple_users(self.users_to_unfollow)
 
-    def follow_users_step(self):
+    def explore_tags(self):
         """
         Start the real step.
 
         1. Search by hashtags
 
         """
-        self.follow_users_by_multiple_hashtags(
+        self.explore_tags_by_multiple_hashtags(
             self.search_tags,
             min_followers=self.min_followers_for_a_new_follow,
             total_to_follow=self.total_to_follow_per_hashtag,
@@ -476,4 +471,4 @@ class InstaBot:
         self.login()
         self.picture_step()
         self.unfollow_users_step(users_to_unfollow=users_to_unfollow)
-        self.follow_users_step()
+        self.explore_tags()

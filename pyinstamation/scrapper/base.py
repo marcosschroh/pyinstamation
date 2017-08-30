@@ -56,8 +56,9 @@ class BaseScrapper:
         _find = getattr(self.browser, 'find_element_by_%s' % method)
         return _find(selector, **kwargs)
 
-    def reach_website(self):
-        self.get_page(self.website_url)
+    @property
+    def page_source(self):
+        return self.browser.page_source
 
     def get_page(self, url, sleep_time=3):
         self.browser.get(url)

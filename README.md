@@ -27,9 +27,8 @@
 These will be removed once completed
 
 - [ ] Gather more posts to like (currently it does not reach the max likes to give )
-- [ ] Ignore post of users already followed
 - [ ] Finish tests
-- [ ] Do not like or comment users already followed (controller should provide them)
+
 
 Note: The internal API of `bot.py` is still changing.
 
@@ -51,7 +50,7 @@ python 3
 Remember to create a [virtualenv](https://virtualenv.pypa.io/en/stable/installation/)
 
 
-## Instalation
+## Installation
 
 `pip install -r requirements.txt`
 
@@ -71,8 +70,8 @@ The options are divided in different sections.
 
 | Option | Type | Description |
 | --- | --- | --- |
-| username * | str | instagram username to operate with |
-| password ** | str | username's password |
+| `username` * | str | instagram username to operate with |
+| `password` ** | str | username's password |
 | `hide_browser` | bool | does not display the browser |
 
 \*  Required
@@ -89,6 +88,8 @@ The options are divided in different sections.
 | `posts_per_hashtag` | int | number of posts to be processed per hashtag |
 | `likes_per_day` | int | maximum likes given in a day | 100 |
 | `like_probability` | float | probability to give a like | 0.5 |
+| `comments_per_day` | int | maximum comments given in a day | 10 |
+| `comment_probability` | float| probability to comment | 0.5 |
 | `comment_enabled` | bool| bot will comment in the searched posts | True |
 | `comment_generator` | bool | bot will generate a random generic comment | True |
 | `custom_comments` | array | in case you don't want random comments, you can provide them | [] |
