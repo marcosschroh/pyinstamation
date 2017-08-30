@@ -30,7 +30,6 @@ class InstaBot:
         self.username = username
         self.password = password
         self.is_new = is_new
-        self.users_to_unfollow = None
 
         _posts = CONFIG.get('posts', {})
         self.likes_per_day = _posts.get('likes_per_day', 0)
@@ -72,6 +71,10 @@ class InstaBot:
         self.users_followed_by_bot = []
         self.users_unfollowed_by_bot = []
         self.total_user_followed_by_bot = 0
+
+        # represent the users that you are already following
+        # this result comes from the Controller
+        self.users_following_to_ignore = []
 
         self.scrapper = scrapper
 
@@ -195,7 +198,7 @@ class InstaBot:
 
     def unfollow_multiple_users(self, users_list):
         """
-        :user_list type: iter(Followers)
+        :type user_list: iter(Followers)
         """
         for user in users_list:
             self.unfollow_user(user.username)
@@ -279,7 +282,16 @@ class InstaBot:
             self.scrapper.wait(sleep_time=3)
             username = self.scrapper.get_username_in_post_page(post_url)
 
+<<<<<<< HEAD
             if self._should_like():
+=======
+            if any(user.username == username for user in self.users_following_to_ignore):
+                msg = 'Skip because already following the user {0}'.format(username)
+                logger.info(msg)
+                continue
+
+            if self._check_like_conditions():
+>>>>>>> 0468f1f4523f650136abdea2a40653482849064f
                 self.like(post_url)
 
             if self._should_comment():
@@ -438,7 +450,7 @@ class InstaBot:
 
     def unfollow_users_step(self, users_to_unfollow=None):
         if users_to_unfollow:
-            self.unfollow_multiple_users(self.users_to_unfollow)
+            self.unfollow_multiple_users(users_to_unfollow)
 
     def explore_tags(self):
         """
@@ -458,6 +470,9 @@ class InstaBot:
 
     def run(self, users_to_unfollow=None, users_following=None):
         """
+        :type users_to_unfollow: iter(Follower)
+        :type users_following: iter(Follower)
+
         1. login
         2. pics
         3. unfollow users
@@ -471,4 +486,8 @@ class InstaBot:
         self.login()
         self.picture_step()
         self.unfollow_users_step(users_to_unfollow=users_to_unfollow)
+
+        # set the users that are already followed
+        if users_following:
+            self.users_following_to_ignore = users_following
         self.explore_tags()
