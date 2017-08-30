@@ -38,9 +38,9 @@ class InstaBot:
         self.comment_enabled = _posts.get('comment_enabled', False)
         self.comment_generator = _posts.get('comment_generator', False)
         self.comment_probability = _posts.get('comment_probability', 0.5)
-        self.search_tags = self.parse_tags(_posts.get('search_tags', []))
+        self.search_tags = _posts.get('search_tags', [])
         self.custom_comments = _posts.get('custom_comments', [])
-        self.ignore_tags = self.parse_tags(_posts.get('ignore_tags', None))
+        self.ignore_tags = _posts.get('ignore_tags', [])
         self.total_to_follow_per_hashtag = _posts.get('total_to_follow_per_hashtag', 10)
         self.posts_per_hashtag = _posts.get('posts_per_hashtag', )
 
@@ -77,16 +77,6 @@ class InstaBot:
         self.users_following_to_ignore = []
 
         self.scrapper = scrapper
-
-    @staticmethod
-    def parse_tags(tags):
-        """
-        From a given string remove hashtags and spaces.
-        :rtype list:
-        """
-        if tags is None:
-            return []
-        return tags.replace('#', '').replace(' ', '').split(',')
 
     @staticmethod
     def parse_caption(caption):
@@ -212,11 +202,12 @@ class InstaBot:
             return True
 
         caption = post.get('caption')
-        tags_in_post = self.parse_caption(caption)
+        if caption:
+            tags_in_post = self.parse_caption(caption)
 
-        for t in ignore_tags:
-            if t in tags_in_post:
-                return False
+            for t in ignore_tags:
+                if t in tags_in_post:
+                    return False
         return True
 
     def _should_follow(self, username, min_followers=None, max_followers=None, ignore_users=None):
