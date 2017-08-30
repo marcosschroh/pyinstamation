@@ -8,8 +8,10 @@ posts:
   posts_per_hashtag: 0
   likes_per_day: 100
   like_probability: 0.5
+  comments_per_day: 10
   comment_enabled: true
   comment_generator: true
+  comment_probability: 0.5
   custom_comments: []
   total_to_follow_per_hashtag: 10
 

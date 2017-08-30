@@ -1,19 +1,28 @@
 import unittest
 from unittest.mock import patch
 from pyinstamation.scrapper.base import BaseScrapper
+from pyinstamation.scrapper import instagram_const
 from pyinstamation import CONFIG
+from tests import get_free_port, start_mock_server
+import time
 
 
 SLEEP = 1
-URL_TO_GET = 'https://www.instagram.com/'
+MOCK_HOSTNAME = 'http://localhost:{port}/'
 
 
 class BaseScrapperTest(unittest.TestCase):
 
+    @classmethod
+    def setUpClass(cls):
+        cls.mock_server_port = get_free_port()
+        start_mock_server(cls.mock_server_port)
+
     def setUp(self):
         self.base = BaseScrapper()
         self.base.open_browser()
-        CONFIG.update({'hide_browser': True})
+        instagram_const.HOSTNAME = MOCK_HOSTNAME.format(port=self.mock_server_port)
+        CONFIG.update({'hide_browser': False})
 
     def tearDown(self):
         if self.base.browser is not None:
@@ -41,3 +50,10 @@ class BaseScrapperTest(unittest.TestCase):
     def test_wait_sleep_time_defined(self, time_sleep):
         waited = self.base.wait(sleep_time=SLEEP, explicit=True)
         self.assertEqual(waited, SLEEP)
+
+    def test_get_page(self):
+        self.base.get_page(instagram_const.HOSTNAME + '/users')
+        print(instagram_const.HOSTNAME)
+        print(self.base.source())
+        # time.sleep(20)
+        assert True is True
