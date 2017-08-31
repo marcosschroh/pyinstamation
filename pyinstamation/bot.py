@@ -14,6 +14,10 @@ FollowedUser = namedtuple('FollowedUser', ['username', 'follow_date'])
 logger = logging.getLogger(__name__)
 
 
+def remove_hashtags(tags):
+    return map(lambda x: x.replace('#', ''), tags)
+
+
 class InstaBot:
 
     def __init__(self, scrapper, username=None, password=None, is_new=True,
@@ -38,9 +42,9 @@ class InstaBot:
         self.comment_enabled = _posts.get('comment_enabled', False)
         self.comment_generator = _posts.get('comment_generator', False)
         self.comment_probability = _posts.get('comment_probability', 0.5)
-        self.search_tags = _posts.get('search_tags', [])
+        self.search_tags = remove_hashtags(_posts.get('search_tags', []))
         self.custom_comments = _posts.get('custom_comments', [])
-        self.ignore_tags = _posts.get('ignore_tags', [])
+        self.ignore_tags = remove_hashtags(_posts.get('ignore_tags', []))
         self.total_to_follow_per_hashtag = _posts.get('total_to_follow_per_hashtag', 10)
         self.posts_per_hashtag = _posts.get('posts_per_hashtag', )
 
@@ -53,7 +57,7 @@ class InstaBot:
         self.ignore_friends = _followers.get('ignore_friends', True)
         self.follow_probability = _followers.get('follow_probability', 0.5)
 
-        _pictures_config = CONFIG.get('picture_step', {})
+        _pictures_config = CONFIG.get('pics', {})
         self.upload = _pictures_config.get('upload', False)
         self.pictures = _pictures_config.get('files', [])
         self.pictures_uploaded = 0
@@ -139,7 +143,6 @@ class InstaBot:
             if date_time_str:
                 date_time = datetime.strptime(date_time_str, "%Y-%m-%dT%H:%M:%S")
                 if datetime.utcnow().date() != date_time.date():
-                    logger.info('Image datetime is different than today')
                     continue
 
             pic = picture.get('path')

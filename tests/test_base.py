@@ -3,6 +3,7 @@ from unittest.mock import patch
 from pyinstamation.scrapper.base import BaseScrapper
 from pyinstamation.scrapper import instagram_const
 from pyinstamation import CONFIG
+from pyinstamation.config import load_config
 from tests import get_free_port, start_mock_server
 import time
 
@@ -15,6 +16,7 @@ class BaseScrapperTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        load_config(filepath='test.config.yaml')
         cls.mock_server_port = get_free_port()
         start_mock_server(cls.mock_server_port)
 

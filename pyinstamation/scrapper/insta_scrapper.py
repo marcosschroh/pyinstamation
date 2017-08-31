@@ -6,6 +6,7 @@ from selenium.common.exceptions import NoSuchElementException
 from .base import BaseScrapper
 
 from . import instagram_const as const
+from .utils import save_page_source
 
 
 logger = logging.getLogger(__name__)
@@ -96,6 +97,7 @@ class InstaScrapper(BaseScrapper):
 
         self.wait(explicit=True)
         self.browser.find_element_by_xpath(const.UPLOAD_PICTURE_SHARE_LINK).click()
+        save_page_source('redirection/pic/uploaded', self.page_source)
         logger.info('[UPLOAD] Success. Picture: %s', image_path)
 
     def get_user_page(self, username):

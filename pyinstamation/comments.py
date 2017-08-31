@@ -28,7 +28,7 @@ PHRASE_OPTIONS = [
 
 
 def symbol_generator(symbol=None):
-    """Appends to the end of a word.
+    """Randomly generates (or not) a symbol repeated.
 
     :returns: a symbol which may have a space before it, and sometimes nothing.
     :rtype: str
@@ -40,7 +40,7 @@ def symbol_generator(symbol=None):
 
 
 def letter_repetition(word, probability=0.2):
-    """ Repeats a random letter of a word.
+    """Repeats a random letter of a word.
 
     :type word: str
     :probability: between 0 and 1
