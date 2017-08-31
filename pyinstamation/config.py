@@ -3,6 +3,7 @@ import yaml
 import logging
 import logging.config
 
+SAVE_SOURCE = False
 
 LOGGING = {
     'version': 1,

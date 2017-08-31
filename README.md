@@ -28,9 +28,10 @@ These will be removed once completed
 
 - [ ] Gather more posts to like (currently it does not reach the max likes to give )
 - [ ] Finish tests
+- [ ] Track number of followers and following per day
 
 
-Note: The internal API of `bot.py` is still changing.
+Note: The internal API of `bot.py` may change.
 
 
 ## Supported OS

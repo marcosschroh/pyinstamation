@@ -4,6 +4,7 @@ import random
 from selenium import webdriver
 from pyvirtualdisplay import Display
 from pyinstamation.scrapper.instagram_const import DRIVER_LOCATION
+from pyinstamation.scrapper.utils import save_page_source
 from pyinstamation import CONFIG
 
 
@@ -63,6 +64,7 @@ class BaseScrapper:
     def get_page(self, url, sleep_time=3):
         self.browser.get(url)
         self.wait(sleep_time=sleep_time, explicit=True)
+        save_page_source(url, self.page_source)
 
     def wait(self, sleep_time=None, explicit=False):
         """
