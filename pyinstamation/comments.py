@@ -1,7 +1,7 @@
 import random
 
 
-PRONOUN = ["this"]
+PRONOUN = ['this']
 POST_TYPES = {
     'photo': ['photo', 'pic', 'picture', 'snapshot'],
     'video': ['vid', 'video'],
@@ -14,12 +14,10 @@ ADJECTIVES = [
     'incredible', 'lovely', 'magical', 'magnificent', 'nice', 'prodigious',
     'stunning', 'unbelievable', 'wonderful',
 ]
-
 EXPRESSIONS = [
     'blew my mind',
     'wow'
 ]
-
 PHRASE_OPTIONS = [
     '{pronoun} {post_type} {connector} {adjective}{symbol}',
     '{pronoun} {post_type} {expression}{symbol}',
@@ -32,7 +30,7 @@ PHRASE_OPTIONS = [
 def symbol_generator(symbol=None):
     """Appends to the end of a word.
 
-    :returns: ' !' or '!!' or ':D', note that some have an space
+    :returns: a symbol which may have a space before it, and sometimes nothing.
     :rtype: str
     """
     if symbol is None:
@@ -42,7 +40,7 @@ def symbol_generator(symbol=None):
 
 
 def letter_repetition(word, probability=0.2):
-    """ Repeats a random letter of word
+    """ Repeats a random letter of a word.
 
     :type word: str
     :probability: between 0 and 1
