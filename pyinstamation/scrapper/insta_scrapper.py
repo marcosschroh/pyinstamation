@@ -1,5 +1,7 @@
+import json
 import logging
 import requests
+from urllib.parse import parse_qs
 
 from selenium.common.exceptions import NoSuchElementException
 
@@ -224,3 +226,33 @@ class InstaScrapper(BaseScrapper):
             json_content = r.json()
             return json_content.get('tag', {}).get('media', {}).get('nodes', [])
         return []
+
+    def get_pagination_info(self):
+        network_activity = self.get_network_activity()
+        graphql_activity = list(filter(lambda n: self.URL_GRAPHQL in n.get('name'), network_activity))
+
+        if graphql_activity:
+            # work with the first activity
+            activity = graphql_activity[0]
+            name = activity.get('name')
+
+            # now we have the get with the querystring.
+            # we need to get the query string parameters.
+            # example: 'https://www.instagram.com/graphql/query/?query_id=17875800862117404&variables=%7B%22tag_name%22%3A%22haarlem%22%2C%22first%22%3A8%2C%22after%22%3A%22J0HWaVb3gAAAF0HWaVMDAAAAFkIA%22%7D'
+            data = parse_qs(name)
+
+            # expect the following dictionaty:
+            #    {
+            #        'https://www.instagram.com/graphql/query/?query_id': ['17875800862117404'],
+            #        'variables': ['{"tag_name":"haarlem","first":8,"after":"J0HWaVb3gAAAF0HWaVMDAAAAFkIA"}']
+            #    }
+
+            query_id = data['https://www.instagram.com/graphql/query/?query_id'][0]
+            variables = json.loads(data['variables'][0])
+
+            first = variables.get('first')
+            after = variables.get('after')
+
+            # url to generate:
+                # https://www.instagram.com/graphql/query/?query_id=17875800862117404&variables={%22tag_name%22:%22haarlem%22,%22first%22:8,%22after%22:%22J0HWaUyZQAAAF0HWaUXTwAAAFm4A%22}
+
