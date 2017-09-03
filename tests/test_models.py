@@ -1,4 +1,3 @@
-import unittest
 import datetime
 import peewee
 from pyinstamation.models import User, Follower, future_rand_date

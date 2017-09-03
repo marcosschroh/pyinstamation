@@ -6,7 +6,6 @@ from pyinstamation.scrapper import instagram_const as const
 from pyinstamation import CONFIG
 from pyinstamation.config import load_config
 from tests import get_free_port, start_mock_server
-import time
 
 
 SLEEP = 1
@@ -62,6 +61,7 @@ class BaseScrapperTest(unittest.TestCase):
         waited = self.base.wait(sleep_time=SLEEP, explicit=True)
         self.assertEqual(waited, SLEEP)
 
+    @patch('time.sleep', return_value=None)
     def test_get_page(self):
         self.base.get_page(os.path.join(const.HOSTNAME, 'accounts/login'))
         self.assertIsInstance(self.base.page_source, str)
