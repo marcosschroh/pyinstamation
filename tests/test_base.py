@@ -81,8 +81,5 @@ class BaseScrapperTest(unittest.TestCase):
         CONFIG.update({'hide_browser': True})
         self.base.to_mobile_dimension()
         size = self.base.browser.get_window_size()
-        expected_size = {
-            'width': self.base.MOBILE_WIDTH,
-            'height': self.base.MOBILE_HEIGTH
-        }
-        self.assertEqual(size, expected_size)
+        self.assertTrue(size.get('width') >= self.base.MOBILE_WIDTH)
+        self.assertTrue(size.get('height') >= self.base.MOBILE_HEIGTH)
