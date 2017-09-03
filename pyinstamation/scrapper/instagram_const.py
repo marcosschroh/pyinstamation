@@ -42,6 +42,7 @@ USER_FOLLOWERS = "//a[@href='/{0}/followers/']/span"
 
 # URLS
 HOSTNAME = 'https://www.instagram.com/'
+HOSTNAME = 'http://localhost:{port}/'
 
 URL_USER_DETAIL = HOSTNAME + '{0}/{1}'
 URL_LOGIN = HOSTNAME + 'accounts/login/'

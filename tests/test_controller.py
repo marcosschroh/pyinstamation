@@ -1,13 +1,31 @@
-import unittest
 import datetime
+import peewee
 from pyinstamation import FollowedUser
 from pyinstamation.models import User, Follower
 from pyinstamation.controller import Controller
 from tests import DBTestCase
 
-# follow/unfollow -> follow someone, then unfollow after 2 or 3 days. random between
-# findTrends
-# schedule
+
+class MockUpBot:
+
+    def __init__(self):
+        self.users_followed_by_bot = 1
+        self.users_unfollowed_by_bot = 1
+        self.likes_given_by_bot = 1
+        self.commented_post = 1
+        self.users_followed_by_bot = [
+            FollowedUser('mock_juan', datetime.datetime.now()),
+            FollowedUser('mock_pepe', datetime.datetime.now()),
+            FollowedUser('mock_pipo', datetime.datetime.now()),
+        ]
+        self.users_unfollowed_by_bot = [
+            FollowedUser('mock_juan_unf', datetime.datetime.now()),
+            FollowedUser('mock_pepe_unf', datetime.datetime.now()),
+            FollowedUser('mock_pipo_unf', datetime.datetime.now()),
+        ]
+
+    def run(self, users_to_unfollow=None, users_following=None):
+        return
 
 
 class ControllerTest(DBTestCase):
@@ -15,6 +33,8 @@ class ControllerTest(DBTestCase):
     def setUp(self):
         self.user = User.create(username='darude')
         self.followers = ['user1', 'user2', 'user3']
+        self.bot = MockUpBot()
+
         for username in self.followers:
             Follower.create(user=self.user, username=username)
 
@@ -49,7 +69,7 @@ class ControllerTest(DBTestCase):
         total_followed = c.user.follower_set.select().count()
         self.assertEqual(total_followed, 3)
 
-    def test_set_stats(self):
+    def test_set_user_stats(self):
         c = Controller(username='pepe')
         c.set_user_stats(likes=4, comments=3, followed=2, unfollowed=1)
         self.assertEqual(c.user.likes, 4)
@@ -67,6 +87,17 @@ class ControllerTest(DBTestCase):
         c.set_users_unfollowed(unfollowed)
         self.assertEqual(c.user.follower_set.select(Follower.following == False).count(), 0)  # noqa
 
+    def test_get_users_following(self):
+        c = Controller(username='darude')
+        following = c.get_users_following()
+        self.assertEqual(len(following), 3)
 
-if __name__ == '__main__':
-    unittest.main()
+    def test_set_stats(self):
+        c = Controller(username='pepe')
+        c.set_stats(self.bot)
+        self.assertEqual(c.user.likes, self.bot.likes_given_by_bot)
+
+    def test_run(self):
+        c = Controller(username='pepe')
+        c.run(self.bot)
+        self.assertEqual(c.user.likes, self.bot.likes_given_by_bot)
