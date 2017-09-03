@@ -62,7 +62,7 @@ class BaseScrapperTest(unittest.TestCase):
         self.assertEqual(waited, SLEEP)
 
     @patch('time.sleep', return_value=None)
-    def test_get_page(self):
+    def test_get_page(self, time_sleep):
         self.base.get_page(os.path.join(const.HOSTNAME, 'accounts/login'))
         self.assertIsInstance(self.base.page_source, str)
 

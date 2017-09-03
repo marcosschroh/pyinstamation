@@ -1,7 +1,7 @@
-site_url: https://www.instagram.com
 username: discovrar
 password: discorvd
 hide_browser: false
+testing: true
 
 posts:
   search_tags: [apartmentdecor, architecture, building]
