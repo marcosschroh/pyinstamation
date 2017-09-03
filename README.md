@@ -2,7 +2,7 @@
 
 > Easy to use, config oriented, instagram bot, written in python 3
 
-
+[![Build Status](https://travis-ci.org/discov-r/pyinstamation.svg?branch=master)](https://travis-ci.org/discov-r/pyinstamation)
 [![codecov](https://codecov.io/gh/discov-r/pyinstamation/branch/master/graph/badge.svg)](https://codecov.io/gh/discov-r/pyinstamation)
 
 
