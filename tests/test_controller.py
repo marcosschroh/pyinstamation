@@ -66,7 +66,3 @@ class ControllerTest(DBTestCase):
         ]
         c.set_users_unfollowed(unfollowed)
         self.assertEqual(c.user.follower_set.select(Follower.following == False).count(), 0)  # noqa
-
-
-if __name__ == '__main__':
-    unittest.main()

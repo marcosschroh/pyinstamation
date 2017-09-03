@@ -36,5 +36,5 @@ class CommentTestCase(unittest.TestCase):
         self.assertEqual(comment, 'this photo is awesome')
 
     def test_comment_type_video(self):
-        comment = comments.generate_comment (post_type='video')
+        comment = comments.generate_comment(post_type='video')
         self.assertEqual(comment, 'this vid is awesome')

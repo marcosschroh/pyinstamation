@@ -32,7 +32,3 @@ class ModelTest(DBTestCase):
     def test_already_exist_username(self):
         with self.assertRaises(peewee.IntegrityError):
             User.create(username='darude')
-
-
-if __name__ == '__main__':
-    unittest.main()
