@@ -71,6 +71,7 @@ class InstaBot:
         self.total_followers = 0
         self.total_following = 0
         self.likes_given_by_bot = 0
+        self.unlikes_given_by_bot = 0
         self.min_followers_for_a_new_follow = min_followers_for_a_new_follow
         self.users_followed_by_bot = []
         self.users_unfollowed_by_bot = []
@@ -105,13 +106,12 @@ class InstaBot:
 
     def logout(self):
         if self.user_login:
-            self.scrapper._get_my_profile_page()
             self.scrapper.logout()
-        else:
-            logger.info('login first alsjeblieft')
+            self._user_login = False
+            return True
 
-    def _get_my_profile_page(self):
-        self.scrapper.get_my_profile_page(self.username)
+        logger.info('login first alsjeblieft')
+        return False
 
     @property
     def user_login(self):
@@ -225,8 +225,8 @@ class InstaBot:
             if not (min_followers <= user_followers <= max_followers):
                 return False
 
-            if ignore_users and username in ignore_users:
-                return False
+        if ignore_users and username in ignore_users:
+            return False
 
         return self.probability_of_occurrence(self.follow_probability)
 
@@ -373,7 +373,7 @@ class InstaBot:
     def unlike(self, post_link):
         if self._user_login:
             if self.scrapper.unlike(post_link):
-                self.likes_given_by_bot -= 1
+                self.unlikes_given_by_bot += 1
 
     def like_multiple_posts(self, post_link_list):
         for post in post_link_list:
