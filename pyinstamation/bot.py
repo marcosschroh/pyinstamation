@@ -119,6 +119,7 @@ class InstaBot:
 
     def upload_picture(self, image_path, comment=None):
         self.scrapper.upload_picture(image_path, comment)
+        self.pictures_uploaded += 1
 
     def upload_multiple_pictures(self, pictures_list):
         """
@@ -148,7 +149,6 @@ class InstaBot:
             pic = picture.get('path')
             comment = picture.get('comment', None)
             self.upload_picture(pic, comment)
-            self.pictures_uploaded += 1
 
     def follow_user(self, username, conditions_checked=True, min_followers=None,
                     max_followers=None):
@@ -213,7 +213,7 @@ class InstaBot:
                     return False
         return True
 
-    def _should_follow(self, username, min_followers=None, max_followers=None, ignore_users=None):
+    def _should_follow(self, username, min_followers=0, max_followers=None, ignore_users=None):
 
         if min_followers or max_followers:
             user_info = self.get_user_info(username)
@@ -238,11 +238,11 @@ class InstaBot:
         return self.probability_of_occurrence(self.like_probability)
 
     def _should_comment(self):
-        if self.commented_post < self.comments_per_day:
-            logger.info('Comments per day exceeded.')
+        if not self.comment_enabled:
             return False
 
-        if not self.comment_enabled:
+        if self.comments_per_day <= self.commented_post:
+            logger.info('Comments per day exceeded.')
             return False
 
         return self.probability_of_occurrence(self.comment_probability)
