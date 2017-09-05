@@ -126,8 +126,3 @@ class BotTestCase(unittest.TestCase):
 
         self.bot.commented_post = 100
         self.assertFalse(self.bot._should_comment())
-
-
-if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(BotTestCase)
-    unittest.TextTestRunner(verbosity=2).run(suite)
