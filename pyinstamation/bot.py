@@ -71,6 +71,7 @@ class InstaBot:
         self.total_followers = 0
         self.total_following = 0
         self.likes_given_by_bot = 0
+        self.unlikes_given_by_bot = 0
         self.min_followers_for_a_new_follow = min_followers_for_a_new_follow
         self.users_followed_by_bot = []
         self.users_unfollowed_by_bot = []
@@ -105,13 +106,12 @@ class InstaBot:
 
     def logout(self):
         if self.user_login:
-            self.scrapper._get_my_profile_page()
             self.scrapper.logout()
-        else:
-            logger.info('login first alsjeblieft')
+            self._user_login = False
+            return True
 
-    def _get_my_profile_page(self):
-        self.scrapper.get_my_profile_page(self.username)
+        logger.info('login first alsjeblieft')
+        return False
 
     @property
     def user_login(self):
@@ -119,6 +119,7 @@ class InstaBot:
 
     def upload_picture(self, image_path, comment=None):
         self.scrapper.upload_picture(image_path, comment)
+        self.pictures_uploaded += 1
 
     def upload_multiple_pictures(self, pictures_list):
         """
@@ -148,7 +149,6 @@ class InstaBot:
             pic = picture.get('path')
             comment = picture.get('comment', None)
             self.upload_picture(pic, comment)
-            self.pictures_uploaded += 1
 
     def follow_user(self, username, conditions_checked=True, min_followers=None,
                     max_followers=None):
@@ -213,7 +213,7 @@ class InstaBot:
                     return False
         return True
 
-    def _should_follow(self, username, min_followers=None, max_followers=None, ignore_users=None):
+    def _should_follow(self, username, min_followers=0, max_followers=None, ignore_users=None):
 
         if min_followers or max_followers:
             user_info = self.get_user_info(username)
@@ -225,8 +225,8 @@ class InstaBot:
             if not (min_followers <= user_followers <= max_followers):
                 return False
 
-            if ignore_users and username in ignore_users:
-                return False
+        if ignore_users and username in ignore_users:
+            return False
 
         return self.probability_of_occurrence(self.follow_probability)
 
@@ -238,11 +238,11 @@ class InstaBot:
         return self.probability_of_occurrence(self.like_probability)
 
     def _should_comment(self):
-        if self.commented_post < self.comments_per_day:
-            logger.info('Comments per day exceeded.')
+        if not self.comment_enabled:
             return False
 
-        if not self.comment_enabled:
+        if self.comments_per_day <= self.commented_post:
+            logger.info('Comments per day exceeded.')
             return False
 
         return self.probability_of_occurrence(self.comment_probability)
@@ -373,7 +373,7 @@ class InstaBot:
     def unlike(self, post_link):
         if self._user_login:
             if self.scrapper.unlike(post_link):
-                self.likes_given_by_bot -= 1
+                self.unlikes_given_by_bot += 1
 
     def like_multiple_posts(self, post_link_list):
         for post in post_link_list:
