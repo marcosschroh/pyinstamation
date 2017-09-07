@@ -8,7 +8,7 @@ run-bot:
 	python -m pyinstamation
 
 run-tests-coverage:
-	coverage run --source=. -m unittest discover -s tests/
+	coverage run --source=pyinstamation -m unittest discover -s tests/
 	coverage report -m
 
 init: webdriver start-conf

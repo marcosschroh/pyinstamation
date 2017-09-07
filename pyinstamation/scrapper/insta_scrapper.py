@@ -1,3 +1,4 @@
+import os
 import logging
 import requests
 
@@ -16,7 +17,8 @@ class InstaScrapper(BaseScrapper):
 
     def login(self, username, password):
         self.get_page(const.URL_LOGIN)
-        logger.debug('[LOGIN] username: %s', username)
+        print(self.browser.current_url)
+        logger.debug('[LOGIN] username "%s"', username)
 
         username_input = self.find('xpath', const.LOGIN_INPUT_USERNAME, wait=False)
         password_input = self.find('xpath', const.LOGIN_INPUT_PASSWORD, wait=False)
@@ -27,15 +29,17 @@ class InstaScrapper(BaseScrapper):
         self.browser.find_element_by_xpath(const.LOGIN_BUTTON).click()
         self.wait(explicit=True)
 
-        logger.info('[LOGIN] Success. Username: %s', username)
+        print(self.browser.current_url)
+        logger.info('[LOGIN] Success. Username "%s"', username)
         return bool(self.browser.get_cookie('sessionid'))
 
     def logout(self):
+        logger.info('[LOGOUT] Done.')
         self.close_browser()
 
     def get_user_info(self, username):
-        url = const.URL_USER_DETAIL.format(username, '?__a=1')
-
+        url = os.path.join(const.HOSTNAME,
+                           const.URL_USER_DETAIL.format(username, '?__a=1'))
         # get the response
         r = requests.get(url)
         user = {}
@@ -66,8 +70,8 @@ class InstaScrapper(BaseScrapper):
         # TODO: get friends/following list
 
         return {
-            'total_following': total_following,
             'total_followers': total_followers,
+            'total_following': total_following,
         }
 
     def upload_picture(self, image_path, comment=None):
@@ -124,22 +128,22 @@ class InstaScrapper(BaseScrapper):
             if follow_button.text == const.FOLLOW_BUTTON_TEXT:
 
                 follow_button.click()
-                logger.info('[FOLLOW] username: %s', username)
+                logger.info('[FOLLOW] username "%s"', username)
                 self.wait(explicit=True)
                 return True
 
-            logger.debug('[FOLLOW] %s already followed', username)
+            logger.debug('[FOLLOW] "%s" already followed', username)
             self.wait(explicit=True, sleep_time=10)
             return False
 
         # try to unfollow the suer
         if follow_button.text == 'Following':
             follow_button.click()
-            logger.info('[UNFOLLOW] username: %s', username)
+            logger.info('[UNFOLLOW] username "%s"', username)
             self.wait(explicit=True)
             return True
 
-        logger.debug('[UNFOLLOW] %s already unfollowed', username)
+        logger.debug('[UNFOLLOW] "%s" already unfollowed', username)
         self.wait(explicit=True, sleep_time=10)
         return False
 
@@ -215,8 +219,7 @@ class InstaScrapper(BaseScrapper):
         self.get_page(url, sleep_time=5)
 
     def get_posts_by_hashtag(self, hashtag):
-        url = const.URL_TAG.format(hashtag, '?__a=1')
-
+        url = os.path.join(const.HOSTNAME, const.URL_TAG.format(hashtag, '?__a=1'))
         # get the response
         r = requests.get(url)
 

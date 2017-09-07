@@ -260,7 +260,7 @@ class InstaBot:
         posts = self.scrapper.get_posts_by_hashtag(hashtag)
 
         if not posts:
-            logger.info('No posts were found for HASHTAG {0}'.format(hashtag))
+            logger.info('No posts were found for HASHTAG "{0}"'.format(hashtag))
             return
 
         users_followed_by_hashtag = 0
@@ -270,14 +270,14 @@ class InstaBot:
             post_code = post.get('code')
             post_url = self.scrapper.generate_post_link_by_code(post_code)
             if not self._validate_post(post, ignore_tags=ignore_tags):
-                msg = 'Ignoring the post {0}. Has at least one hashtag of {1}'
+                msg = 'Ignoring the post "{0}". Has at least one hashtag of "{1}"'
                 logger.info(msg.format(post_url, ignore_tags))
 
             self.scrapper.wait(sleep_time=3)
             username = self.scrapper.get_username_in_post_page(post_url)
 
             if any(user.username == username for user in self.users_following_to_ignore):
-                msg = 'Skip because already following the user {0}'.format(username)
+                msg = 'Skip because already following the user "{0}"'.format(username)
                 logger.info(msg)
                 continue
 
@@ -354,7 +354,7 @@ class InstaBot:
                 min_followers = hashtag_data.get('min_followers', min_followers)
                 total_to_follow = hashtag_data.get('total_to_follow', total_to_follow)
 
-            logger.info('Processing hashtag {0}'.format(hashtag))
+            logger.info('Processing hashtag "{0}"'.format(hashtag))
 
             self.follow_users_by_hashtag(
                 hashtag,

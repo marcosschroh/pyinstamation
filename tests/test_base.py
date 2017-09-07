@@ -1,15 +1,15 @@
-import unittest
 import os
+import unittest
 from unittest.mock import patch
-from pyinstamation.scrapper.base import BaseScrapper
-from pyinstamation.scrapper import instagram_const as const
+
 from pyinstamation import CONFIG
 from pyinstamation.config import load_config
-from tests import get_free_port, start_mock_server
+from pyinstamation.scrapper.base import BaseScrapper
+from pyinstamation.scrapper import instagram_const as const
+from tests import get_free_port, start_mock_server, MOCK_HOSTNAME
 
 
 SLEEP = 1
-MOCK_HOSTNAME = 'http://localhost:{port}/'
 
 
 class BaseScrapperTest(unittest.TestCase):
@@ -22,9 +22,9 @@ class BaseScrapperTest(unittest.TestCase):
         const.HOSTNAME = MOCK_HOSTNAME.format(port=mock_server_port)
 
     def setUp(self):
+        CONFIG.update({'hide_browser': True})
         self.base = BaseScrapper()
         self.base.open_browser()
-        CONFIG.update({'hide_browser': True})
 
     def tearDown(self):
         if self.base.browser is not None:
@@ -63,12 +63,12 @@ class BaseScrapperTest(unittest.TestCase):
 
     @patch('time.sleep', return_value=None)
     def test_get_page(self, time_sleep):
-        self.base.get_page(os.path.join(const.HOSTNAME, 'accounts/login'))
+        self.base.get_page('accounts/login')
         self.assertIsInstance(self.base.page_source, str)
 
     @patch('time.sleep', return_value=None)
     def test_find(self, time_sleep):
-        self.base.get_page(os.path.join(const.HOSTNAME, 'accounts/login'))
+        self.base.get_page('accounts/login')
         username_input = self.base.find('xpath', const.LOGIN_INPUT_USERNAME)
         self.assertEqual(username_input.tag_name, 'input')
 

@@ -3,9 +3,11 @@ import time
 import random
 from selenium import webdriver
 from pyvirtualdisplay import Display
-from pyinstamation.scrapper.instagram_const import DRIVER_LOCATION
+# from pyinstamation.scrapper.instagram_const import DRIVER_LOCATION, HOSTNAME
+from pyinstamation.scrapper import instagram_const as const
 from pyinstamation.scrapper.utils import save_page_source
 from pyinstamation import CONFIG
+from urllib.parse import urljoin
 
 
 logger = logging.getLogger(__name__)
@@ -22,9 +24,11 @@ class BaseScrapper:
         self.hide_browser = CONFIG.get('hide_browser', hide_browser)
 
     def open_browser(self):
-        if self.hide_browser:
-            self.display = Display(visible=0, size=(self.MOBILE_WIDTH + 1, self.MOBILE_HEIGTH + 1))
-            self.display.start()
+        # if self.hide_browser:
+
+        size = (self.MOBILE_WIDTH + 1, self.MOBILE_HEIGTH + 1)
+        self.display = Display(visible=int(self.hide_browser), size=size)
+        self.display.start()
         self.browser = self._open_mobile_browser()
 
     def _open_mobile_browser(self):
@@ -39,17 +43,18 @@ class BaseScrapper:
         }
         chrome_options.add_experimental_option('prefs', chrome_prefs)
         return webdriver.Chrome(
-            DRIVER_LOCATION,
+            const.DRIVER_LOCATION,
             desired_capabilities=chrome_options.to_capabilities())
 
     def close_browser(self):
         logger.debug('Closing browser...')
         self.browser.close()
-        if self.hide_browser:
-            self.display.stop()
+        # if self.hide_browser:
+        self.display.stop()
         self.browser = None
 
-    def find(self, method, selector, wait=True, explicit=True, sleep_time=None, **kwargs):
+    def find(self, method, selector, wait=True, explicit=True,
+             sleep_time=None, **kwargs):
         if wait:
             self.wait(sleep_time=sleep_time, explicit=explicit)
 
@@ -60,10 +65,12 @@ class BaseScrapper:
     def page_source(self):
         return self.browser.page_source
 
-    def get_page(self, url, sleep_time=3):
-        self.browser.get(url)
+    def get_page(self, path, sleep_time=3):
+        _url = urljoin(const.HOSTNAME, path)
+
+        self.browser.get(_url)
         self.wait(sleep_time=sleep_time, explicit=True)
-        save_page_source(url, self.page_source)
+        save_page_source(path, self.page_source)
 
     def wait(self, sleep_time=None, explicit=False):
         """

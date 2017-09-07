@@ -10,9 +10,9 @@ POST_TYPES = {
 CONNECTORS = ["is", "looks", "feels", "is really", 'is truly', 'is so']
 ADJECTIVES = [
     'adorable', 'amazing', 'awesome', 'beautiful', 'cool', 'delightful', 'epic',
-    'excellent', 'fabulous', 'fantastic', 'glorious', 'good', 'gorgeous', 'great',
+    'excellent', 'fabulous', 'fantastic', 'glorious', 'good', 'gorgeous',
     'incredible', 'lovely', 'magical', 'magnificent', 'nice', 'prodigious',
-    'stunning', 'unbelievable', 'wonderful',
+    'stunning', 'unbelievable', 'wonderful', 'great'
 ]
 EXPRESSIONS = [
     'blew my mind',
@@ -50,11 +50,11 @@ def letter_repetition(word, probability=0.2):
     if random.random() > probability:
         return word
     letter_pos = random.choice(range(len(word)))
-    times_to_repeat = random.randrange(2, 6)
+    times = random.randrange(2, 6)
     letter_to_repeat = word[letter_pos]
 
     _word = list(word)
-    repeated_word = _word[:letter_pos] + [letter_to_repeat] * times_to_repeat + _word[letter_pos:]
+    repeated_word = _word[:letter_pos] + [letter_to_repeat] * times + _word[letter_pos:]
     return ''.join(repeated_word)
 
 
