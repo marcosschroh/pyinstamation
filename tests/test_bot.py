@@ -21,6 +21,29 @@ class BotTestCase(unittest.TestCase):
         self.bot.login()
         self.assertEqual(self.bot.user_login, True)
 
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.logout', return_value=True)
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.login', return_value=True)
+    def test_logout(self, login_fn, logout_fn):
+        self.assertFalse(self.bot.logout())
+        self.bot.login()
+        self.assertTrue(self.bot.logout())
+
+    @patch('random.uniform', return_value=0.5)
+    def test_probability_of_occurrence(self, uniform_fn):
+        self.assertTrue(self.bot.probability_of_occurrence(0.6))
+        self.assertFalse(self.bot.probability_of_occurrence(0.4))
+
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.get_user_info', return_value={
+        'total_followers': 100,
+        'total_following': 50
+    })
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.login', return_value=True)
+    def test_get_my_profile_info(self, login_fn, get_user_info_fn):
+        self.bot.login()
+        self.bot.get_my_profile_info()
+        self.assertEqual(self.bot.total_followers, 100)
+        self.assertEqual(self.bot.total_following, 50)
+
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.upload_picture', return_value=True)
     def test_upload_picture(self, upload_picture_fn):
         self.bot.upload_picture('image_path', 'comment')
@@ -75,9 +98,14 @@ class BotTestCase(unittest.TestCase):
         self.assertTrue('Hi' in unfollow_users)
         self.assertTrue('Chiche' in unfollow_users)
 
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.get_user_info', return_value={
+        'total_followers': 100,
+        'total_following': 50
+    })
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.follow_user', return_value=True)
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.login', return_value=True)
-    def test_follow_user(self, login_fn, follow_user_fn):
+    def test_follow_user(self, login_fn, follow_user_fn, get_user_info_fn):
+        self.assertFalse(self.bot.follow_user(''))
         self.bot.login()
 
         username = 'Bar'
@@ -85,6 +113,17 @@ class BotTestCase(unittest.TestCase):
         self.assertTrue(
             len([u for u in self.bot.users_followed_by_bot if u.username == username])
         )
+
+        self.assertFalse(self.bot.follow_user(
+            username, conditions_checked=False, min_followers=101))
+
+    @patch('pyinstamation.bot.InstaBot._should_follow', return_value=True)
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.follow_user', return_value=True)
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.login', return_value=True)
+    def test_follow_multiple_users(self, login_fn, follow_user_fn, should_follow_fn):
+        self.bot.login()
+        self.bot.follow_multiple_users(['user1', 'user2'])
+        self.assertEqual(self.bot.total_user_followed_by_bot, 2)
 
     @patch('pyinstamation.bot.InstaBot.probability_of_occurrence', return_value=True)
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.get_user_info', return_value={
@@ -104,6 +143,8 @@ class BotTestCase(unittest.TestCase):
         self.assertFalse(self.bot._should_follow(username, max_followers=90))
         self.assertFalse(self.bot._should_follow(
             username, min_followers=50, max_followers=90))
+        self.assertFalse(self.bot._should_follow(
+            username, ignore_users=(username,)))
 
     @patch('pyinstamation.bot.InstaBot.probability_of_occurrence', return_value=True)
     def test_should_like(self, occurrence_fn):
@@ -113,6 +154,34 @@ class BotTestCase(unittest.TestCase):
 
         self.bot.likes_given_by_bot = 100
         self.assertFalse(self.bot._should_like())
+
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.like', return_value=True)
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.login', return_value=True)
+    def test_like(self, login_fn, like_fn):
+        self.bot.login()
+        self.bot.like('post_link')
+        self.assertEqual(self.bot.likes_given_by_bot, 1)
+
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.unlike', return_value=True)
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.login', return_value=True)
+    def test_unlike(self, login_fn, unlike_fn):
+        self.bot.login()
+        self.bot.unlike('post_link')
+        self.assertEqual(self.bot.unlikes_given_by_bot, 1)
+
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.unlike', return_value=True)
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.login', return_value=True)
+    def test_unlike_multiple_posts(self, login_fn, unlike_fn):
+        self.bot.login()
+        self.bot.unlike_multiple_posts(['post_1', 'post_2'])
+        self.assertEqual(self.bot.unlikes_given_by_bot, 2)
+
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.like', return_value=True)
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.login', return_value=True)
+    def test_like_multiple_posts(self, login_fn, like_fn):
+        self.bot.login()
+        self.bot.like_multiple_posts(['post_1', 'post_2'])
+        self.assertEqual(self.bot.likes_given_by_bot, 2)
 
     @patch('pyinstamation.bot.InstaBot.probability_of_occurrence', return_value=True)
     def test_should_comment(self, occurrence_fn):
@@ -126,3 +195,34 @@ class BotTestCase(unittest.TestCase):
 
         self.bot.commented_post = 100
         self.assertFalse(self.bot._should_comment())
+
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.comment', return_value=True)
+    def test_comment(self, comment_fn):
+        self.bot.comment('post_link', 'comment')
+        self.assertEqual(self.bot.commented_post, 1)
+
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.comment', return_value=True)
+    def test_comment_multiple_posts(self, comment_fn):
+        posts = [
+            {
+                'post': 'https://www.instagram.com/p/BXamBMihdBF/',
+                'comment': 'very nice'
+            },
+            {
+                'post': 'https://www.instagram.com/p/BXamBMihkdki9/',
+                'comment': '#awesome #trip'
+            },
+            {}
+
+        ]
+
+        self.bot.comment_multiple_posts(posts)
+        self.assertEqual(self.bot.commented_post, 2)
+
+    def test_validate_post(self):
+        self.assertTrue(self.bot._validate_post('_'))
+        post = {
+            'caption': '#hola #argentina'
+        }
+        self.assertFalse(self.bot._validate_post(post, ['hola']))
+        self.assertTrue(self.bot._validate_post(post, ['netherlands']))
