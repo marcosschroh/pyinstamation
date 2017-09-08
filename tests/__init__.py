@@ -74,8 +74,8 @@ class MockServerRequestHandler(BaseHTTPRequestHandler):
         self._set_headers()
         self._read_from_file_or_404()
 
-    # def log_message(self, format, *args):
-    #     return
+    def log_message(self, format, *args):
+        return
 
 
 def get_free_port():

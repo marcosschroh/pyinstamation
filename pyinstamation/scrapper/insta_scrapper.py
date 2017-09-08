@@ -17,7 +17,6 @@ class InstaScrapper(BaseScrapper):
 
     def login(self, username, password):
         self.get_page(const.URL_LOGIN)
-        print(self.browser.current_url)
         logger.debug('[LOGIN] username "%s"', username)
 
         username_input = self.find('xpath', const.LOGIN_INPUT_USERNAME, wait=False)
@@ -27,14 +26,14 @@ class InstaScrapper(BaseScrapper):
         password_input.send_keys(password)
         self.wait()
         self.browser.find_element_by_xpath(const.LOGIN_BUTTON).click()
-        self.wait(explicit=True)
+        # self.wait(explicit=True)
 
-        print(self.browser.current_url)
         logger.info('[LOGIN] Success. Username "%s"', username)
         return bool(self.browser.get_cookie('sessionid'))
 
     def logout(self):
         logger.info('[LOGOUT] Done.')
+        # Logout logic should be implemented here.
         self.close_browser()
 
     def get_user_info(self, username):
@@ -47,6 +46,8 @@ class InstaScrapper(BaseScrapper):
         if r.ok:
             # parse json
             json_content = r.json()
+            save_page_source(const.URL_USER_DETAIL.format(username, '?__a=1'),
+                             json_content)
             user = json_content.get('user', {})
 
         return {
@@ -74,34 +75,33 @@ class InstaScrapper(BaseScrapper):
             'total_following': total_following,
         }
 
-    def upload_picture(self, image_path, comment=None):
+    def upload_picture(self, image_path, description=None):
         logger.debug('[UPLOAD] Picture: %s', image_path)
 
         # simulate the click in the Camera Logo
         image_input = self.find(
             'class_name', const.UPLOAD_PICTURE_CAMARA_CSS_CLASS)
         image_input.click()
-
-        image_input = self.browser.find_element_by_xpath(const.UPLOAD_PICTURE_INPUT_FILE)
+        save_page_source(self.current_url.path, self.page_source)
+        image_input = self.find('xpath', const.UPLOAD_PICTURE_INPUT_FILE,
+                                wait=False)
         image_input.send_keys(image_path)
 
-        self.wait(explicit=True)
-        self.browser.find_element_by_xpath(const.UPLOAD_PICTURE_NEXT_LINK).click()
+        self.wait(explicit=True, sleep_time=0.2)
+        self.find('xpath', const.UPLOAD_PICTURE_NEXT_LINK).click()
+        save_page_source(self.current_url.path, self.page_source)
 
-        # Set the comment
-        self.wait(explicit=True)
-        comment_input = self.browser.find_element_by_xpath(
-            const.UPLOAD_PICTURE_TEXTAREA_COMMENT)
-        comment_input.click()
-
-        self.wait(explicit=True)
-
-        if comment:
-            comment_input.send_keys(comment)
+        if description:
+            comment_input = self.find('xpath',
+                                      const.UPLOAD_PICTURE_TEXTAREA_COMMENT)
+            comment_input.click()
+            save_page_source(self.current_url.path, self.page_source)
+            self.wait(explicit=True)
+            comment_input.send_keys(description)
 
         self.wait(explicit=True)
         self.browser.find_element_by_xpath(const.UPLOAD_PICTURE_SHARE_LINK).click()
-        save_page_source('redirection/pic/uploaded', self.page_source)
+        save_page_source(self.current_url.path, self.page_source)
         logger.info('[UPLOAD] Success. Picture: %s', image_path)
 
     def get_user_page(self, username):
@@ -222,8 +222,8 @@ class InstaScrapper(BaseScrapper):
         url = os.path.join(const.HOSTNAME, const.URL_TAG.format(hashtag, '?__a=1'))
         # get the response
         r = requests.get(url)
-
         if r.ok:
             json_content = r.json()
+            save_page_source(const.URL_TAG.format(hashtag, '?__a=1'), json_content)
             return json_content.get('tag', {}).get('media', {}).get('nodes', [])
         return []

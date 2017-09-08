@@ -1,6 +1,7 @@
 import os
 from urllib.parse import quote
 from pyinstamation import config
+import json
 
 
 TEST_LOCATION = 'tests/static'
@@ -13,6 +14,9 @@ def save_page_source(path, source, location=None):
 
     if location is None:
         location = TEST_LOCATION
+
+    if not isinstance(source, str):
+        source = json.dumps(source)
 
     filename = quote(path.strip('/'), safe='') + '.html'
     filepath = os.path.join(location, filename)

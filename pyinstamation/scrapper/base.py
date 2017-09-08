@@ -1,6 +1,7 @@
 import logging
 import time
 import random
+from urllib.parse import urlparse
 from selenium import webdriver
 from pyvirtualdisplay import Display
 # from pyinstamation.scrapper.instagram_const import DRIVER_LOCATION, HOSTNAME
@@ -21,13 +22,13 @@ class BaseScrapper:
 
     def __init__(self, hide_browser=False):
         self.browser = None
+        self.display = None
         self.hide_browser = CONFIG.get('hide_browser', hide_browser)
 
     def open_browser(self):
         # if self.hide_browser:
-
         size = (self.MOBILE_WIDTH + 1, self.MOBILE_HEIGTH + 1)
-        self.display = Display(visible=int(self.hide_browser), size=size)
+        self.display = Display(visible=int(not self.hide_browser), size=size)
         self.display.start()
         self.browser = self._open_mobile_browser()
 
@@ -48,10 +49,11 @@ class BaseScrapper:
 
     def close_browser(self):
         logger.debug('Closing browser...')
-        self.browser.close()
-        # if self.hide_browser:
-        self.display.stop()
-        self.browser = None
+        if self.browser is not None:
+            self.browser.quit()
+            self.browser = None
+        if self.display is not None:
+            self.display.stop()
 
     def find(self, method, selector, wait=True, explicit=True,
              sleep_time=None, **kwargs):
@@ -65,9 +67,12 @@ class BaseScrapper:
     def page_source(self):
         return self.browser.page_source
 
+    @property
+    def current_url(self):
+        return urlparse(self.browser.current_url)
+
     def get_page(self, path, sleep_time=3):
         _url = urljoin(const.HOSTNAME, path)
-
         self.browser.get(_url)
         self.wait(sleep_time=sleep_time, explicit=True)
         save_page_source(path, self.page_source)

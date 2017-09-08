@@ -109,7 +109,8 @@ class InstaBot:
             self.scrapper.logout()
             self._user_login = False
             return True
-
+        else:
+            self.scrapper.close_browser()
         logger.info('login first alsjeblieft')
         return False
 
@@ -117,8 +118,8 @@ class InstaBot:
     def user_login(self):
         return self._user_login
 
-    def upload_picture(self, image_path, comment=None):
-        self.scrapper.upload_picture(image_path, comment)
+    def upload_picture(self, image_path, description=None):
+        self.scrapper.upload_picture(image_path, description)
         self.pictures_uploaded += 1
 
     def upload_multiple_pictures(self, pictures_list):
@@ -147,8 +148,8 @@ class InstaBot:
                     continue
 
             pic = picture.get('path')
-            comment = picture.get('comment', None)
-            self.upload_picture(pic, comment)
+            descripton = picture.get('descripton', None)
+            self.upload_picture(pic, descripton)
 
     def follow_user(self, username, conditions_checked=True, min_followers=None,
                     max_followers=None):
@@ -292,7 +293,7 @@ class InstaBot:
 
                 if comment:
                     self.comment(post_url, comment)
-                    logger.info('Comment to post: {0}'.format(comment))
+                    logger.info('Comment: "{0}"'.format(comment))
 
             if self.follow_enable and self.total_user_followed_by_bot < self.follow_per_day \
                     and users_followed_by_hashtag < total_to_follow:
@@ -481,3 +482,4 @@ class InstaBot:
         if users_following:
             self.users_following_to_ignore = users_following
         self.explore_tags()
+        self.logout()

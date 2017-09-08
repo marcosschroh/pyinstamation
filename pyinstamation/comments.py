@@ -7,7 +7,7 @@ POST_TYPES = {
     'video': ['vid', 'video'],
     'other': ['shot', 'post', 'view']
 }
-CONNECTORS = ["is", "looks", "feels", "is really", 'is truly', 'is so']
+CONNECTORS = ["is", "looks", "is really", 'is truly', 'is so']
 ADJECTIVES = [
     'adorable', 'amazing', 'awesome', 'beautiful', 'cool', 'delightful', 'epic',
     'excellent', 'fabulous', 'fantastic', 'glorious', 'good', 'gorgeous',

@@ -75,7 +75,9 @@ class Controller:
     def run(self, bot):
         unfollow_users = self.get_users_to_unfollow()
         users_following = self.get_users_following()
-        bot.run(users_to_unfollow=unfollow_users, users_following=users_following)
+
+        bot.run(users_to_unfollow=unfollow_users,
+                users_following=users_following)
 
         self.set_stats(bot)
         db.close()

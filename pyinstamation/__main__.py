@@ -41,6 +41,7 @@ def signal_handler(bot, controller, signal, frame):
     logger.info('You pressed Ctrl+C!')
     controller.set_stats(bot)
     logger.info('Saving stats!')
+    bot.logout()
     sys.exit(0)
 
 
