@@ -26,10 +26,10 @@ class BaseScrapperTest(unittest.TestCase):
         self.post_like = 'p%2FBYdLVnQAdfz'
 
         # patch time.sleep
-        self.patcher = patch('time.sleep')
-        r = self.patcher.start()
-        r.return_value = None
-        self.addCleanup(self.patcher.stop)
+        # self.patcher = patch('time.sleep')
+        # r = self.patcher.start()
+        # r.return_value = None
+        # self.addCleanup(self.patcher.stop)
 
         # init scrapper
         self.scrapper = InstaScrapper()

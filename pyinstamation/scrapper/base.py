@@ -91,7 +91,7 @@ class BaseScrapper:
 
     @staticmethod
     def random_seconds():
-        return random.randrange(1, 10)
+        return random.randrange(1, 5)
 
     def resize_window(self, width, heigth):
         self.browser.set_window_size(width, heigth)

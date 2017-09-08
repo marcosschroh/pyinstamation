@@ -25,10 +25,10 @@ class BaseScrapperTest(unittest.TestCase):
         CONFIG.update({'hide_browser': True})
 
         # patch time.sleep
-        self.patcher = patch('time.sleep')
-        r = self.patcher.start()
-        r.return_value = None
-        self.addCleanup(self.patcher.stop)
+        # self.patcher = patch('time.sleep')
+        # r = self.patcher.start()
+        # r.return_value = None
+        # self.addCleanup(self.patcher.stop)
 
         self.base = BaseScrapper()
         self.base.open_browser()
