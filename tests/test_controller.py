@@ -1,5 +1,4 @@
 import datetime
-import peewee
 from pyinstamation import FollowedUser
 from pyinstamation.models import User, Follower
 from pyinstamation.controller import Controller
@@ -52,8 +51,10 @@ class ControllerTest(DBTestCase):
         c = Controller(username='pepe')
         yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
 
-        Follower.create(user=c.user, username='fulanito', unfollow_date=yesterday)
-        Follower.create(user=c.user, username='noUnfoll', following=False, unfollow_date=yesterday)
+        Follower.create(user=c.user, username='fulanito',
+                        unfollow_date=yesterday)
+        Follower.create(user=c.user, username='noUnfoll',
+                        following=False, unfollow_date=yesterday)
 
         users = c.get_users_to_unfollow()
         self.assertEqual(users.count(), 1)
@@ -85,7 +86,8 @@ class ControllerTest(DBTestCase):
             FollowedUser('user3', None)
         ]
         c.set_users_unfollowed(unfollowed)
-        self.assertEqual(c.user.follower_set.select(Follower.following == False).count(), 0)  # noqa
+        not_follows = c.user.follower_set.select(Follower.following == False)  # noqa
+        self.assertEqual(not_follows.count(), 0)
 
     def test_get_users_following(self):
         c = Controller(username='darude')

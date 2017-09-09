@@ -29,6 +29,6 @@ pics:
   files:
     - path: '/home/santiago/projects/instagram/nn/sorted_pics/47__30_brussels.JPG'
       datetime: '2016-08-18T18:00:00'
-      comment: '#awesome #belgium'
+      description: '#awesome #belgium'
     - path: '/home/santiago/projects/instagram/nn/sorted_pics/48__20_santander_friends.JPG'
       datetime: '2016-08-19T19:10:00'

@@ -109,7 +109,8 @@ class InstaBot:
             self.scrapper.logout()
             self._user_login = False
             return True
-
+        else:
+            self.scrapper.close_browser()
         logger.info('login first alsjeblieft')
         return False
 
@@ -117,8 +118,8 @@ class InstaBot:
     def user_login(self):
         return self._user_login
 
-    def upload_picture(self, image_path, comment=None):
-        self.scrapper.upload_picture(image_path, comment)
+    def upload_picture(self, image_path, description=None):
+        self.scrapper.upload_picture(image_path, description)
         self.pictures_uploaded += 1
 
     def upload_multiple_pictures(self, pictures_list):
@@ -147,8 +148,8 @@ class InstaBot:
                     continue
 
             pic = picture.get('path')
-            comment = picture.get('comment', None)
-            self.upload_picture(pic, comment)
+            descripton = picture.get('descripton', None)
+            self.upload_picture(pic, descripton)
 
     def follow_user(self, username, conditions_checked=True, min_followers=None,
                     max_followers=None):
@@ -260,7 +261,7 @@ class InstaBot:
         posts = self.scrapper.get_posts_by_hashtag(hashtag)
 
         if not posts:
-            logger.info('No posts were found for HASHTAG {0}'.format(hashtag))
+            logger.info('No posts were found for HASHTAG "{0}"'.format(hashtag))
             return
 
         users_followed_by_hashtag = 0
@@ -270,14 +271,14 @@ class InstaBot:
             post_code = post.get('code')
             post_url = self.scrapper.generate_post_link_by_code(post_code)
             if not self._validate_post(post, ignore_tags=ignore_tags):
-                msg = 'Ignoring the post {0}. Has at least one hashtag of {1}'
+                msg = 'Ignoring the post "{0}". Has at least one hashtag of "{1}"'
                 logger.info(msg.format(post_url, ignore_tags))
 
             self.scrapper.wait(sleep_time=3)
             username = self.scrapper.get_username_in_post_page(post_url)
 
             if any(user.username == username for user in self.users_following_to_ignore):
-                msg = 'Skip because already following the user {0}'.format(username)
+                msg = 'Skip because already following the user "{0}"'.format(username)
                 logger.info(msg)
                 continue
 
@@ -292,7 +293,7 @@ class InstaBot:
 
                 if comment:
                     self.comment(post_url, comment)
-                    logger.info('Comment to post: {0}'.format(comment))
+                    logger.info('Comment: "{0}"'.format(comment))
 
             if self.follow_enable and self.total_user_followed_by_bot < self.follow_per_day \
                     and users_followed_by_hashtag < total_to_follow:
@@ -354,7 +355,7 @@ class InstaBot:
                 min_followers = hashtag_data.get('min_followers', min_followers)
                 total_to_follow = hashtag_data.get('total_to_follow', total_to_follow)
 
-            logger.info('Processing hashtag {0}'.format(hashtag))
+            logger.info('Processing hashtag "{0}"'.format(hashtag))
 
             self.follow_users_by_hashtag(
                 hashtag,
@@ -481,3 +482,4 @@ class InstaBot:
         if users_following:
             self.users_following_to_ignore = users_following
         self.explore_tags()
+        self.logout()

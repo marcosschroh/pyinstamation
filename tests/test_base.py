@@ -1,15 +1,15 @@
-import unittest
 import os
+import unittest
 from unittest.mock import patch
-from pyinstamation.scrapper.base import BaseScrapper
-from pyinstamation.scrapper import instagram_const as const
+
 from pyinstamation import CONFIG
 from pyinstamation.config import load_config
-from tests import get_free_port, start_mock_server
+from pyinstamation.scrapper.base import BaseScrapper
+from pyinstamation.scrapper import instagram_const as const
+from tests import get_free_port, start_mock_server, MOCK_HOSTNAME
 
 
 SLEEP = 1
-MOCK_HOSTNAME = 'http://localhost:{port}/'
 
 
 class BaseScrapperTest(unittest.TestCase):
@@ -22,9 +22,16 @@ class BaseScrapperTest(unittest.TestCase):
         const.HOSTNAME = MOCK_HOSTNAME.format(port=mock_server_port)
 
     def setUp(self):
+        CONFIG.update({'hide_browser': True})
+
+        # patch time.sleep
+        # self.patcher = patch('time.sleep')
+        # r = self.patcher.start()
+        # r.return_value = None
+        # self.addCleanup(self.patcher.stop)
+
         self.base = BaseScrapper()
         self.base.open_browser()
-        CONFIG.update({'hide_browser': True})
 
     def tearDown(self):
         if self.base.browser is not None:
@@ -50,25 +57,21 @@ class BaseScrapperTest(unittest.TestCase):
             waited = self.base.wait(explicit=False)
             self.assertEqual(waited, SLEEP)
 
-    @patch('time.sleep', return_value=None)
-    def test_wait_sleep_time_none_explicit_true(self, time_sleep):
+    def test_wait_sleep_time_none_explicit_true(self):
         with patch('random.randrange', return_value=SLEEP):
             waited = self.base.wait(explicit=True)
             self.assertEqual(waited, SLEEP)
 
-    @patch('time.sleep', return_value=None)
-    def test_wait_sleep_time_defined(self, time_sleep):
+    def test_wait_sleep_time_defined(self):
         waited = self.base.wait(sleep_time=SLEEP, explicit=True)
         self.assertEqual(waited, SLEEP)
 
-    @patch('time.sleep', return_value=None)
-    def test_get_page(self, time_sleep):
-        self.base.get_page(os.path.join(const.HOSTNAME, 'accounts/login'))
+    def test_get_page(self):
+        self.base.get_page('accounts/login')
         self.assertIsInstance(self.base.page_source, str)
 
-    @patch('time.sleep', return_value=None)
-    def test_find(self, time_sleep):
-        self.base.get_page(os.path.join(const.HOSTNAME, 'accounts/login'))
+    def test_find(self):
+        self.base.get_page('accounts/login')
         username_input = self.base.find('xpath', const.LOGIN_INPUT_USERNAME)
         self.assertEqual(username_input.tag_name, 'input')
 
