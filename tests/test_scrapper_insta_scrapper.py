@@ -1,6 +1,12 @@
+"""
+Most tests that interact with selenium return True even if there are no
+conditions, because we are testing that selenium performs
+the operations correctly.
+If selenium fails to do something, the tests will fail.
+"""
 import os
 import unittest
-
+from collections import namedtuple
 from unittest.mock import patch
 from pyinstamation import CONFIG
 from pyinstamation.config import load_config
@@ -9,7 +15,9 @@ from pyinstamation.scrapper import instagram_const as const
 from tests import get_free_port, start_mock_server, MOCK_HOSTNAME
 
 
-class BaseScrapperTest(unittest.TestCase):
+response = namedtuple('response', ('ok', 'json'))
+
+class InstaScrapperTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -31,6 +39,9 @@ class BaseScrapperTest(unittest.TestCase):
 
         self.post_path_liked = 'BY3Bg4THwNi'
         self.post_link_liked = 'p/{0}/'.format(self.post_path_liked)
+
+        self.post_to_comment = 'BYxjRwQAq6N'
+        self.post_link_to_comment = 'p/{0}/'.format(self.post_to_comment)
 
         self.hastag = 'apartmentdecor'
 
@@ -122,10 +133,9 @@ class BaseScrapperTest(unittest.TestCase):
         username = self.scrapper.username_in_post_page(self.post_link_liked)
         self.assertEqual(username, 'fancyhoustonapartments')
 
-    @unittest.skip("no way to properly test yet")
     def test_comment(self):
         comment = 'this is a comment'
-        result = self.scrapper.comment(self.post_link_liked, comment)
+        result = self.scrapper.comment(self.post_link_to_comment, comment)
         self.assertTrue(result)
 
     def test_generate_post_link_by_code(self):
@@ -141,8 +151,45 @@ class BaseScrapperTest(unittest.TestCase):
         result = self.scrapper.get_posts_by_hashtag(self.hastag)
         self.assertEqual(len(result), 18)
 
-    # @unittest.skip("TODO: FIX ERROR")
-    def test_upload_picture(self):
+    @patch('requests.get', return_value=response(False, '{}'))
+    def test_get_posts_by_hashtag_fail(self, requests_get_fn):
+        result = self.scrapper.get_posts_by_hashtag(self.hastag)
+        self.assertEqual(len(result), 0)
+
+    def test_select_image(self):
+        self.scrapper.get_page('/')
+        r = self.scrapper._select_image(self.filepath)
+        self.assertTrue(r)
+
+    def test_format_image(self):
+        self.scrapper.get_page('create/style')
+        r = self.scrapper._format_image()
+        self.assertTrue(r)
+
+    def test_add_description_is_none(self):
+        r = self.scrapper._add_description()
+        self.assertFalse(r)
+
+    def test_add_description(self):
+        self.scrapper.get_page('create/details')
+        r = self.scrapper._add_description(description='not a real descr')
+        self.assertTrue(r)
+
+    def test_share_image(self):
+        self.scrapper.get_page('create/details')
+        r = self.scrapper._share_image()
+        self.assertTrue(r)
+
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper._select_image', return_value=True)
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper._format_image', return_value=True)
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper._add_description', return_value=True)
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper._share_image', return_value=True)
+    def test_upload_picture(self, _select_image_fn, _format_image_fn,
+                            _add_description_fn, _share_image_fn):
         self.scrapper.get_page('/')
         r = self.scrapper.upload_picture(self.filepath, description='not real')
+        self.assertTrue(r)
+
+    def test_logout(self):
+        r = self.scrapper.logout()
         self.assertTrue(r)

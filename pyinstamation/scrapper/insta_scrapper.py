@@ -36,7 +36,11 @@ class InstaScrapper(BaseScrapper):
     def logout(self):
         logger.info('Logout done.')
         # TODO: Log out user
-        pass
+        return True
+
+    def user_page(self, username):
+        url = const.URL_USER_DETAIL.format(username, '')
+        self.get_page(url)
 
     def user_info(self, username):
         url = os.path.join(const.HOSTNAME,
@@ -77,42 +81,48 @@ class InstaScrapper(BaseScrapper):
             'total_following': total_following,
         }
 
-    def upload_picture(self, image_path, description=None):
-        logger.debug('Picture to upload: %s', image_path)
-
-        # simulate the click in the Camera Logo
+    def _select_image(self, image_path):
+        """Click on the camera logo is required in order to work."""
         image_input = self.find('class_name', const.UPLOAD_PICTURE_CAMARA_CLASS)
         image_input.click()
         image_input = self.find('xpath', const.UPLOAD_PICTURE_INPUT_FILE,
                                 wait=False)
         image_input.send_keys(image_path)
         save_page_source(self.current_url.path, self.page_source)
+        return True
 
+    def _format_image(self):
         element = WebDriverWait(self.browser, 10).until(
             EC.presence_of_element_located((
                 By.XPATH, const.UPLOAD_PICTURE_NEXT_LINK)))
-        save_page_source(self.current_url.path, self.page_source)
         element.click()
         save_page_source(self.current_url.path, self.page_source)
-
-        if description:
-            comment_input = self.find('xpath',
-                                      const.UPLOAD_PICTURE_TEXTAREA_COMMENT)
-            comment_input.click()
-            save_page_source(self.current_url.path, self.page_source)
-            self.wait(explicit=True)
-            comment_input.send_keys(description)
-            save_page_source(self.current_url.path, self.page_source)
-
-        self.wait(explicit=True)
-        self.browser.find_element_by_xpath(const.UPLOAD_PICTURE_SHARE_LINK).click()
-        save_page_source(self.current_url.path, self.page_source)
-        logger.info('Upload successful. Picture: %s', image_path)
         return True
 
-    def user_page(self, username):
-        url = const.URL_USER_DETAIL.format(username, '')
-        self.get_page(url)
+    def _add_description(self, description=None):
+        if description is None:
+            return False
+        comment_input = self.find('xpath',
+                                  const.UPLOAD_PICTURE_TEXTAREA_COMMENT)
+        comment_input.click()
+        save_page_source(self.current_url.path, self.page_source)
+        comment_input.send_keys(description)
+        self.wait(explicit=True)
+        return True
+
+    def _share_image(self):
+        self.browser.find_element_by_xpath(const.UPLOAD_PICTURE_SHARE_LINK).click()
+        save_page_source(self.current_url.path, self.page_source)
+        return True
+
+    def upload_picture(self, image_path, description=None):
+        logger.debug('Picture to upload: %s', image_path)
+        self._select_image(image_path)
+        self._format_image()
+        self._add_description(description)
+        self._share_image()
+        logger.info('Upload successful. Picture: %s', image_path)
+        return True
 
     @property
     def _is_followed(self):
@@ -211,12 +221,12 @@ class InstaScrapper(BaseScrapper):
 
         new_comment_btn = self.find('xpath', const.REQUEST_NEW_COMMENT_BUTTON)
         new_comment_btn.click()
+        save_page_source(self.current_url.path, self.page_source)
         self.wait(explicit=True)
 
-        textarea_comment = self.find('xpath', const.COMMENT_TEXTEAREA)
-        textarea_comment.click()
-        self.wait(explicit=True)
-
+        textarea_comment = WebDriverWait(self.browser, 5).until(
+            EC.presence_of_element_located((
+                By.XPATH, const.COMMENT_TEXTEAREA)))
         textarea_comment.send_keys(comment)
         self.wait(explicit=True)
 

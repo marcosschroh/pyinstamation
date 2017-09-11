@@ -15,6 +15,7 @@ class BotTestCase(unittest.TestCase):
         password = 'password'
         self.scrapper = InstaScrapper(hide_browser=True)
         self.bot = InstaBot(self.scrapper, username=username, password=password)
+        self.hashtag = 'apartmentdecor'
 
     def test_bot_username_and_password_from_config(self):
         bot = InstaBot(self.scrapper)

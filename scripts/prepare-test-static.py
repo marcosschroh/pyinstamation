@@ -59,6 +59,7 @@ to_unlike(bot, NOT_FOLLOWED_USER['post_to_unlike_state'])
 
 to_like(bot, FOLLOWED_USER['post_to_like_state'])
 to_unlike(bot, FOLLOWED_USER['post_to_unlike_state'])
+bot.comment(NOT_FOLLOWED_USER['post_to_like_state'], 'wow!')
 
 bot.scrapper.user_page(NOT_FOLLOWED_USER['user'])
 if bot.scrapper._is_followed:
@@ -69,7 +70,6 @@ bot.scrapper.user_page(FOLLOWED_USER['user'])
 if not bot.scrapper._is_followed:
     bot.follow(FOLLOWED_USER['user'])
     bot.scrapper.user_page(FOLLOWED_USER['user'])
-
 
 for tag in TAGS:
     bot.scrapper.get_hashtag_page(tag)
