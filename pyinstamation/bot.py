@@ -274,7 +274,7 @@ class InstaBot:
 
         if not posts:
             logger.info('No posts were found for HASHTAG "{0}"'.format(hashtag))
-            return
+            return None
 
         users_followed_by_hashtag = 0
         for i, post in enumerate(posts, 1):

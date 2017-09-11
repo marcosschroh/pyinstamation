@@ -1,6 +1,6 @@
 username: discovrar
 password: discorvd
-hide_browser: false
+hide_browser: true
 testing: true
 
 posts:
