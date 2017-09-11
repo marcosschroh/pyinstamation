@@ -14,6 +14,7 @@ The document has moved
 <A HREF="https://www.google.nl/?gfe_rd=cr&amp;dcr=0&amp;ei=KzesWZWQNPHG8AeTk5a4DA">here</A>.
 </BODY></HTML>
 '''
+JSON_CONTENT = {'data': 'muevelo'}
 
 
 class UtilsTestCase(unittest.TestCase):
@@ -28,6 +29,11 @@ class UtilsTestCase(unittest.TestCase):
     def test_save_page_source_allowed(self):
         config.SAVE_SOURCE = True
         self.filepath = utils.save_page_source(URL, CONTENT)
+        self.assertTrue(os.path.exists(self.filepath))
+
+    def test_save_page_source_json(self):
+        config.SAVE_SOURCE = True
+        self.filepath = utils.save_page_source(URL, JSON_CONTENT)
         self.assertTrue(os.path.exists(self.filepath))
 
     def test_save_page_source_not_allowed(self):

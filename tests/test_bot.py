@@ -52,6 +52,10 @@ class BotTestCase(unittest.TestCase):
         self.assertEqual(self.bot.total_followers, 100)
         self.assertEqual(self.bot.total_following, 50)
 
+    def test_user_info_no_login(self):
+        r = self.bot.user_info('no_real_username')
+        self.assertEqual(r, {})
+
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.upload_picture', return_value=True)
     def test_upload_picture(self, upload_picture_fn):
         self.bot.upload_picture('image_path', 'comment')
@@ -80,6 +84,30 @@ class BotTestCase(unittest.TestCase):
         self.bot.upload_multiple_pictures(images)
         self.assertEqual(self.bot.pictures_uploaded, 2)
 
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.upload_picture', return_value=True)
+    def test_picture_step(self, upload_picture_fn):
+        self.bot.upload = True
+        self.bot.pictures = [
+            {
+                'comment': '#motivation',
+                'datetime': '2017-08-31T13:30:00',
+                'path': '/home/User/Pictures/one_day.jpg'
+            },
+            {
+                'comment': '#motivation2',
+                'datetime': datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S"),
+                'path': '/home/User/Pictures/two_day.jpg'
+            },
+            {
+                'comment': '#motivation3',
+                'datetime': datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S"),
+                'path': '/home/User/Pictures/three_day.jpg'
+            },
+        ]
+
+        self.bot.picture_step()
+        self.assertEqual(self.bot.pictures_uploaded, 2)
+
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.unfollow', return_value=True)
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.login', return_value=True)
     def test_unfollow_user(self, login_fn, unfollow_user_fn):
@@ -90,6 +118,11 @@ class BotTestCase(unittest.TestCase):
         self.assertTrue(
             len([u for u in self.bot.users_unfollowed_by_bot if u.username == username])
         )
+
+    def test_unfollow_no_login(self):
+        username = 'Foo'
+        result = self.bot.unfollow(username)
+        self.assertFalse(result)
 
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.unfollow', return_value=True)
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.login', return_value=True)
@@ -153,6 +186,21 @@ class BotTestCase(unittest.TestCase):
             username, min_followers=50, max_followers=90))
         self.assertFalse(self.bot._should_follow(
             username, ignore_users=(username,)))
+
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.login', return_value=True)
+    def test_should_follow_not_enabled(self, login_fn):
+        self.bot.login()
+        self.bot.follow_enable = False
+        username = 'Foo'
+        self.assertFalse(self.bot._should_follow(username))
+
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.login', return_value=True)
+    def test_should_follow_users_followed_more_than_follow_per_day(self, login_fn):
+        self.bot.login()
+        self.bot.total_user_followed_by_bot = 10
+        self.bot.follow_per_day = 5
+        username = 'Foo'
+        self.assertFalse(self.bot._should_follow(username))
 
     @patch('pyinstamation.bot.InstaBot.probability_of_occurrence', return_value=True)
     def test_should_like(self, occurrence_fn):
