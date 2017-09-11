@@ -54,7 +54,7 @@ class Controller:
                                 Follower.following == True,  # noqa
                                 Follower.user == self.user.id))
         modified_rows = query.execute()
-        logger.debug("Users unfollowed %s", modified_rows)
+        return modified_rows
 
     def set_user_stats(self, likes=0, comments=0, followed=0, unfollowed=0):
         self.user.likes += likes
@@ -62,6 +62,11 @@ class Controller:
         self.user.followed += followed
         self.user.unfollowed += unfollowed
         self.user.save()
+        logger.info('FINAL STATS')
+        logger.info('Likes: %s', likes)
+        logger.info('Comments: %s', comments)
+        logger.info('Followed: %s', followed)
+        logger.info('Unfollowed: %s', unfollowed)
 
     def set_stats(self, bot):
         self.set_users_followed(bot.users_followed_by_bot)
