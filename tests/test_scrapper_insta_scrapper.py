@@ -1,6 +1,6 @@
 import os
 import unittest
-from urllib.parse import urlparse
+
 from unittest.mock import patch
 from pyinstamation import CONFIG
 from pyinstamation.config import load_config
@@ -141,7 +141,7 @@ class BaseScrapperTest(unittest.TestCase):
         result = self.scrapper.get_posts_by_hashtag(self.hastag)
         self.assertEqual(len(result), 18)
 
-    @unittest.skip("TODO: FIX ERROR")
+    # @unittest.skip("TODO: FIX ERROR")
     def test_upload_picture(self):
         self.scrapper.get_page('/')
         r = self.scrapper.upload_picture(self.filepath, description='not real')

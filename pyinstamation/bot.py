@@ -46,7 +46,7 @@ class InstaBot:
         self.custom_comments = _posts.get('custom_comments', [])
         self.ignore_tags = remove_hashtags(_posts.get('ignore_tags', []))
         self.total_to_follow_per_hashtag = _posts.get('total_to_follow_per_hashtag', 10)
-        self.posts_per_hashtag = _posts.get('posts_per_hashtag', 20)
+        self.posts_per_hashtag = _posts.get('posts_per_hashtag', None)
 
         _followers = CONFIG.get('followers', {})
         self.ignore_users = _followers.get('ignore_users', [])

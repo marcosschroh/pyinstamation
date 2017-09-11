@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import sys
-import os
-
+import os  # noqa
 sys.path.append('../pyinstamation')
 
 from pyinstamation.bot import InstaBot  # noqa
@@ -9,7 +8,7 @@ from pyinstamation.scrapper import InstaScrapper  # noqa
 from pyinstamation import config  # noqa
 
 
-FILEPATH = os.path.abspath('../tests/static/one_day.jpg')
+FILEPATH = os.path.abspath('tests/static/one_day.jpg')
 
 NOT_FOLLOWED_USER = {
     'user': 'fancyhoustonapartments',
