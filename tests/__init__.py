@@ -44,7 +44,7 @@ class MockServerRequestHandler(BaseHTTPRequestHandler):
     @property
     def filepath(self):
         if len(self.path) < 2 or self.logged:
-            filename = 'p%2FBYdLVnQAdfz'
+            filename = '%2F'
         else:
             filename = quote(self.path.strip('/'), safe='')
         return os.path.join('./tests/static', '{0}.html'.format(filename))

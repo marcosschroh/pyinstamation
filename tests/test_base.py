@@ -67,8 +67,15 @@ class BaseScrapperTest(unittest.TestCase):
         self.assertEqual(waited, SLEEP)
 
     def test_get_page(self):
-        self.base.get_page('accounts/login')
+        result = self.base.get_page('accounts/login')
         self.assertIsInstance(self.base.page_source, str)
+        self.assertTrue(result)
+
+    def test_get_page_cache(self):
+        self.base.get_page('accounts/login')
+        self.base.wait(sleep_time=1)
+        result = self.base.get_page('accounts/login')
+        self.assertFalse(result)
 
     def test_find(self):
         self.base.get_page('accounts/login')

@@ -18,7 +18,7 @@ def save_page_source(path, source, location=None):
     if not isinstance(source, str):
         source = json.dumps(source)
 
-    filename = quote(path.strip('/'), safe='') + '.html'
+    filename = quote(path.strip('/') or '/', safe='') + '.html'
     filepath = os.path.join(location, filename)
 
     with open(filepath, 'w') as f:

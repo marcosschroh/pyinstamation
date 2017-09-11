@@ -25,6 +25,10 @@ class BaseScrapper:
         self.display = None
         self.hide_browser = CONFIG.get('hide_browser', hide_browser)
 
+    @staticmethod
+    def random_seconds():
+        return random.randrange(1, 5)
+
     def open_browser(self):
         # if self.hide_browser:
         size = (self.MOBILE_WIDTH + 1, self.MOBILE_HEIGTH + 1)
@@ -71,11 +75,21 @@ class BaseScrapper:
     def current_url(self):
         return urlparse(self.browser.current_url)
 
-    def get_page(self, path, sleep_time=3):
+    def get_page(self, path, sleep_time=None):
         _url = urljoin(const.HOSTNAME, path)
+
+        if sleep_time is None:
+            sleep_time = self.random_seconds()
+
+        if self.current_url == urlparse(_url):
+            # use already loaded page
+            save_page_source(path, self.page_source)
+            return False
+
         self.browser.get(_url)
         self.wait(sleep_time=sleep_time, explicit=True)
         save_page_source(path, self.page_source)
+        return True
 
     def wait(self, sleep_time=None, explicit=False):
         """
@@ -88,10 +102,6 @@ class BaseScrapper:
         else:
             self.browser.implicitly_wait(sleep_time)
         return sleep_time
-
-    @staticmethod
-    def random_seconds():
-        return random.randrange(1, 5)
 
     def resize_window(self, width, heigth):
         self.browser.set_window_size(width, heigth)

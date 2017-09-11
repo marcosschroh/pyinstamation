@@ -16,6 +16,11 @@ class BotTestCase(unittest.TestCase):
         self.scrapper = InstaScrapper(hide_browser=True)
         self.bot = InstaBot(self.scrapper, username=username, password=password)
 
+    def test_bot_username_and_password_from_config(self):
+        bot = InstaBot(self.scrapper)
+        self.assertEqual(bot.username, config.CONFIG.get('username'))
+        self.assertEqual(bot.password, config.CONFIG.get('password'))
+
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.login', return_value=True)
     def test_login(self, login_fn):
         self.bot.login()
@@ -24,8 +29,11 @@ class BotTestCase(unittest.TestCase):
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.logout', return_value=True)
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.login', return_value=True)
     def test_logout(self, login_fn, logout_fn):
-        self.assertFalse(self.bot.logout())
         self.bot.login()
+        self.assertTrue(self.bot.logout())
+
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.logout', return_value=True)
+    def test_logout_no_login(self, logout_fn):
         self.assertTrue(self.bot.logout())
 
     @patch('random.uniform', return_value=0.5)
@@ -33,14 +41,14 @@ class BotTestCase(unittest.TestCase):
         self.assertTrue(self.bot.probability_of_occurrence(0.6))
         self.assertFalse(self.bot.probability_of_occurrence(0.4))
 
-    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.get_user_info', return_value={
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.user_info', return_value={
         'total_followers': 100,
         'total_following': 50
     })
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.login', return_value=True)
-    def test_get_my_profile_info(self, login_fn, get_user_info_fn):
+    def test_my_profile_info(self, login_fn, user_info_fn):
         self.bot.login()
-        self.bot.get_my_profile_info()
+        self.bot.my_profile_info()
         self.assertEqual(self.bot.total_followers, 100)
         self.assertEqual(self.bot.total_following, 50)
 
@@ -72,18 +80,18 @@ class BotTestCase(unittest.TestCase):
         self.bot.upload_multiple_pictures(images)
         self.assertEqual(self.bot.pictures_uploaded, 2)
 
-    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.unfollow_user', return_value=True)
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.unfollow', return_value=True)
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.login', return_value=True)
     def test_unfollow_user(self, login_fn, unfollow_user_fn):
         self.bot.login()
 
         username = 'Foo'
-        self.bot.unfollow_user(username)
+        self.bot.unfollow(username)
         self.assertTrue(
             len([u for u in self.bot.users_unfollowed_by_bot if u.username == username])
         )
 
-    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.unfollow_user', return_value=True)
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.unfollow', return_value=True)
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.login', return_value=True)
     def test_unfollow_multiple_users(self, login_fn, unfollow_user_fn):
         self.bot.login()
@@ -98,27 +106,27 @@ class BotTestCase(unittest.TestCase):
         self.assertTrue('Hi' in unfollow_users)
         self.assertTrue('Chiche' in unfollow_users)
 
-    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.get_user_info', return_value={
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.user_info', return_value={
         'total_followers': 100,
         'total_following': 50
     })
-    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.follow_user', return_value=True)
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.follow', return_value=True)
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.login', return_value=True)
-    def test_follow_user(self, login_fn, follow_user_fn, get_user_info_fn):
-        self.assertFalse(self.bot.follow_user(''))
+    def test_follow_user(self, login_fn, follow_user_fn, user_info_fn):
+        self.assertFalse(self.bot.follow(''))
         self.bot.login()
 
         username = 'Bar'
-        self.bot.follow_user(username)
+        self.bot.follow(username)
         self.assertTrue(
             len([u for u in self.bot.users_followed_by_bot if u.username == username])
         )
 
-        self.assertFalse(self.bot.follow_user(
+        self.assertFalse(self.bot.follow(
             username, conditions_checked=False, min_followers=101))
 
     @patch('pyinstamation.bot.InstaBot._should_follow', return_value=True)
-    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.follow_user', return_value=True)
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.follow', return_value=True)
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.login', return_value=True)
     def test_follow_multiple_users(self, login_fn, follow_user_fn, should_follow_fn):
         self.bot.login()
@@ -126,12 +134,12 @@ class BotTestCase(unittest.TestCase):
         self.assertEqual(self.bot.total_user_followed_by_bot, 2)
 
     @patch('pyinstamation.bot.InstaBot.probability_of_occurrence', return_value=True)
-    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.get_user_info', return_value={
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.user_info', return_value={
         'total_followers': 100,
         'total_following': 50
     })
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.login', return_value=True)
-    def test_should_follow(self, login_fn, get_user_info_fn, occurrence_fn):
+    def test_should_follow(self, login_fn, user_info_fn, occurrence_fn):
         self.bot.login()
         username = 'Foo'
         self.assertTrue(self.bot._should_follow(username))
@@ -226,3 +234,23 @@ class BotTestCase(unittest.TestCase):
         }
         self.assertFalse(self.bot._validate_post(post, ['hola']))
         self.assertTrue(self.bot._validate_post(post, ['netherlands']))
+
+    def test_start_browser(self):
+        self.bot.start_browser()
+        self.assertIsNotNone(self.bot.scrapper.browser)
+        self.bot.logout()
+
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.unfollow', return_value=True)
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.login', return_value=True)
+    def test_unfollow_users_step(self, login_fn, unfollow_user_fn):
+        self.bot.login()
+        users = [
+            FollowedUser('Hi', '_'),
+            FollowedUser('Chiche', '_')
+        ]
+
+        self.bot.unfollow_users_step(users_to_unfollow=users)
+        unfollow_users = [u.username for u in self.bot.users_unfollowed_by_bot]
+
+        self.assertTrue('Hi' in unfollow_users)
+        self.assertTrue('Chiche' in unfollow_users)
