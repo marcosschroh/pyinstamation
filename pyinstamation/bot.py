@@ -100,6 +100,9 @@ class InstaBot:
         logger.info(msg.format(r, probability))
         return r <= probability
 
+    def start_browser(self):
+        self.scrapper.open_browser()
+
     def login(self):
         if self.scrapper.login(self.username, self.password):
             self._user_login = True
@@ -117,6 +120,17 @@ class InstaBot:
     @property
     def user_login(self):
         return self._user_login
+
+    def user_info(self, username):
+        if self._user_login:
+            return self.scrapper.user_info(username)
+        return {}
+
+    def my_profile_info(self):
+        if self._user_login:
+            my_profile = self.user_info(self.username)
+            self.total_followers = my_profile.get('total_followers')
+            self.total_following = my_profile.get('total_following')
 
     def upload_picture(self, image_path, description=None):
         self.scrapper.upload_picture(image_path, description)
@@ -200,24 +214,6 @@ class InstaBot:
         for user in users_list:
             self.unfollow(user.username)
 
-    def user_info(self, username):
-        if self._user_login:
-            return self.scrapper.user_info(username)
-        return {}
-
-    def _validate_post(self, post, ignore_tags=None):
-        if not ignore_tags:
-            return True
-
-        caption = post.get('caption')
-        if caption:
-            tags_in_post = self.parse_caption(caption)
-
-            for t in ignore_tags:
-                if t in tags_in_post:
-                    return False
-        return True
-
     def _should_follow(self, username, min_followers=0, max_followers=None,
                        ignore_users=None):
 
@@ -259,15 +255,26 @@ class InstaBot:
 
         return self.probability_of_occurrence(self.comment_probability)
 
-    def my_profile_info(self):
-        if self._user_login:
-            my_profile = self.user_info(self.username)
-            self.total_followers = my_profile.get('total_followers')
-            self.total_following = my_profile.get('total_following')
+    def _validate_post(self, post, ignore_tags=None):
+        if not ignore_tags:
+            return True
+
+        caption = post.get('caption')
+        if caption:
+            tags_in_post = self.parse_caption(caption)
+
+            for t in ignore_tags:
+                if t in tags_in_post:
+                    return False
+        return True
+
+    def _ignore_followed(self, username):
+        return any(user.username == username for user in
+                   self.users_following_to_ignore)
 
     def explore_hashtag(self, hashtag, min_followers=None,
-                                total_to_follow=1, ignore_users=None,
-                                posts_per_hashtag=None, ignore_tags=None):
+                        total_to_follow=1, ignore_users=None,
+                        posts_per_hashtag=None, ignore_tags=None):
 
         self.scrapper.get_hashtag_page(hashtag)
         posts = self.scrapper.get_posts_by_hashtag(hashtag)
@@ -277,10 +284,11 @@ class InstaBot:
             return None
 
         users_followed_by_hashtag = 0
-        for i, post in enumerate(posts, 1):
+        posts_analyzed = 0
+        for i, post in enumerate(posts):
 
             if posts_per_hashtag and posts_per_hashtag <= i:
-                break
+                return posts_analyzed
 
             # if there is a posts there is a code....
             post_code = post.get('code')
@@ -288,11 +296,13 @@ class InstaBot:
             if not self._validate_post(post, ignore_tags=ignore_tags):
                 msg = 'Ignoring the post "{0}". Has at least one hashtag of "{1}"'
                 logger.info(msg.format(post_url, ignore_tags))
+                continue
 
             self.scrapper.wait(sleep_time=3)
             username = self.scrapper.username_in_post_page(post_url)
 
-            if any(user.username == username for user in self.users_following_to_ignore):
+            # if any(user.username == username for user in self.users_following_to_ignore):
+            if self._ignore_followed(username):
                 msg = 'Skip because already following the user "{0}"'.format(username)
                 logger.info(msg)
                 continue
@@ -301,17 +311,11 @@ class InstaBot:
                 self.like(post_url)
 
             if self._should_comment():
-                if self.comment_generator:
-                    comment = comments.generate_comment()
-                elif self.custom_comments:
-                    comment = random.choice(self.custom_comments)
+                comment = self.comment_issuer()
 
                 if comment:
                     self.comment(post_url, comment)
                     logger.info('Comment: "{0}"'.format(comment))
-
-            # if self.follow_enable and self.total_user_followed_by_bot < self.follow_per_day \
-            #         and users_followed_by_hashtag < total_to_follow:
 
             if not users_followed_by_hashtag < total_to_follow:
                 continue
@@ -320,6 +324,10 @@ class InstaBot:
                                    ignore_users=ignore_users):
                 if self.follow(username):
                     users_followed_by_hashtag += 1
+
+            posts_analyzed += 1
+
+        return posts_analyzed
 
     def like(self, post_link):
         if self._user_login:
@@ -338,6 +346,14 @@ class InstaBot:
     def unlike_multiple_posts(self, post_link_list):
         for post in post_link_list:
             self.unlike(post)
+
+    def comment_issuer(self):
+        comment = None
+        if self.comment_generator:
+            comment = comments.generate_comment()
+        elif self.custom_comments:
+            comment = random.choice(self.custom_comments)
+        return comment
 
     def comment(self, post_link, comment):
         if self.scrapper.comment(post_link, comment):
@@ -373,7 +389,7 @@ class InstaBot:
 
         for post_object in posts_list:
             post = post_object.get('post')
-            comment = post_object.get('post', default_comment)
+            comment = post_object.get('comment', default_comment)
 
             if not post or not comment:
                 continue
@@ -382,9 +398,6 @@ class InstaBot:
 
         total_comments_made = self.commented_post - current_commented_posts
         logger.info('Commented {0} of {1}'.format(total_comments_made, len(posts_list)))
-
-    def start_browser(self):
-        self.scrapper.open_browser()
 
     def picture_step(self):
         if self.upload:
