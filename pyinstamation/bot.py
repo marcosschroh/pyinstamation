@@ -214,6 +214,76 @@ class InstaBot:
         for user in users_list:
             self.unfollow(user.username)
 
+    def like(self, post_link):
+        if self._user_login:
+            if self.scrapper.like(post_link):
+                self.likes_given_by_bot += 1
+
+    def unlike(self, post_link):
+        if self._user_login:
+            if self.scrapper.unlike(post_link):
+                self.unlikes_given_by_bot += 1
+
+    def like_multiple_posts(self, post_link_list):
+        for post in post_link_list:
+            self.like(post)
+
+    def unlike_multiple_posts(self, post_link_list):
+        for post in post_link_list:
+            self.unlike(post)
+
+    def comment_issuer(self):
+        comment = None
+        if self.comment_generator:
+            comment = comments.generate_comment()
+        elif self.custom_comments:
+            comment = random.choice(self.custom_comments)
+        return comment
+
+    def comment(self, post_link, comment):
+        if self.scrapper.comment(post_link, comment):
+            self.commented_post += 1
+
+    def comment_multiple_posts(self, posts_list, default_comment=None):
+        """
+        Expect a list of dictionaries where every dict
+        has the post link and the comment.
+
+        E.g.
+
+        [
+            {
+                'post': 'https://www.instagram.com/p/BXamBMihdBF/'
+                'comment': 'very nice'
+            },
+            {
+                'post': 'https://www.instagram.com/p/BXamBMihkdki9/'
+                'comment': '#awesome #trip'
+            },
+
+            ...
+
+        ]
+
+        If a dict has not the attribute comment it tries to use the
+        default_comment key. If the default_comment is not present,
+        just skip.
+        """
+
+        current_commented_posts = self.commented_post
+
+        for post_object in posts_list:
+            post = post_object.get('post')
+            comment = post_object.get('comment', default_comment)
+
+            if not post or not comment:
+                continue
+
+            self.comment(post, comment)
+
+        total_comments_made = self.commented_post - current_commented_posts
+        logger.info('Commented {0} of {1}'.format(total_comments_made, len(posts_list)))
+
     def _should_follow(self, username, min_followers=0, max_followers=None,
                        ignore_users=None):
 
@@ -294,17 +364,16 @@ class InstaBot:
             post_code = post.get('code')
             post_url = self.scrapper.generate_post_link_by_code(post_code)
             if not self._validate_post(post, ignore_tags=ignore_tags):
-                msg = 'Ignoring the post "{0}". Has at least one hashtag of "{1}"'
+                msg = 'Ignoring post "{0}". Has at least one hashtag of "{1}"'
                 logger.info(msg.format(post_url, ignore_tags))
                 continue
 
             self.scrapper.wait(sleep_time=3)
             username = self.scrapper.username_in_post_page(post_url)
 
-            # if any(user.username == username for user in self.users_following_to_ignore):
             if self._ignore_followed(username):
-                msg = 'Skip because already following the user "{0}"'.format(username)
-                logger.info(msg)
+                msg = 'Skip. Already following the user "{0}"'.format(username)
+                logger.debug(msg)
                 continue
 
             if self._should_like():
@@ -329,75 +398,34 @@ class InstaBot:
 
         return posts_analyzed
 
-    def like(self, post_link):
-        if self._user_login:
-            if self.scrapper.like(post_link):
-                self.likes_given_by_bot += 1
+    def explore_hashtags(self):
+        min_followers = self.min_followers_for_a_new_follow
+        total_to_follow = self.total_to_follow_per_hashtag
+        ignore_users = self.ignore_users
+        posts_per_hashtag = self.posts_per_hashtag
+        ignore_tags = self.ignore_tags
+        hashtags = self.search_tags
 
-    def unlike(self, post_link):
-        if self._user_login:
-            if self.scrapper.unlike(post_link):
-                self.unlikes_given_by_bot += 1
+        total = 0
+        for tag in hashtags:
+            hashtag_name = tag
 
-    def like_multiple_posts(self, post_link_list):
-        for post in post_link_list:
-            self.like(post)
+            if isinstance(tag, dict):
+                hashtag_name = tag.get('hashtag')
+                min_followers = tag.get('min_followers', min_followers)
+                total_to_follow = tag.get('total_to_follow', total_to_follow)
 
-    def unlike_multiple_posts(self, post_link_list):
-        for post in post_link_list:
-            self.unlike(post)
+            logger.info('Processing hashtag "{0}"'.format(hashtag_name))
 
-    def comment_issuer(self):
-        comment = None
-        if self.comment_generator:
-            comment = comments.generate_comment()
-        elif self.custom_comments:
-            comment = random.choice(self.custom_comments)
-        return comment
-
-    def comment(self, post_link, comment):
-        if self.scrapper.comment(post_link, comment):
-            self.commented_post += 1
-
-    def comment_multiple_posts(self, posts_list, default_comment=None):
-        """
-        Expect a list of dictionaries where every dict
-        has the post link and the comment.
-
-        E.g.
-
-        [
-            {
-                'post': 'https://www.instagram.com/p/BXamBMihdBF/'
-                'comment': 'very nice'
-            },
-            {
-                'post': 'https://www.instagram.com/p/BXamBMihkdki9/'
-                'comment': '#awesome #trip'
-            },
-
-            ...
-
-        ]
-
-        If a dict has not the attribute comment it tries to use the
-        default_comment key. If the default_comment is not present,
-        just skip.
-        """
-
-        current_commented_posts = self.commented_post
-
-        for post_object in posts_list:
-            post = post_object.get('post')
-            comment = post_object.get('comment', default_comment)
-
-            if not post or not comment:
-                continue
-
-            self.comment(post, comment)
-
-        total_comments_made = self.commented_post - current_commented_posts
-        logger.info('Commented {0} of {1}'.format(total_comments_made, len(posts_list)))
+            total += self.explore_hashtag(
+                hashtag_name,
+                min_followers=min_followers,
+                total_to_follow=total_to_follow,
+                ignore_users=ignore_users,
+                posts_per_hashtag=posts_per_hashtag,
+                ignore_tags=ignore_tags
+            )
+        return total
 
     def picture_step(self):
         if self.upload:
@@ -406,33 +434,6 @@ class InstaBot:
     def unfollow_users_step(self, users_to_unfollow=None):
         if users_to_unfollow:
             self.unfollow_multiple_users(users_to_unfollow)
-
-    def explore_hashtags(self):
-        min_followers = self.min_followers_for_a_new_follow
-        total_to_follow = self.total_to_follow_per_hashtag
-        ignore_users = self.ignore_users
-        posts_per_hashtag = self.posts_per_hashtag
-        ignore_tags = self.ignore_tags
-        hashtags   = self.search_tags
-
-        for hashtag in hashtags:
-            hashtag_name = hashtag
-
-            if isinstance(hashtag, dict):
-                hashtag_name = hashtag.get('hashtag')
-                min_followers = hashtag.get('min_followers', min_followers)
-                total_to_follow = hashtag.get('total_to_follow', total_to_follow)
-
-            logger.info('Processing hashtag "{0}"'.format(hashtag_name))
-
-            self.explore_hashtag(
-                hashtag_name,
-                min_followers=min_followers,
-                total_to_follow=total_to_follow,
-                ignore_users=ignore_users,
-                posts_per_hashtag=posts_per_hashtag,
-                ignore_tags=ignore_tags
-            )
 
     def run(self, users_to_unfollow=None, users_following=None):
         """
