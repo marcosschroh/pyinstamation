@@ -1,17 +1,15 @@
 import os
-import logging
-import unittest
-import peewee
-from playhouse.test_utils import test_database
-from pyinstamation import models
-from http.server import BaseHTTPRequestHandler, HTTPServer
 import re
+import peewee
 import socket
+import unittest
 from threading import Thread
 from urllib.parse import quote
+from pyinstamation import models
+from playhouse.test_utils import test_database
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
-logging.disable(logging.CRITICAL)
 MOCK_HOSTNAME = 'http://localhost:{port}/'
 
 
@@ -25,11 +23,6 @@ class DBTestCase(unittest.TestCase):
 
 class MockServerRequestHandler(BaseHTTPRequestHandler):
 
-    URL_ACC = re.compile(r'accounts.login.html')
-    URL_TAG = re.compile(r'explore.tags.(?P<tag>[\w-]+)')
-    URL_POST = re.compile(r'p.(?P<post_id>[\w-]+)')
-    URL_USER = re.compile(r'(?P<username>[\w-]+)')
-    URL_LOGIN = re.compile(r'accounts/login')
     LOGGED = re.compile(r'username=(?P<username>[\w-]+)&password=(?P<password>[\w-]+)')
 
     def format_path(self, path):
