@@ -5,7 +5,7 @@ hide_browser: false
 posts:
   search_tags: []
   ignore_tags: []
-  posts_per_hashtag: 0
+  posts_per_hashtag: 20
   likes_per_day: 100
   like_probability: 0.5
   comments_per_day: 10

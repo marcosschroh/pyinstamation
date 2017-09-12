@@ -2,6 +2,8 @@ DRIVER_LOCATION = './assets/chromedriver'
 
 TOTAL_MAX_FOLLOWERS = 7000
 
+DEPRECATED = 'Deprecated do not use.'
+
 LOGIN_LINK = "//article/div/div/p/a[text()='Log in']"
 LOGIN_BUTTON = "//form/span/button[text()='Log in']"
 LOGIN_INPUT_USERNAME = "//input[@name='username']"
@@ -13,7 +15,7 @@ UPLOAD_PICTURE_INPUT_FILE = "//input[@type='file']"
 UPLOAD_PICTURE_NEXT_LINK = "//header/div/button[text()='Next']"
 UPLOAD_PICTURE_TEXTAREA_COMMENT = "//section/div/textarea"
 UPLOAD_PICTURE_SHARE_LINK = "//button[text()='Share']"
-UPLOAD_PICTURE_CAMARA_CSS_CLASS = "coreSpriteCameraInactive"
+UPLOAD_PICTURE_CAMARA_CLASS = "coreSpriteCameraInactive"
 
 # FOLLOW/UNFOLLOW
 FOLLOW_UNFOLLOW_BUTTON = "//*[contains(text(), 'Follow')]"
@@ -21,6 +23,7 @@ FOLLOW_BUTTON_TEXT = "Follow"
 UNFOLLOW_BUTTON_TEXT = "Following"
 
 # LIKE/UNLIKE
+LIKE_UNLIKE_BUTTON = "//a[.//span[contains(translate(text(),'L','l'),'like')]]"
 LIKE_BUTTON_TEXT = "Like"
 UNLIKE_BUTTON_TEXT = "Unlike"
 
