@@ -253,7 +253,14 @@ class InstaScrapper(BaseScrapper):
 
     def get_hashtag_page(self, hashtag):
         url = const.URL_TAG.format(hashtag, '')
-        self.get_page(url, sleep_time=5)
+        self.get_page(url, sleep_time=2)
+        self._load_more_posts()
+        self._set_pagination_info(hashtag)
+
+    def _load_more_posts(self):
+        load_more_button = self.find('xpath', const.LOAD_MORE_POSTS)
+        load_more_button.click()
+        self.wait(explicit=True)
 
     def get_posts_by_hashtag(self, hashtag):
         url = os.path.join(const.HOSTNAME, const.URL_TAG.format(hashtag, '?__a=1'))
@@ -265,12 +272,11 @@ class InstaScrapper(BaseScrapper):
             return json_content.get('tag', {}).get('media', {}).get('nodes', [])
         return []
 
-    def get_pagination_info(self):
+    def _set_pagination_info(self, hashtag):
         network_activity = self.get_network_activity()
-        graphql_activity = list(filter(lambda n: self.URL_GRAPHQL in n.get('name'), network_activity))
+        graphql_activity = list(filter(lambda n: const.URL_GRAPHQL in n.get('name'), network_activity))
 
         if graphql_activity:
-            # work with the first activity
             activity = graphql_activity[0]
             name = activity.get('name')
 
@@ -287,10 +293,16 @@ class InstaScrapper(BaseScrapper):
 
             query_id = data['https://www.instagram.com/graphql/query/?query_id'][0]
             variables = json.loads(data['variables'][0])
-
             first = variables.get('first')
             after = variables.get('after')
 
-            # url to generate:
-                # https://www.instagram.com/graphql/query/?query_id=17875800862117404&variables={%22tag_name%22:%22haarlem%22,%22first%22:8,%22after%22:%22J0HWaUyZQAAAF0HWaUXTwAAAFm4A%22}
+            self.pagination_info[hashtag] = {
+                'query_id': query_id,
+                'first': first,
+                'after': after
+            }
 
+        def get_next_page(self, hashtag, first=10):
+            # url to generate:
+            # https://www.instagram.com/graphql/query/?query_id=17875800862117404&variables={%22tag_name%22:%22haarlem%22,%22first%22:8,%22after%22:%22J0HWaUyZQAAAF0HWaUXTwAAAFm4A%22}
+            pass
