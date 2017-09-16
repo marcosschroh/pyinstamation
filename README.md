@@ -2,7 +2,7 @@
 
 > Easy to use, config oriented, instagram bot, written in python 3
 
-
+[![Build Status](https://travis-ci.org/discov-r/pyinstamation.svg?branch=master)](https://travis-ci.org/discov-r/pyinstamation)
 [![codecov](https://codecov.io/gh/discov-r/pyinstamation/branch/master/graph/badge.svg)](https://codecov.io/gh/discov-r/pyinstamation)
 
 
@@ -27,11 +27,10 @@
 These will be removed once completed
 
 - [ ] Gather more posts to like (currently it does not reach the max likes to give )
-- [ ] Finish tests
-- [ ] Track number of followers and following per day
 
 
 Note: The internal API of `bot.py` may change.
+If you want to check how to use the bot in your project check the examples.
 
 
 ## Supported OS

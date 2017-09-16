@@ -1,14 +1,14 @@
-site_url: https://www.instagram.com
 username: discovrar
 password: discorvd
-hide_browser: false
+hide_browser: true
+testing: true
 
 posts:
   search_tags: [apartmentdecor, architecture, building]
   ignore_tags: [
     hippie, parkour, freerunning, naturalskincare, streetart
     selfobsessed, ClassyGal, motivation,
-    childrenphoto, handsome, thedubaimall
+    childrenphoto, handsome, thedubaimall, typography
   ]
   posts_per_hashtag: 2
   likes_per_day: 100
@@ -34,4 +34,4 @@ pics:
   files:
     - path: '/home/santiago/Pictures/one_day.jpg'
       datetime: '2017-08-31T13:30:00'
-      comment: '#motivation #getmotivated #phraseoftheday'
+      description: '#motivation #getmotivated #phraseoftheday'

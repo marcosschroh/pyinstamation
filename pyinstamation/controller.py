@@ -25,44 +25,36 @@ class Controller:
         self.is_new = is_new
 
     def get_users_to_unfollow(self):
-        return (
-            self.user.follower_set.select(
-                Follower.username, Follower.following).where(
-                Follower.following == True,  # noqa
-                Follower.unfollow_date < datetime.datetime.now())
-            )
+        return (self.user.follower_set.select(Follower.username, Follower.following)
+                                      .where(Follower.following == True,  # noqa
+                                             Follower.unfollow_date < datetime.datetime.now()))
 
     def get_users_following(self):
-        return (
-            self.user.follower_set.select(
-                Follower.username, Follower.following).where(
-                Follower.following == True) # noqa
-            )
+        return (self.user.follower_set.select(Follower.username, Follower.following)
+                                      .where(Follower.following == True)) # noqa
 
     def set_users_followed(self, users):
         """
         :type users: list(namedtuple)
         """
-
+        count = 0
         for user in users:
             unfollow_date = future_rand_date(date=user.follow_date)
-            try:
-                Follower.create(user=self.user, username=user.username, unfollow_date=unfollow_date)
-            except peewee.IntegrityError:
-                logger.exception('%s is already present in following list', user.username)
+            Follower.create(user=self.user, username=user.username, unfollow_date=unfollow_date)
+            count += 1
+        return count
 
     def set_users_unfollowed(self, users):
         """
         :type users: list(namedtuple)
         """
-
         usernames = [user.username for user in users]
         query = (Follower.update(following=False)
                          .where(Follower.username in usernames,
                                 Follower.following == True,  # noqa
                                 Follower.user == self.user.id))
         modified_rows = query.execute()
-        logger.debug("Users unfollowed %s", modified_rows)
+        return modified_rows
 
     def set_user_stats(self, likes=0, comments=0, followed=0, unfollowed=0):
         self.user.likes += likes
@@ -70,6 +62,11 @@ class Controller:
         self.user.followed += followed
         self.user.unfollowed += unfollowed
         self.user.save()
+        logger.info('FINAL STATS')
+        logger.info('Likes: %s', likes)
+        logger.info('Comments: %s', comments)
+        logger.info('Followed: %s', followed)
+        logger.info('Unfollowed: %s', unfollowed)
 
     def set_stats(self, bot):
         self.set_users_followed(bot.users_followed_by_bot)
@@ -78,11 +75,14 @@ class Controller:
                             comments=bot.commented_post,
                             followed=len(bot.users_followed_by_bot),
                             unfollowed=len(bot.users_unfollowed_by_bot))
+        return True
 
     def run(self, bot):
         unfollow_users = self.get_users_to_unfollow()
         users_following = self.get_users_following()
-        bot.run(users_to_unfollow=unfollow_users, users_following=users_following)
+
+        bot.run(users_to_unfollow=unfollow_users,
+                users_following=users_following)
 
         self.set_stats(bot)
         db.close()

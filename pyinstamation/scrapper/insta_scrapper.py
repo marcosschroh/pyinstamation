@@ -1,10 +1,12 @@
 import json
+import os
 import logging
 import requests
 from urllib.parse import parse_qs
 
-from selenium.common.exceptions import NoSuchElementException
-
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 from .base import BaseScrapper
 
 from . import instagram_const as const
@@ -18,7 +20,7 @@ class InstaScrapper(BaseScrapper):
 
     def login(self, username, password):
         self.get_page(const.URL_LOGIN)
-        logger.debug('[LOGIN] username: %s', username)
+        logger.debug('Attempting to login user "%s"', username)
 
         username_input = self.find('xpath', const.LOGIN_INPUT_USERNAME, wait=False)
         password_input = self.find('xpath', const.LOGIN_INPUT_PASSWORD, wait=False)
@@ -27,17 +29,24 @@ class InstaScrapper(BaseScrapper):
         password_input.send_keys(password)
         self.wait()
         self.browser.find_element_by_xpath(const.LOGIN_BUTTON).click()
-        self.wait(explicit=True)
 
-        logger.info('[LOGIN] Success. Username: %s', username)
+        WebDriverWait(self.browser, 5).until(
+            lambda _: self.browser.get_cookie('sessionid'))
+        logger.info('Login successful. Username "%s"', username)
         return bool(self.browser.get_cookie('sessionid'))
 
     def logout(self):
-        self.close_browser()
+        logger.info('Logout done.')
+        # TODO: Log out user
+        return True
 
-    def get_user_info(self, username):
-        url = const.URL_USER_DETAIL.format(username, '?__a=1')
+    def user_page(self, username):
+        url = const.URL_USER_DETAIL.format(username, '')
+        self.get_page(url)
 
+    def user_info(self, username):
+        url = os.path.join(const.HOSTNAME,
+                           const.URL_USER_DETAIL.format(username, '?__a=1'))
         # get the response
         r = requests.get(url)
         user = {}
@@ -45,6 +54,8 @@ class InstaScrapper(BaseScrapper):
         if r.ok:
             # parse json
             json_content = r.json()
+            save_page_source(const.URL_USER_DETAIL.format(username, '?__a=1'),
+                             json_content)
             user = json_content.get('user', {})
 
         return {
@@ -52,8 +63,8 @@ class InstaScrapper(BaseScrapper):
             'total_following': user.get('follows', {}).get('count', 0)
         }
 
-    def get_user_info_in_post_page(self, username):
-        self.get_user_page(username)
+    def user_info_in_post_page(self, username):
+        self.user_page(username)
 
         total_following = self.find(
             'xpath', const.USER_FOLLOWING.format(username)).text
@@ -68,128 +79,156 @@ class InstaScrapper(BaseScrapper):
         # TODO: get friends/following list
 
         return {
-            'total_following': total_following,
             'total_followers': total_followers,
+            'total_following': total_following,
         }
 
-    def upload_picture(self, image_path, comment=None):
-        logger.debug('[UPLOAD] Picture: %s', image_path)
-
-        # simulate the click in the Camera Logo
-        image_input = self.find(
-            'class_name', const.UPLOAD_PICTURE_CAMARA_CSS_CLASS)
+    def _select_image(self, image_path):
+        """Click on the camera logo is required in order to work."""
+        image_input = self.find('class_name', const.UPLOAD_PICTURE_CAMARA_CLASS)
         image_input.click()
-
-        image_input = self.browser.find_element_by_xpath(const.UPLOAD_PICTURE_INPUT_FILE)
+        image_input = self.find('xpath', const.UPLOAD_PICTURE_INPUT_FILE,
+                                wait=False)
         image_input.send_keys(image_path)
+        save_page_source(self.current_url.path, self.page_source)
+        return True
 
-        self.wait(explicit=True)
-        self.browser.find_element_by_xpath(const.UPLOAD_PICTURE_NEXT_LINK).click()
+    def _format_image(self):
+        element = WebDriverWait(self.browser, 10).until(
+            EC.presence_of_element_located((
+                By.XPATH, const.UPLOAD_PICTURE_NEXT_LINK)))
+        element.click()
+        save_page_source(self.current_url.path, self.page_source)
+        return True
 
-        # Set the comment
-        self.wait(explicit=True)
-        comment_input = self.browser.find_element_by_xpath(
-            const.UPLOAD_PICTURE_TEXTAREA_COMMENT)
+    def _add_description(self, description=None):
+        if description is None:
+            return False
+        comment_input = self.find('xpath',
+                                  const.UPLOAD_PICTURE_TEXTAREA_COMMENT)
         comment_input.click()
-
+        save_page_source(self.current_url.path, self.page_source)
+        comment_input.send_keys(description)
         self.wait(explicit=True)
+        return True
 
-        if comment:
-            comment_input.send_keys(comment)
-
-        self.wait(explicit=True)
+    def _share_image(self):
         self.browser.find_element_by_xpath(const.UPLOAD_PICTURE_SHARE_LINK).click()
-        save_page_source('redirection/pic/uploaded', self.page_source)
-        logger.info('[UPLOAD] Success. Picture: %s', image_path)
+        save_page_source(self.current_url.path, self.page_source)
+        return True
 
-    def get_user_page(self, username):
-        url = const.URL_USER_DETAIL.format(username, '')
-        self.get_page(url)
+    def upload_picture(self, image_path, description=None):
+        logger.debug('Picture to upload: %s', image_path)
+        self._select_image(image_path)
+        self._format_image()
+        self._add_description(description)
+        self._share_image()
+        logger.info('Upload successful. Picture: %s', image_path)
+        return True
 
-    def follow_user(self, username, min_followers=None, max_followers=None):
-        """Follows a given user."""
-        return self._follow_unfollow_process(username)
+    @property
+    def _is_followed(self):
+        """Use only after getting a post page somewhere else."""
+        button = self.find('xpath', const.FOLLOW_UNFOLLOW_BUTTON, wait=False)
+        return button.text == 'Following'
 
-    def unfollow_user(self, username):
-        return self._follow_unfollow_process(username, follow_user=False)
-
-    def _follow_unfollow_process(self, username, follow_user=True):
-        """ By default try to follow the user.
-
-        Logic is the same, that's why it's controlled with a flag.
-        """
-        self.get_user_page(username)
-
+    def _click_follow_button(self):
         follow_button = self.find('xpath', const.FOLLOW_UNFOLLOW_BUTTON)
+        follow_button.click()
 
-        if follow_user:
-            if follow_button.text == const.FOLLOW_BUTTON_TEXT:
+    def _validate_follow_click(self, operation):
+        _text = {
+            'follow': 'Following',
+            'unfollow': 'Follow'
+        }
+        self.wait(explicit=True)
+        self.browser.refresh()
+        element = WebDriverWait(self.browser, 5).until(
+            EC.presence_of_element_located((
+                By.XPATH, const.FOLLOW_UNFOLLOW_BUTTON)))
 
-                follow_button.click()
-                logger.info('[FOLLOW] username: %s', username)
-                self.wait(explicit=True)
-                return True
+        return element.text == _text[operation]
 
-            logger.debug('[FOLLOW] %s already followed', username)
-            self.wait(explicit=True, sleep_time=10)
+    def follow(self, username):
+        self.user_page(username)
+
+        if self._is_followed:
+            logger.debug('Already followed "%s"', username)
+            return False
+        self._click_follow_button()
+
+        is_ok = self._validate_follow_click(operation='follow')
+        if not is_ok:
+            msg = 'Could not follow "%s", instagram may be blocking'
+            logger.info(msg, username)
             return False
 
-        # try to unfollow the suer
-        if follow_button.text == 'Following':
-            follow_button.click()
-            logger.info('[UNFOLLOW] username: %s', username)
-            self.wait(explicit=True)
-            return True
+        logger.info('Following user "%s"', username)
+        return True
 
-        logger.debug('[UNFOLLOW] %s already unfollowed', username)
-        self.wait(explicit=True, sleep_time=10)
-        return False
+    def unfollow(self, username):
+        self.user_page(username)
+
+        if not self._is_followed:
+            logger.debug('Already unfollowed "%s"', username)
+            return False
+        self._click_follow_button()
+
+        is_ok = self._validate_follow_click(operation='unfollow')
+        if not is_ok:
+            msg = 'Could not unfollow "%s", instagram may be blocking'
+            logger.info(msg, username)
+            return False
+
+        logger.info('Unfollowed user "%s"', username)
+        return True
+
+    @property
+    def _is_liked(self):
+        """Use only after getting a post page somewhere else."""
+        e = self.find('xpath', const.LIKE_UNLIKE_BUTTON, wait=False)
+        return e.text == 'Unlike'
+
+    def _click_heart_button(self):
+        """Use only after getting a post page somewhere else."""
+        button = self.find('xpath', const.LIKE_UNLIKE_BUTTON)
+        button.click()
 
     def like(self, post_link):
-        self._like_unlike_process(post_link)
+        self.get_page(post_link)
+
+        if self._is_liked:
+            logger.debug('Already liked: "%s"', post_link)
+            return False
+
+        self._click_heart_button()
+        logger.info('Liked: "%s"', post_link)
+        return True
 
     def unlike(self, post_link):
-        self._like_unlike_process(post_link, like=False)
-
-    def _like_unlike_process(self, post_link, like=True):
-        """
-        By default try to like a post.
-        """
         self.get_page(post_link)
 
-        button_text = const.UNLIKE_BUTTON_TEXT
-        success_message = const.SUCCESS_UNLIKE_POST_MESSAGE
-        fail_message = const.FAIL_UNLIKE_POST_MESSAGE
-
-        if like:
-            button_text = const.LIKE_BUTTON_TEXT
-            success_message = const.SUCCESS_LIKE_POST_MESSAGE
-            fail_message = const.FAIL_LIKE_POST_MESSAGE
-
-        try:
-            button = self.find('link_text', button_text, sleep_time=2)
-        except NoSuchElementException:
-            logger.info(fail_message.format(post_link))
-            self.wait(explicit=True)
+        if not self._is_liked:
+            logger.debug('Already unliked: "%s"', post_link)
             return False
-        else:
-            button.click()
-            self.wait(explicit=True)
-            logger.info(success_message.format(post_link))
-            return True
+
+        self._click_heart_button()
+        logger.info('Unliked: "%s"', post_link)
+        return True
 
     def comment(self, post_link, comment):
+        logger.info('Attempting comment at post: %s', post_link)
+
         self.get_page(post_link)
 
-        request_comment_button = self.find('xpath', const.REQUEST_NEW_COMMENT_BUTTON)
-
-        request_comment_button.click()
+        new_comment_btn = self.find('xpath', const.REQUEST_NEW_COMMENT_BUTTON)
+        new_comment_btn.click()
+        save_page_source(self.current_url.path, self.page_source)
         self.wait(explicit=True)
 
-        textarea_comment = self.find('xpath', const.COMMENT_TEXTEAREA)
-        textarea_comment.click()
-        self.wait(explicit=True)
-
+        textarea_comment = WebDriverWait(self.browser, 5).until(
+            EC.presence_of_element_located((
+                By.XPATH, const.COMMENT_TEXTEAREA)))
         textarea_comment.send_keys(comment)
         self.wait(explicit=True)
 
@@ -197,11 +236,11 @@ class InstaScrapper(BaseScrapper):
         send_comment_button.click()
         self.wait(explicit=True)
 
-        logger.info('[COMMENT] post: %s\ncomment: %s', post_link, comment)
+        logger.info('Post commented: %s', post_link)
 
         return True
 
-    def get_username_in_post_page(self, post_url):
+    def username_in_post_page(self, post_url):
         self.get_page(post_url)
         web_element = self.find('xpath', const.USERNAME_IN_POST_PAGE)
         user_page_link = web_element.get_attribute('href')
@@ -217,13 +256,12 @@ class InstaScrapper(BaseScrapper):
         self.get_page(url, sleep_time=5)
 
     def get_posts_by_hashtag(self, hashtag):
-        url = const.URL_TAG.format(hashtag, '?__a=1')
-
+        url = os.path.join(const.HOSTNAME, const.URL_TAG.format(hashtag, '?__a=1'))
         # get the response
         r = requests.get(url)
-
         if r.ok:
             json_content = r.json()
+            save_page_source(const.URL_TAG.format(hashtag, '?__a=1'), json_content)
             return json_content.get('tag', {}).get('media', {}).get('nodes', [])
         return []
 

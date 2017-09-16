@@ -5,7 +5,7 @@ hide_browser: false
 posts:
   search_tags: []
   ignore_tags: []
-  posts_per_hashtag: 0
+  posts_per_hashtag: 20
   likes_per_day: 100
   like_probability: 0.5
   comments_per_day: 10
@@ -29,6 +29,6 @@ pics:
   files:
     - path: '/home/santiago/projects/instagram/nn/sorted_pics/47__30_brussels.JPG'
       datetime: '2016-08-18T18:00:00'
-      comment: '#awesome #belgium'
+      description: '#awesome #belgium'
     - path: '/home/santiago/projects/instagram/nn/sorted_pics/48__20_santander_friends.JPG'
       datetime: '2016-08-19T19:10:00'
