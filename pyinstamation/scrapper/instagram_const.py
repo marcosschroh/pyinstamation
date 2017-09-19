@@ -54,3 +54,5 @@ URL_MEDIA_DETAIL = HOSTNAME + 'p/{0}/{1}'
 URL_LOGOUT = HOSTNAME + 'accounts/logout/'
 URL_TAG = HOSTNAME + 'explore/tags/{0}/{1}'
 URL_GRAPHQL = HOSTNAME + 'graphql/query/'
+NEXT_POST_PAGE = URL_GRAPHQL + '?query_id={query_id}&variables={{"tag_name":"{tag_name}","first":{first},"after":"{after}"}}'
+
