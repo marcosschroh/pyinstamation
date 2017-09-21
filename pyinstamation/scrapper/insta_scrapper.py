@@ -255,19 +255,28 @@ class InstaScrapper(BaseScrapper):
         url = const.URL_TAG.format(hashtag, '')
         self.get_page(url, sleep_time=2)
         self._load_more_posts()
-        self._set_pagination_info(hashtag)
+
+        if not self.pagination_info.get(hashtag):
+            self._set_pagination_info(hashtag)
 
     def get_posts_by_hashtag(self, hashtag):
-        url = os.path.join(const.HOSTNAME, const.URL_TAG.format(hashtag, '?__a=1'))
+        pagination_info = self.pagination_info.get(hashtag, {})
 
-        r = requests.get(url)
-        if r.ok:
-            json_content = r.json()
-            save_page_source(const.URL_TAG.format(hashtag, '?__a=1'), json_content)
-            posts = json_content.get('tag', {}).get('media', {}).get('nodes', [])
-            return [{'code': p.get('code'), 'caption': p.get('caption')} for p in posts]
+        if not pagination_info.get('top_posts_explored'):
+            url = const.URL_TAG.format(hashtag, '?__a=1')
+            print(url)
+            pagination_info['top_posts_explored'] = True
 
-        return []
+            r = requests.get(url)
+            print(r)
+            if r.ok:
+                json_content = r.json()
+                save_page_source(const.URL_TAG.format(hashtag, '?__a=1'), json_content)
+                posts = json_content.get('tag', {}).get('media', {}).get('nodes', [])
+                return [{'code': p.get('code'), 'caption': p.get('caption')} for p in posts]
+            return []
+        else:
+            return self._get_next_posts_page(hashtag)
 
     def _load_more_posts(self):
         load_more_button = self.find('xpath', const.LOAD_MORE_POSTS)
@@ -284,7 +293,8 @@ class InstaScrapper(BaseScrapper):
 
             # now we have the get with the querystring.
             # we need to get the query string parameters.
-            # example: 'https://www.instagram.com/graphql/query/?query_id=17875800862117404&variables=%7B%22tag_name%22%3A%22haarlem%22%2C%22first%22%3A8%2C%22after%22%3A%22J0HWaVb3gAAAF0HWaVMDAAAAFkIA%22%7D'
+            # example: 'https://www.instagram.com/graphql/query/?query_id=17875800862117404& \
+            # variables=%7B%22tag_name%22%3A%22haarlem%22%2C%22first%22%3A8%2C%22after%22%3A%22J0HWaVb3gAAAF0HWaVMDAAAAFkIA%22%7D'
             qs = parse_qs(url)
 
             # expect the following dictionaty:
@@ -296,12 +306,10 @@ class InstaScrapper(BaseScrapper):
             query_id = qs['https://www.instagram.com/graphql/query/?query_id'][0]
             variables = json.loads(qs['variables'][0])
             page_size = variables.get('first')
-            # next_token = variables.get('after')
 
             self.pagination_info[hashtag] = {
                 'query_id': query_id,
                 'page_size': page_size
-                # 'next_token': next_token
             }
 
             # we should get the latest token page.
@@ -320,12 +328,12 @@ class InstaScrapper(BaseScrapper):
                     'next_token': page_info.get('end_cursor')
                 })
 
-    def get_next_posts_page(self, hashtag, first=10):
-
+    def _get_next_posts_page(self, hashtag, first=10):
         if self.pagination_info.get(hashtag, {}).get('has_next_page'):
 
             # url to generate:
-            # https://www.instagram.com/graphql/query/?query_id=17875800862117404&variables={%22tag_name%22:%22haarlem%22,%22first%22:8,%22after%22:%22J0HWaUyZQAAAF0HWaUXTwAAAFm4A%22}
+            # https://www.instagram.com/graphql/query/?query_id=17875800862117404& \
+            # variables={%22tag_name%22:%22haarlem%22,%22first%22:8,%22after%22:%22J0HWaUyZQAAAF0HWaUXTwAAAFm4A%22}
             hashtag_page_info = self.pagination_info.get(hashtag, {})
 
             qs = {
@@ -369,5 +377,4 @@ class InstaScrapper(BaseScrapper):
                         })
 
                 return posts
-
         return []
