@@ -149,7 +149,7 @@ class InstaScrapperTest(unittest.TestCase):
 
     def test_get_posts_by_hashtag(self):
         result = self.scrapper.get_posts_by_hashtag(self.hastag)
-        self.assertEqual(len(result), 18)
+        self.assertEqual(len(result), 19)
 
     @patch('requests.get', return_value=response(False, '{}'))
     def test_get_posts_by_hashtag_fail(self, requests_get_fn):

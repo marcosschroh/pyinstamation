@@ -198,7 +198,7 @@ class InstaBot:
             )
 
     def unfollow(self, username):
-        if self._user_login:
+        if self.user_login:
             if self.scrapper.unfollow(username):
                 self.users_unfollowed_by_bot.append(
                     FollowedUser(username=username, follow_date=datetime.utcnow())
@@ -215,7 +215,7 @@ class InstaBot:
             self.unfollow(user.username)
 
     def like(self, post_link):
-        if self._user_login:
+        if self.user_login:
             if self.scrapper.like(post_link):
                 self.likes_given_by_bot += 1
 
@@ -404,9 +404,9 @@ class InstaBot:
 
     @property
     def should_explore_tags(self):
-        return self.likes_given_by_bot < self.likes_per_day or \
-               self.commented_post < self.comments_per_day or \
-               self.total_user_followed_by_bot < self.follow_per_day
+        return self.likes_given_by_bot <= self.likes_per_day or \
+               self.commented_post <= self.comments_per_day or \
+               self.total_user_followed_by_bot <= self.follow_per_day
 
     def explore_hashtags(self):
         min_followers = self.min_followers_for_a_new_follow
@@ -440,6 +440,8 @@ class InstaBot:
 
                 if not self.should_explore_tags:
                     break
+
+            print('SHould explore', self.should_explore_tags)
 
         return total
 
