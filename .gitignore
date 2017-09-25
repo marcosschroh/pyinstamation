@@ -2,6 +2,8 @@
 chromedriver
 config.yaml
 *.db
+*.sublime-workspace
+*.sublime-project
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -102,4 +104,3 @@ ENV/
 
 # mypy
 .mypy_cache/
-*.sublime-project

@@ -264,11 +264,9 @@ class InstaScrapper(BaseScrapper):
 
         if not pagination_info.get('top_posts_explored'):
             url = const.URL_TAG.format(hashtag, '?__a=1')
-            print(url)
             pagination_info['top_posts_explored'] = True
 
             r = requests.get(url)
-            print(r)
             if r.ok:
                 json_content = r.json()
                 save_page_source(const.URL_TAG.format(hashtag, '?__a=1'), json_content)

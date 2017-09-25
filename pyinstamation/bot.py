@@ -441,8 +441,6 @@ class InstaBot:
                 if not self.should_explore_tags:
                     break
 
-            print('SHould explore', self.should_explore_tags)
-
         return total
 
     def picture_step(self):

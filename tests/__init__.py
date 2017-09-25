@@ -3,6 +3,7 @@ import re
 import peewee
 import socket
 import unittest
+import logging
 from threading import Thread
 from urllib.parse import quote
 from pyinstamation import models
@@ -11,6 +12,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
 MOCK_HOSTNAME = 'http://localhost:{port}/'
+logging.disable(logging.CRITICAL)
 
 
 class DBTestCase(unittest.TestCase):

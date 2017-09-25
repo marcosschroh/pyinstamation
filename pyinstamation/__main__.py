@@ -12,7 +12,7 @@ from pyinstamation.scrapper import InstaScrapper
 logger = logging.getLogger(__name__)
 
 
-def get_arguments():
+def get_parser():
     description = (
         'Pyinstamation is an easy to use, config oriented, instagram bot, '
         'written in python 3.\n'
@@ -34,7 +34,7 @@ def get_arguments():
     parser.add_argument('-H', '--hide_browser',
                         action="store_true", default=False,
                         help='dont show the browser, useful to run in servers')
-    return parser.parse_args()
+    return parser
 
 
 def signal_handler(bot, controller, signal, frame):
@@ -46,7 +46,8 @@ def signal_handler(bot, controller, signal, frame):
 
 
 def main():
-    args = get_arguments()
+    parser = get_parser()
+    args = parser.parse_args()
     if args.config is not None:
         load_config(filepath=args.config)
 
