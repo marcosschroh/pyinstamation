@@ -24,6 +24,7 @@ class BaseScrapper:
         self.browser = None
         self.display = None
         self.hide_browser = CONFIG.get('hide_browser', hide_browser)
+        self.pagination_info = {}
 
     @staticmethod
     def random_seconds():
@@ -108,3 +109,14 @@ class BaseScrapper:
 
     def to_mobile_dimension(self):
         self.resize_window(self.MOBILE_WIDTH, self.MOBILE_HEIGTH)
+
+    @staticmethod
+    def get_network_script():
+        script = "var performance = window.performance || window.mozPerformance ||" \
+                 "window.msPerformance || window.webkitPerformance || {};" \
+                 "var network = performance.getEntries() || {}; return network;"
+
+        return script
+
+    def get_network_activity(self):
+        return self.browser.execute_script(self.get_network_script())

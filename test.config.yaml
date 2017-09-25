@@ -11,9 +11,9 @@ posts:
     childrenphoto, handsome, thedubaimall, typography
   ]
   posts_per_hashtag: 2
-  likes_per_day: 100
+  likes_per_day: 4
   like_probability: 0.5
-  comments_per_day: 20
+  comments_per_day: 4
   comment_enabled: true
   comment_generator: true
   comment_probability: 0.5
@@ -26,7 +26,7 @@ followers:
   max_followers: null
   follow_probability: 0.5
   ignore_users: []
-  follow_per_day: 50
+  follow_per_day: 4
   unfollow_followed_users: true
 
 pics:

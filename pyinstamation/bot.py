@@ -14,10 +14,6 @@ FollowedUser = namedtuple('FollowedUser', ['username', 'follow_date'])
 logger = logging.getLogger(__name__)
 
 
-def remove_hashtags(tags):
-    return map(lambda x: x.replace('#', ''), tags)
-
-
 class InstaBot:
 
     def __init__(self, scrapper, username=None, password=None, is_new=True,
@@ -42,9 +38,9 @@ class InstaBot:
         self.comment_enabled = _posts.get('comment_enabled', False)
         self.comment_generator = _posts.get('comment_generator', False)
         self.comment_probability = _posts.get('comment_probability', 0.5)
-        self.search_tags = remove_hashtags(_posts.get('search_tags', []))
+        self.search_tags = self.remove_hashtags(_posts.get('search_tags', []))
         self.custom_comments = _posts.get('custom_comments', [])
-        self.ignore_tags = remove_hashtags(_posts.get('ignore_tags', []))
+        self.ignore_tags = self.remove_hashtags(_posts.get('ignore_tags', []))
         self.total_to_follow_per_hashtag = _posts.get('total_to_follow_per_hashtag', 10)
         self.posts_per_hashtag = _posts.get('posts_per_hashtag', None)
 
@@ -89,6 +85,10 @@ class InstaBot:
             lambda x: x.replace('#', ''),
             (filter(lambda h: h.startswith("#"), caption.split(' ')))
         )
+
+    @staticmethod
+    def remove_hashtags(tags):
+        return list(map(lambda x: x.replace('#', ''), tags))
 
     @staticmethod
     def probability_of_occurrence(probability):
@@ -198,7 +198,7 @@ class InstaBot:
             )
 
     def unfollow(self, username):
-        if self._user_login:
+        if self.user_login:
             if self.scrapper.unfollow(username):
                 self.users_unfollowed_by_bot.append(
                     FollowedUser(username=username, follow_date=datetime.utcnow())
@@ -215,7 +215,7 @@ class InstaBot:
             self.unfollow(user.username)
 
     def like(self, post_link):
-        if self._user_login:
+        if self.user_login:
             if self.scrapper.like(post_link):
                 self.likes_given_by_bot += 1
 
@@ -396,7 +396,17 @@ class InstaBot:
 
             posts_analyzed += 1
 
+            # If the goal was reached, finish.
+            if not self.should_explore_tags:
+                break
+
         return posts_analyzed
+
+    @property
+    def should_explore_tags(self):
+        return self.likes_given_by_bot <= self.likes_per_day or \
+               self.commented_post <= self.comments_per_day or \
+               self.total_user_followed_by_bot <= self.follow_per_day
 
     def explore_hashtags(self):
         min_followers = self.min_followers_for_a_new_follow
@@ -407,24 +417,32 @@ class InstaBot:
         hashtags = self.search_tags
 
         total = 0
-        for tag in hashtags:
-            hashtag_name = tag
 
-            if isinstance(tag, dict):
-                hashtag_name = tag.get('hashtag')
-                min_followers = tag.get('min_followers', min_followers)
-                total_to_follow = tag.get('total_to_follow', total_to_follow)
+        while self.should_explore_tags:
+            for tag in hashtags:
+                hashtag_name = tag
 
-            logger.info('Processing hashtag "{0}"'.format(hashtag_name))
+                if isinstance(tag, dict):
+                    hashtag_name = tag.get('hashtag')
+                    min_followers = tag.get('min_followers', min_followers)
+                    total_to_follow = tag.get('total_to_follow', total_to_follow)
 
-            total += self.explore_hashtag(
-                hashtag_name,
-                min_followers=min_followers,
-                total_to_follow=total_to_follow,
-                ignore_users=ignore_users,
-                posts_per_hashtag=posts_per_hashtag,
-                ignore_tags=ignore_tags
-            )
+                logger.info('Processing hashtag "{0}"'.format(hashtag_name))
+
+                total += self.explore_hashtag(
+                    hashtag_name,
+                    min_followers=min_followers,
+                    total_to_follow=total_to_follow,
+                    ignore_users=ignore_users,
+                    posts_per_hashtag=posts_per_hashtag,
+                    ignore_tags=ignore_tags
+                )
+
+                if not self.should_explore_tags:
+                    break
+
+            print('SHould explore', self.should_explore_tags)
+
         return total
 
     def picture_step(self):

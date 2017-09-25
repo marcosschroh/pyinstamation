@@ -1,6 +1,8 @@
+import json
 import os
 import logging
 import requests
+from urllib.parse import parse_qs
 
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
@@ -251,14 +253,128 @@ class InstaScrapper(BaseScrapper):
 
     def get_hashtag_page(self, hashtag):
         url = const.URL_TAG.format(hashtag, '')
-        self.get_page(url, sleep_time=5)
+        self.get_page(url, sleep_time=2)
+        self._load_more_posts()
+
+        if not self.pagination_info.get(hashtag):
+            self._set_pagination_info(hashtag)
 
     def get_posts_by_hashtag(self, hashtag):
-        url = os.path.join(const.HOSTNAME, const.URL_TAG.format(hashtag, '?__a=1'))
-        # get the response
-        r = requests.get(url)
-        if r.ok:
-            json_content = r.json()
-            save_page_source(const.URL_TAG.format(hashtag, '?__a=1'), json_content)
-            return json_content.get('tag', {}).get('media', {}).get('nodes', [])
+        pagination_info = self.pagination_info.get(hashtag, {})
+
+        if not pagination_info.get('top_posts_explored'):
+            url = const.URL_TAG.format(hashtag, '?__a=1')
+            print(url)
+            pagination_info['top_posts_explored'] = True
+
+            r = requests.get(url)
+            print(r)
+            if r.ok:
+                json_content = r.json()
+                save_page_source(const.URL_TAG.format(hashtag, '?__a=1'), json_content)
+                posts = json_content.get('tag', {}).get('media', {}).get('nodes', [])
+                return [{'code': p.get('code'), 'caption': p.get('caption')} for p in posts]
+            return []
+        else:
+            return self._get_next_posts_page(hashtag)
+
+    def _load_more_posts(self):
+        load_more_button = self.find('xpath', const.LOAD_MORE_POSTS)
+        load_more_button.click()
+        self.wait(explicit=True)
+
+    def _set_pagination_info(self, hashtag):
+        network_activity = self.get_network_activity()
+        graphql_activity = list(filter(lambda n: const.URL_GRAPHQL in n.get('name'), network_activity))
+
+        if graphql_activity:
+            activity = graphql_activity[0]
+            url = activity.get('name')
+
+            # now we have the get with the querystring.
+            # we need to get the query string parameters.
+            # example: 'https://www.instagram.com/graphql/query/?query_id=17875800862117404& \
+            # variables=%7B%22tag_name%22%3A%22haarlem%22%2C%22first%22%3A8%2C%22after%22%3A%22J0HWaVb3gAAAF0HWaVMDAAAAFkIA%22%7D'
+            qs = parse_qs(url)
+
+            # expect the following dictionaty:
+            #    {
+            #        'https://www.instagram.com/graphql/query/?query_id': ['17875800862117404'],
+            #        'variables': ['{"tag_name":"haarlem","first":8,"after":"J0HWaVb3gAAAF0HWaVMDAAAAFkIA"}']
+            #    }
+
+            query_id = qs['https://www.instagram.com/graphql/query/?query_id'][0]
+            variables = json.loads(qs['variables'][0])
+            page_size = variables.get('first')
+
+            self.pagination_info[hashtag] = {
+                'query_id': query_id,
+                'page_size': page_size
+            }
+
+            # we should get the latest token page.
+            r = requests.get(url)
+
+            if r.ok:
+                json_content = r.json()
+                page_info = json_content.get(
+                    'data', {}).get(
+                    'hashtag', {}).get(
+                    'edge_hashtag_to_media', {}).get(
+                    'page_info', {})
+
+                self.pagination_info[hashtag].update({
+                    'has_next_page': page_info.get('has_next_page'),
+                    'next_token': page_info.get('end_cursor')
+                })
+
+    def _get_next_posts_page(self, hashtag, first=10):
+        if self.pagination_info.get(hashtag, {}).get('has_next_page'):
+
+            # url to generate:
+            # https://www.instagram.com/graphql/query/?query_id=17875800862117404& \
+            # variables={%22tag_name%22:%22haarlem%22,%22first%22:8,%22after%22:%22J0HWaUyZQAAAF0HWaUXTwAAAFm4A%22}
+            hashtag_page_info = self.pagination_info.get(hashtag, {})
+
+            qs = {
+                'query_id': hashtag_page_info.get('query_id'),
+                'tag_name': hashtag,
+                'first': hashtag_page_info.get('page_size'),
+                'after': hashtag_page_info.get('next_token')
+            }
+
+            url = const.NEXT_POST_PAGE.format(**qs)
+
+            r = requests.get(url)
+
+            if r.ok:
+                json_content = r.json()
+                data = json_content.get(
+                    'data', {}).get(
+                    'hashtag', {}).get(
+                    'edge_hashtag_to_media', {})
+
+                page_info = data.get('page_info')
+
+                # set the new page info
+                self.pagination_info[hashtag].update({
+                    'has_next_page': page_info.get('has_next_page'),
+                    'next_token': page_info.get('end_cursor')
+                })
+
+                nodes = data.get('edges', [])
+                posts = []
+
+                for node in nodes:
+                    n = node.get('node', {})
+                    edges = n.get('edge_media_to_caption').get('edges')
+
+                    if edges:
+                        caption = edges[0].get('node').get('text')
+                        posts.append({
+                            'code': n.get('shortcode'),
+                            'caption': caption
+                        })
+
+                return posts
         return []
