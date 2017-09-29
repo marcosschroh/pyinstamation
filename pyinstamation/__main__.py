@@ -38,7 +38,7 @@ def get_parser():
 
 
 def signal_handler(bot, controller, signal, frame):
-    logger.info('You pressed Ctrl+C!')
+    logger.info('Aborted...')
     controller.set_stats(bot)
     logger.info('Saving stats!')
     bot.logout()

@@ -17,6 +17,7 @@ from tests import get_free_port, start_mock_server, MOCK_HOSTNAME
 
 response = namedtuple('response', ('ok', 'json'))
 
+
 class InstaScrapperTest(unittest.TestCase):
 
     @classmethod
@@ -142,14 +143,15 @@ class InstaScrapperTest(unittest.TestCase):
         result = self.scrapper.generate_post_link_by_code(self.post_path_no_like)
         self.assertEqual(result, self.post_link_no_like)
 
-    def test_get_hashtag_page(self):
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper._load_more_posts', return_value=None)
+    def test_get_hashtag_page(self, load_more_posts_fn):
         self.scrapper.get_hashtag_page(self.hastag)
         self.assertEqual(self.scrapper.current_url.path,
                          '/explore/tags/{0}/'.format(self.hastag))
 
     def test_get_posts_by_hashtag(self):
         result = self.scrapper.get_posts_by_hashtag(self.hastag)
-        self.assertEqual(len(result), 19)
+        self.assertEqual(len(result), 18)
 
     @patch('requests.get', return_value=response(False, '{}'))
     def test_get_posts_by_hashtag_fail(self, requests_get_fn):

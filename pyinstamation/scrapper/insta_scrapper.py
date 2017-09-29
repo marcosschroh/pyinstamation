@@ -263,7 +263,7 @@ class InstaScrapper(BaseScrapper):
         pagination_info = self.pagination_info.get(hashtag, {})
 
         if not pagination_info.get('top_posts_explored'):
-            url = const.URL_TAG.format(hashtag, '?__a=1')
+            url = os.path.join(const.HOSTNAME, const.URL_TAG.format(hashtag, '?__a=1'))
             pagination_info['top_posts_explored'] = True
 
             r = requests.get(url)
@@ -341,8 +341,7 @@ class InstaScrapper(BaseScrapper):
                 'after': hashtag_page_info.get('next_token')
             }
 
-            url = const.NEXT_POST_PAGE.format(**qs)
-
+            url = os.path.join(const.HOSTNAME, const.NEXT_POST_PAGE.format(**qs))
             r = requests.get(url)
 
             if r.ok:
