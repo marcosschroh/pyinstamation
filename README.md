@@ -17,20 +17,35 @@
 - [x] Logging
 - [x] Comment generator
 - [ ] Daemonize and upload pics/vids at exact time
-- [ ] Support for plugins
-- [ ] Web with graphs and statistics
 - [ ] Dockerization
 - [ ] Auto update user's description
 
-## TODO
 
-These will be removed once completed
+## API Example
 
-- [ ] Gather more posts to like (currently it does not reach the max likes to give )
+If you want to check how to use the bot in depth check the [examples](./examples) or read the
+source.
+
+Example
+```
+from pyinstamation.bot import InstaBot
+from pyinstamation.scrapper import InstaScrapper
 
 
-Note: The internal API of `bot.py` may change.
-If you want to check how to use the bot in your project check the examples.
+POST_LINK = 'p/not_a_real_post_id'
+USERNAME = 'not_a_real_username'
+PASSWORD = 'not_a_real_password'
+
+s = InstaScrapper()
+bot = InstaBot(s, username=USERNAME, password=PASSWORD)
+
+bot.start_browser()
+bot.login()
+bot.like(POST_LINK)
+bot.comment(POST_LINK, 'this is a simple comment')
+bot.stop()
+
+```
 
 
 ## Supported OS
@@ -85,7 +100,8 @@ The options are divided in different sections.
 | --- | --- | --- | --- |
 | `search_tags` | str | comma separated tags to search for | [] |
 | `ignore_tags` | str | comma separated tags to ignore if a post contains them while searching | [] |
-| `posts_per_hashtag` | int | number of posts to be processed per hashtag |
+| `posts_per_day` | int | number of posts to be processed in total, ignored does not count |
+| `posts_per_hashtag` | int | number of posts to be processed per hashtag (not recommended) |
 | `likes_per_day` | int | maximum likes given in a day | 100 |
 | `like_probability` | float | probability to give a like | 0.5 |
 | `comments_per_day` | int | maximum comments given in a day | 10 |

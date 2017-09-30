@@ -43,6 +43,7 @@ class InstaBot:
         self.custom_comments = _posts.get('custom_comments', [])
         self.ignore_tags = self.remove_hashtags(_posts.get('ignore_tags', []))
         self.total_to_follow_per_hashtag = _posts.get('total_to_follow_per_hashtag', 10)
+        self.posts_per_day = _posts.get('posts_per_day', None)
         self.posts_per_hashtag = _posts.get('posts_per_hashtag', None)
 
         _followers = CONFIG.get('followers', {})
@@ -64,6 +65,7 @@ class InstaBot:
         self._user_login = False
 
         # Bot statistics
+        self.posts_explored = 0
         self.commented_post = 0
         self.total_followers = 0
         self.total_following = 0
@@ -371,7 +373,7 @@ class InstaBot:
             if posts_per_hashtag and posts_per_hashtag <= i:
                 return posts_analyzed
 
-            # if there is a posts there is a code....
+            # if there is a post there is a code....
             post_code = post.get('code')
             post_url = self.scrapper.generate_post_link_by_code(post_code)
             if not self._validate_post(post, ignore_tags=ignore_tags):
@@ -379,6 +381,7 @@ class InstaBot:
                 logger.info(msg.format(post_url, ignore_tags))
                 continue
 
+            self.posts_explored += 1
             self.scrapper.wait(sleep_time=3)
             username = self.scrapper.username_in_post_page(post_url)
 
@@ -408,16 +411,19 @@ class InstaBot:
             posts_analyzed += 1
 
             # If the goal was reached, finish.
-            if not self.should_explore_tags:
+            if not self._should_explore_tags:
                 break
 
         return posts_analyzed
 
     @property
-    def should_explore_tags(self):
-        return self.likes_given_by_bot <= self.likes_per_day or \
-               self.commented_post <= self.comments_per_day or \
-               self.total_user_followed_by_bot <= self.follow_per_day
+    def _should_explore_tags(self):
+        if (self.posts_per_day is not None) and self.posts_explored >= self.posts_per_day:
+            return False
+
+        return (self.likes_given_by_bot <= self.likes_per_day or
+                self.commented_post <= self.comments_per_day or
+                self.total_user_followed_by_bot <= self.follow_per_day)
 
     def explore_hashtags(self):
         min_followers = self.min_followers_for_a_new_follow
@@ -429,7 +435,7 @@ class InstaBot:
 
         total = 0
 
-        while self.should_explore_tags:
+        while self._should_explore_tags:
             for tag in hashtags:
                 hashtag_name = tag
 
@@ -449,7 +455,7 @@ class InstaBot:
                     ignore_tags=ignore_tags
                 )
 
-                if not self.should_explore_tags:
+                if not self._should_explore_tags:
                     break
 
         return total

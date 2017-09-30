@@ -1,12 +1,12 @@
-username: discovrar
-password: discorvd
+username: yourusername
+password: yourpassword
 hide_browser: false
 
 posts:
   search_tags: []
   ignore_tags: []
-  posts_per_hashtag: 20
-  likes_per_day: 100
+  posts_per_day: 100
+  likes_per_day: 200
   like_probability: 0.5
   comments_per_day: 10
   comment_enabled: true

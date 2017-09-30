@@ -233,6 +233,10 @@ class BotTestCase(unittest.TestCase):
         self.bot.likes_given_by_bot = 100
         self.assertFalse(self.bot._should_like())
 
+    def test_should_like_disabled(self):
+        self.bot.likes_enabled = False
+        self.assertFalse(self.bot._should_like())
+
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.like', return_value=True)
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.login', return_value=True)
     def test_like(self, login_fn, like_fn):
@@ -567,6 +571,28 @@ class BotTestCase(unittest.TestCase):
                              should_follow_fn):
         r = self.bot.explore_hashtag(self.hashtag)
         self.assertEqual(r, 5)
+
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.like', return_value=True)
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.login', return_value=True)
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.get_hashtag_page', return_value=True)
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.get_posts_by_hashtag', return_value=json.loads(POSTS))
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.wait', return_value=None)
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.username_in_post_page', return_value=USERNAME)
+    @patch('pyinstamation.bot.InstaBot._validate_post', return_value=True)
+    @patch('pyinstamation.bot.InstaBot._should_like', return_value=False)
+    @patch('pyinstamation.bot.InstaBot._should_comment', return_value=False)
+    @patch('pyinstamation.bot.InstaBot._should_follow', return_value=True)
+    def test_explore_hashtag_posts_per_day(self, like_fn, login_fn,
+                                           get_hashtag_page_fn,
+                                           get_posts_by_hashtag_fn,
+                                           wait_fn,
+                                           username_in_post_page_fn,
+                                           validate_post_fn,
+                                           should_like_fn, should_comment_fn,
+                                           should_follow_fn):
+        self.bot.posts_per_day = 4
+        r = self.bot.explore_hashtag(self.hashtag)
+        self.assertEqual(r, 4)
 
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.comment', return_value=True)
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.follow', return_value=True)

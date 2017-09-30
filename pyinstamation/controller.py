@@ -56,13 +56,14 @@ class Controller:
         modified_rows = query.execute()
         return modified_rows
 
-    def set_user_stats(self, likes=0, comments=0, followed=0, unfollowed=0):
+    def set_user_stats(self, likes=0, comments=0, followed=0, unfollowed=0, posts=0):
         self.user.likes += likes
         self.user.commented += comments
         self.user.followed += followed
         self.user.unfollowed += unfollowed
         self.user.save()
         logger.info('FINAL STATS')
+        logger.info('Posts explored: %s', posts)
         logger.info('Likes: %s', likes)
         logger.info('Comments: %s', comments)
         logger.info('Followed: %s', followed)
@@ -74,7 +75,8 @@ class Controller:
         self.set_user_stats(likes=bot.likes_given_by_bot,
                             comments=bot.commented_post,
                             followed=len(bot.users_followed_by_bot),
-                            unfollowed=len(bot.users_unfollowed_by_bot))
+                            unfollowed=len(bot.users_unfollowed_by_bot),
+                            posts=bot.posts_explored)
         return True
 
     def run(self, bot):

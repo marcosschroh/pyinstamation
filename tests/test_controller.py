@@ -12,6 +12,7 @@ class MockUpBot:
         self.users_unfollowed_by_bot = 1
         self.likes_given_by_bot = 1
         self.commented_post = 1
+        self.posts_explored = 1
         self.users_followed_by_bot = [
             FollowedUser('mock_juan', datetime.datetime.now()),
             FollowedUser('mock_pepe', datetime.datetime.now()),
