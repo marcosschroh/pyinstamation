@@ -27,7 +27,7 @@ If you want to check how to use the bot in depth check the [examples](./examples
 source.
 
 Example
-```
+```python
 from pyinstamation.bot import InstaBot
 from pyinstamation.scrapper import InstaScrapper
 

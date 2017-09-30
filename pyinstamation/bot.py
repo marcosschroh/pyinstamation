@@ -99,7 +99,7 @@ class InstaBot:
         :type threshold: float
         """
         r = random.uniform(0, 1)
-        msg = 'Random {0:.2} should be lower than probability {1:.2}'
+        msg = 'Random number ({0:.2}) not lower than probability ({1:.2})'
         logger.info(msg.format(r, probability))
         return r <= probability
 
@@ -376,6 +376,7 @@ class InstaBot:
             # if there is a post there is a code....
             post_code = post.get('code')
             post_url = self.scrapper.generate_post_link_by_code(post_code)
+            logger.info('Current post: {0}'.format(post_url))
             if not self._validate_post(post, ignore_tags=ignore_tags):
                 msg = 'Ignoring post "{0}". Has at least one hashtag of "{1}"'
                 logger.info(msg.format(post_url, ignore_tags))
