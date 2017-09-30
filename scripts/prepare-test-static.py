@@ -43,6 +43,7 @@ def to_unlike(bot, post_id):
 
 config.load_config(filepath='test.config.yaml')
 config.SAVE_SOURCE = True
+config.CONFIG['hide_browser'] = False
 
 s = InstaScrapper()
 bot = InstaBot(s)
@@ -75,4 +76,4 @@ for tag in TAGS:
     bot.scrapper.get_hashtag_page(tag)
     bot.scrapper.get_posts_by_hashtag(tag)
 
-bot.logout()
+bot.stop()

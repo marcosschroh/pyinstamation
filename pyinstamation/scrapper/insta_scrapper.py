@@ -276,7 +276,14 @@ class InstaScrapper(BaseScrapper):
         else:
             return self._get_next_posts_page(hashtag)
 
+    def _scroll(self, to=None):
+        """to bottom by default."""
+        if to is None:
+            to = 'document.body.scrollHeight'
+        self.browser.execute_script("window.scrollTo(0, {to});".format(to=to))
+
     def _load_more_posts(self):
+        self._scroll()
         load_more_button = self.find('xpath', const.LOAD_MORE_POSTS)
         load_more_button.click()
         self.wait(explicit=True)
@@ -315,6 +322,7 @@ class InstaScrapper(BaseScrapper):
 
             if r.ok:
                 json_content = r.json()
+                save_page_source(url, json_content)
                 page_info = json_content.get(
                     'data', {}).get(
                     'hashtag', {}).get(
@@ -340,12 +348,12 @@ class InstaScrapper(BaseScrapper):
                 'first': hashtag_page_info.get('page_size'),
                 'after': hashtag_page_info.get('next_token')
             }
-
             url = os.path.join(const.HOSTNAME, const.NEXT_POST_PAGE.format(**qs))
             r = requests.get(url)
 
             if r.ok:
                 json_content = r.json()
+                save_page_source(url, json_content)
                 data = json_content.get(
                     'data', {}).get(
                     'hashtag', {}).get(
@@ -372,6 +380,5 @@ class InstaScrapper(BaseScrapper):
                             'code': n.get('shortcode'),
                             'caption': caption
                         })
-
                 return posts
         return []

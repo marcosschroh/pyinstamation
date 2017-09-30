@@ -32,6 +32,7 @@ class InstaBot:
         self.is_new = is_new
 
         _posts = CONFIG.get('posts', {})
+        self.likes_enabled = _posts.get('likes_enabled', True)
         self.likes_per_day = _posts.get('likes_per_day', 0)
         self.like_probability = _posts.get('like_probability', 0.5)
         self.comments_per_day = _posts.get('comments_per_day', 0)
@@ -116,6 +117,9 @@ class InstaBot:
         self.scrapper.close_browser()
         self._user_login = False  # always set user not logged
         return True
+
+    def stop(self):
+        return self.logout()
 
     @property
     def user_login(self):
@@ -291,6 +295,8 @@ class InstaBot:
             return False
 
         if not self.total_user_followed_by_bot < self.follow_per_day:
+            logger.info('Follows per day exceeded.')
+            self.follow_enable = False
             return False
 
         if min_followers or max_followers:
@@ -309,8 +315,12 @@ class InstaBot:
         return self.probability_of_occurrence(self.follow_probability)
 
     def _should_like(self):
+        if not self.likes_enabled:
+            return False
+
         if not self.likes_given_by_bot < self.likes_per_day:
             logger.info('Likes per day exceeded.')
+            self.likes_enabled = False
             return False
 
         return self.probability_of_occurrence(self.like_probability)
@@ -321,6 +331,7 @@ class InstaBot:
 
         if self.comments_per_day <= self.commented_post:
             logger.info('Comments per day exceeded.')
+            self.comment_enabled = False
             return False
 
         return self.probability_of_occurrence(self.comment_probability)
@@ -474,4 +485,4 @@ class InstaBot:
         if users_following:
             self.users_following_to_ignore = users_following
         self.explore_hashtags()
-        self.logout()
+        self.stop()

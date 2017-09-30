@@ -49,6 +49,12 @@ class BotTestCase(unittest.TestCase):
         self.assertTrue(self.bot.logout())
 
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.logout', return_value=True)
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.login', return_value=True)
+    def test_stop(self, login_fn, logout_fn):
+        self.bot.login()
+        self.assertTrue(self.bot.stop())
+
+    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.logout', return_value=True)
     def test_logout_no_login(self, logout_fn):
         self.assertTrue(self.bot.logout())
 
