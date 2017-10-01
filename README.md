@@ -8,6 +8,24 @@
 
 ![](./docs/demo.gif)
 
+## **Table of Contents**
+
+- [PYINSTAMATION](#pyinstamation)
+  - [Features](#features)
+  - [Quickstart](#quickstart)
+  - [API Example](#api-example)
+  - [Supported OS](#supported-os)
+  - [Requirements](#requirements)
+  - [Installation](#installation)
+  - [Usage](#usage)
+  - [Configuration](#configuration)
+    - [Posts](#posts)
+    - [Followers](#followers)
+    - [Pics](#pics)
+      - [Pics > files](#pics-files)
+  - [Troubleshooting](#troubleshooting)
+
+
 ## Features
 
 - [x] Upload pictures
@@ -21,10 +39,21 @@
 - [ ] Auto update user's description
 
 
+## Quickstart
+
+Check you are using `python3` and [pyvirtualenv is installed properly](http://pyvirtualdisplay.readthedocs.io/en/latest/#general)
+
+```
+make init
+# set username and password in  `config.yaml` and configure at will
+make run-bot
+```
+
+
 ## API Example
 
 If you want to check how to use the bot in depth check the [examples](./examples) or read the
-source.
+source. Do not run the examples from the folder, copy them to the root folder.
 
 Example
 ```python
@@ -33,8 +62,8 @@ from pyinstamation.scrapper import InstaScrapper
 
 
 POST_LINK = 'p/not_a_real_post_id'
-USERNAME = 'not_a_real_username'
-PASSWORD = 'not_a_real_password'
+USERNAME = 'replace_this_with_your_username'
+PASSWORD = 'replace_this_with_your_password'
 
 s = InstaScrapper()
 bot = InstaBot(s, username=USERNAME, password=PASSWORD)
@@ -144,3 +173,10 @@ For config template check [default.config.yaml](./default.config.yaml)
 
 
 We told you it was easy.
+
+
+## Troubleshooting
+
+* If you have an error similar to `FileNotFoundError: [Errno 2] No such file or directory: 'Xephyr'`
+try installing the missing dependency `sudo apt-get install xvfb xserver-xephyr`.
+For more information check [pyvirtualdisplay docs](http://pyvirtualdisplay.readthedocs.io/en/latest/#general)
