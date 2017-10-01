@@ -41,7 +41,7 @@
 
 ## Quickstart
 
-Check you are using `python3` and [pyvirtualenv is installed properly](http://pyvirtualdisplay.readthedocs.io/en/latest/#general)
+Check you are using `python3` and [pyvirtualdisplay is installed properly](http://pyvirtualdisplay.readthedocs.io/en/latest/#general)
 
 ```
 make init
