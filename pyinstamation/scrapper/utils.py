@@ -1,7 +1,11 @@
 import os
-from urllib.parse import quote
 from pyinstamation import config
 import json
+
+try:
+    from urllib.parse import quote
+except ImportError:
+    from urllib import quote
 
 
 TEST_LOCATION = 'tests/static'

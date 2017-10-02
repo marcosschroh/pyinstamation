@@ -2,7 +2,6 @@ import json
 import os
 import logging
 import requests
-from urllib.parse import parse_qs
 
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
@@ -11,7 +10,10 @@ from .base import BaseScrapper
 
 from . import instagram_const as const
 from .utils import save_page_source
-
+try:
+    from urllib.parse import parse_qs
+except ImportError:
+    from urlparse import parse_qs
 
 logger = logging.getLogger(__name__)
 

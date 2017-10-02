@@ -1,14 +1,15 @@
 import logging
 import time
 import random
-from urllib.parse import urlparse
 from selenium import webdriver
 from pyvirtualdisplay import Display
-# from pyinstamation.scrapper.instagram_const import DRIVER_LOCATION, HOSTNAME
 from pyinstamation.scrapper import instagram_const as const
 from pyinstamation.scrapper.utils import save_page_source
 from pyinstamation import CONFIG
-from urllib.parse import urljoin
+try:
+    from urllib.parse import urlparse, urljoin
+except ImportError:
+    from urlparse import urlparse, urljoin
 
 
 logger = logging.getLogger(__name__)
