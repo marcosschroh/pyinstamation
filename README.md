@@ -45,7 +45,7 @@ Check you are using `python3` and [pyvirtualdisplay is installed properly](http:
 
 ```
 make init
-# set username and password in  `config.yaml` and configure at will
+# set username and password in `config.yaml` and configure at will
 make run-bot
 ```
 
@@ -180,3 +180,5 @@ We told you it was easy.
 * If you have an error similar to `FileNotFoundError: [Errno 2] No such file or directory: 'Xephyr'`
 try installing the missing dependency `sudo apt-get install xvfb xserver-xephyr`.
 For more information check [pyvirtualdisplay docs](http://pyvirtualdisplay.readthedocs.io/en/latest/#general)
+* If you have an error similar to `OSError: [Errno 8] Exec format error` try downloading manually
+the chromedriver from [here](https://chromedriver.storage.googleapis.com/index.html?path=2.31/)
