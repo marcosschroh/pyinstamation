@@ -41,7 +41,7 @@
 
 ## Quickstart
 
-Check you are using `python3` and [pyvirtualdisplay is installed properly](http://pyvirtualdisplay.readthedocs.io/en/latest/#general)
+Check [pyvirtualdisplay is installed properly](http://pyvirtualdisplay.readthedocs.io/en/latest/#general)
 
 ```
 make init
@@ -88,7 +88,8 @@ OS X
 ## Requirements
 
 ```
-python 3
+python >3.5
+python >2.7
 ```
 
 Remember to create a [virtualenv](https://virtualenv.pypa.io/en/stable/installation/)
