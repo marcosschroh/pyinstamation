@@ -364,7 +364,7 @@ class InstaBot:
 
         if not posts:
             logger.info('No posts were found for HASHTAG "{0}"'.format(hashtag))
-            return None
+            return 0
 
         users_followed_by_hashtag = 0
         posts_analyzed = 0
