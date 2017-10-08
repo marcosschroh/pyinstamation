@@ -376,7 +376,7 @@ class BotTestCase(unittest.TestCase):
                                       get_hashtag_page_fn,
                                       get_posts_by_hashtag_fn):
         r = self.bot.explore_hashtag(self.hashtag)
-        self.assertIsNone(r)
+        self.assertEqual(r, 0)
 
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.get_hashtag_page', return_value=True)
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.get_posts_by_hashtag', return_value=json.loads(POSTS))
