@@ -96,9 +96,10 @@ class InstaBot:
         :type threshold: float
         """
         r = random.uniform(0, 1)
-        msg = 'Random number ({0:.2}) not lower than probability ({1:.2})'
+        is_lower = r <= probability
+        msg = 'Random ({0:.2}) ' + 'not ' * (not is_lower) + 'lower than probability ({1:.2})'
         logger.info(msg.format(r, probability))
-        return r <= probability
+        return is_lower
 
     def start_browser(self):
         self.scrapper.open_browser()
