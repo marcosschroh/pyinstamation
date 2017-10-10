@@ -3,6 +3,7 @@ import os
 import logging
 import requests
 
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -273,6 +274,9 @@ class InstaScrapper(BaseScrapper):
                 json_content = r.json()
                 save_page_source(const.URL_TAG.format(hashtag, '?__a=1'), json_content)
                 posts = json_content.get('tag', {}).get('media', {}).get('nodes', [])
+                if len(posts) == 0:
+                    posts = json_content.get('tag', {}).get('top_posts', {}).get('nodes', [])
+
                 return [{'code': p.get('code'), 'caption': p.get('caption')} for p in posts]
             return []
         else:
@@ -286,8 +290,12 @@ class InstaScrapper(BaseScrapper):
 
     def _load_more_posts(self):
         self._scroll()
-        load_more_button = self.find('xpath', const.LOAD_MORE_POSTS)
-        load_more_button.click()
+        try:
+            load_more_button = self.find('xpath', const.LOAD_MORE_POSTS)
+        except NoSuchElementException:
+            return None
+        else:
+            load_more_button.click()
         self.wait(explicit=True)
 
     def _set_pagination_info(self, hashtag):
