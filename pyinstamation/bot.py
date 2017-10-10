@@ -16,8 +16,7 @@ logger = logging.getLogger(__name__)
 
 class InstaBot:
 
-    def __init__(self, scrapper, username=None, password=None, is_new=True,
-                 min_followers_for_a_new_follow=100):
+    def __init__(self, scrapper, username=None, password=None, is_new=True):
         if username is None:
             username = CONFIG.get('username', None)
         if password is None:
@@ -42,15 +41,14 @@ class InstaBot:
         self.search_tags = self.remove_hashtags(_posts.get('search_tags', []))
         self.custom_comments = _posts.get('custom_comments', [])
         self.ignore_tags = self.remove_hashtags(_posts.get('ignore_tags', []))
-        self.total_to_follow_per_hashtag = _posts.get('total_to_follow_per_hashtag', 10)
         self.posts_per_day = _posts.get('posts_per_day', None)
         self.posts_per_hashtag = _posts.get('posts_per_hashtag', None)
 
         _followers = CONFIG.get('followers', {})
         self.ignore_users = _followers.get('ignore_users', [])
         self.follow_enable = _followers.get('follow_enable', False)
-        self.min_followers = _followers.get('min_followers', 0)
-        self.max_followers = _followers.get('max_followers', 0)
+        self.min_followers = _followers.get('min_followers', 100)
+        self.max_followers = _followers.get('max_followers', 7000)
         self.follow_per_day = _followers.get('follow_per_day', 50)
         self.ignore_friends = _followers.get('ignore_friends', True)
         self.follow_probability = _followers.get('follow_probability', 0.5)
@@ -71,7 +69,6 @@ class InstaBot:
         self.total_following = 0
         self.likes_given_by_bot = 0
         self.unlikes_given_by_bot = 0
-        self.min_followers_for_a_new_follow = min_followers_for_a_new_follow
         self.users_followed_by_bot = []
         self.users_unfollowed_by_bot = []
         self.total_user_followed_by_bot = 0
@@ -176,8 +173,7 @@ class InstaBot:
         if self.user_login:
 
             if not conditions_checked:
-                if not self._should_follow(username, min_followers=min_followers,
-                                           max_followers=max_followers):
+                if not self._should_follow(username):
                     return False
 
             if self.scrapper.follow(username):
@@ -290,8 +286,9 @@ class InstaBot:
         total_comments_made = self.commented_post - current_commented_posts
         logger.info('Commented {0} of {1}'.format(total_comments_made, len(posts_list)))
 
-    def _should_follow(self, username, min_followers=0, max_followers=None,
-                       ignore_users=None):
+    def _should_follow(self, username, ignore_users=None):
+        min_followers = self.min_followers
+        max_followers = self.max_followers
 
         if not self.follow_enable:
             return False
@@ -302,16 +299,21 @@ class InstaBot:
             return False
 
         if min_followers or max_followers:
+            if min_followers is None:
+                min_followers = 0
+            if max_followers is None:
+                max_followers = 1 << 32
             user_info = self.user_info(username)
             user_followers = user_info.get('total_followers', 0)
 
-            if not max_followers:
-                max_followers = instagram_const.TOTAL_MAX_FOLLOWERS
-
             if not (min_followers <= user_followers <= max_followers):
+                msg = '{username} not in range of followers min ({min_fs}) and max ({max_fs})'
+                logger.info(msg.format(username=username, min_fs=min_followers,
+                                       max_fs=max_followers))
                 return False
 
         if ignore_users and username in ignore_users:
+            logger.info('ignoring user {username}'.format(username=username))
             return False
 
         return self.probability_of_occurrence(self.follow_probability)
@@ -355,7 +357,7 @@ class InstaBot:
         return any(user.username == username for user in
                    self.users_following_to_ignore)
 
-    def explore_hashtag(self, hashtag, min_followers=None,
+    def explore_hashtag(self, hashtag,
                         total_to_follow=1, ignore_users=None,
                         posts_per_hashtag=None, ignore_tags=None):
 
@@ -401,12 +403,9 @@ class InstaBot:
                     self.comment(post_url, comment)
                     logger.info('Comment: "{0}"'.format(comment))
 
-            if not users_followed_by_hashtag < total_to_follow:
-                continue
-
-            if self._should_follow(username, min_followers=min_followers,
-                                   ignore_users=ignore_users):
+            if self._should_follow(username, ignore_users=ignore_users):
                 if self.follow(username):
+                    logger.info('Followed: "{0}"'.format(username))
                     users_followed_by_hashtag += 1
 
             posts_analyzed += 1
@@ -427,8 +426,7 @@ class InstaBot:
                 self.total_user_followed_by_bot <= self.follow_per_day)
 
     def explore_hashtags(self):
-        min_followers = self.min_followers_for_a_new_follow
-        total_to_follow = self.total_to_follow_per_hashtag
+        total_to_follow = self.follow_per_day
         ignore_users = self.ignore_users
         posts_per_hashtag = self.posts_per_hashtag
         ignore_tags = self.ignore_tags
@@ -442,14 +440,12 @@ class InstaBot:
 
                 if isinstance(tag, dict):
                     hashtag_name = tag.get('hashtag')
-                    min_followers = tag.get('min_followers', min_followers)
                     total_to_follow = tag.get('total_to_follow', total_to_follow)
 
                 logger.info('Processing hashtag "{0}"'.format(hashtag_name))
 
                 total += self.explore_hashtag(
                     hashtag_name,
-                    min_followers=min_followers,
                     total_to_follow=total_to_follow,
                     ignore_users=ignore_users,
                     posts_per_hashtag=posts_per_hashtag,

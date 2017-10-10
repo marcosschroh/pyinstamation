@@ -3,7 +3,7 @@ import os
 import logging
 import requests
 
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, WebDriverException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -294,13 +294,16 @@ class InstaScrapper(BaseScrapper):
             load_more_button = self.find('xpath', const.LOAD_MORE_POSTS)
         except NoSuchElementException:
             return None
-        else:
+        try:
             load_more_button.click()
+        except WebDriverException:
+            self._scroll()
         self.wait(explicit=True)
 
     def _set_pagination_info(self, hashtag):
         network_activity = self.get_network_activity()
-        graphql_activity = list(filter(lambda n: const.URL_GRAPHQL in n.get('name'), network_activity))
+        graphql_activity = list(filter(lambda n: const.URL_GRAPHQL in n.get('name'),
+                                network_activity))
 
         if graphql_activity:
             activity = graphql_activity[0]

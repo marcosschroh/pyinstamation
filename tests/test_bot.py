@@ -177,8 +177,7 @@ class BotTestCase(unittest.TestCase):
             len([u for u in self.bot.users_followed_by_bot if u.username == username])
         )
 
-        self.assertFalse(self.bot.follow(
-            username, conditions_checked=False, min_followers=101))
+        self.assertFalse(self.bot.follow(username, conditions_checked=False))
 
     @patch('pyinstamation.bot.InstaBot._should_follow', return_value=True)
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.follow', return_value=True)
@@ -198,14 +197,18 @@ class BotTestCase(unittest.TestCase):
         self.bot.login()
         username = 'Foo'
         self.assertTrue(self.bot._should_follow(username))
-        self.assertTrue(self.bot._should_follow(username, min_followers=50))
-        self.assertTrue(self.bot._should_follow(username, max_followers=100))
-        self.assertTrue(self.bot._should_follow(
-            username, min_followers=50, max_followers=101))
-        self.assertFalse(self.bot._should_follow(username, min_followers=150))
-        self.assertFalse(self.bot._should_follow(username, max_followers=90))
-        self.assertFalse(self.bot._should_follow(
-            username, min_followers=50, max_followers=90))
+        self.bot.min_followers = 50
+        self.assertTrue(self.bot._should_follow(username))
+        self.bot.max_followers = 100
+        self.assertTrue(self.bot._should_follow(username))
+        self.bot.min_followers = 50
+        self.bot.max_followers = 101
+        self.assertTrue(self.bot._should_follow(username))
+        self.bot.min_followers = 150
+        self.assertFalse(self.bot._should_follow(username))
+        self.bot.min_followers = 50
+        self.bot.max_followers = 90
+        self.assertFalse(self.bot._should_follow(username))
         self.assertFalse(self.bot._should_follow(
             username, ignore_users=(username,)))
 
@@ -529,9 +532,9 @@ class BotTestCase(unittest.TestCase):
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.wait', return_value=None)
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.username_in_post_page', return_value=USERNAME)
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.follow', return_value=True)
+    @patch('pyinstamation.bot.InstaBot.probability_of_occurrence', return_value=True)
     @patch('pyinstamation.bot.InstaBot._should_like', return_value=False)
     @patch('pyinstamation.bot.InstaBot._should_comment', return_value=False)
-    @patch('pyinstamation.bot.InstaBot._should_follow', return_value=True)
     @patch('pyinstamation.bot.InstaBot._validate_post', return_value=True)
     @patch('pyinstamation.bot.InstaBot._ignore_followed', return_value=False)
     def test_explore_hashtag_follow_limited(self,
@@ -541,15 +544,16 @@ class BotTestCase(unittest.TestCase):
                                             wait_fn,
                                             username_in_post_page_fn,
                                             follow_fn,
+                                            probability_of_occurrence_fn,
                                             should_like_fn,
                                             should_comment_fn,
-                                            should_follow_fn,
                                             validate_post_fn,
                                             ignore_followed_fn):
         self.bot.login()
-        r = self.bot.explore_hashtag(self.hashtag, total_to_follow=2)
+        self.bot.follow_per_day = 2
+        r = self.bot.explore_hashtag(self.hashtag)
         self.assertEqual(self.bot.total_user_followed_by_bot, 2)
-        self.assertEqual(r, 2)
+        self.assertEqual(r, 5)
 
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.like', return_value=True)
     @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.login', return_value=True)
@@ -653,8 +657,8 @@ class BotTestCase(unittest.TestCase):
         self.bot.run(users_to_unfollow=self.users_to_unfollow,
                      users_following=[FollowedUser('miguelito', None)])
 
-        self.assertEqual(self.bot.commented_post, 6)
+        self.assertEqual(self.bot.commented_post, 5)
         self.assertEqual(self.bot.total_user_followed_by_bot, 5)
-        self.assertEqual(self.bot.likes_given_by_bot, 6)
+        self.assertEqual(self.bot.likes_given_by_bot, 5)
         self.assertEqual(len(self.bot.users_unfollowed_by_bot), 2)
         self.assertEqual(len(self.bot.users_followed_by_bot), 5)

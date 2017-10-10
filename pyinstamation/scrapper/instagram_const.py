@@ -1,7 +1,5 @@
 DRIVER_LOCATION = './assets/chromedriver'
 
-TOTAL_MAX_FOLLOWERS = 7000
-
 DEPRECATED = 'Deprecated do not use.'
 
 LOGIN_LINK = "//article/div/div/p/a[text()='Log in']"

@@ -139,15 +139,14 @@ The options are divided in different sections.
 | `comment_enabled` | bool| bot will comment in the searched posts | True |
 | `comment_generator` | bool | bot will generate a random generic comment | True |
 | `custom_comments` | array | in case you don't want random comments, you can provide them | [] |
-| `total_to_follow_per_hashtag` | int | number of users to follow per each hashtag | 10 |
 
 ### Followers
 
 | Option | Type | Description | Default |
 | --- | --- | --- | --- |
 | `follow_enable` | bool | while searching the bot will also follow people | True |
-| `min_followers` | int | minimum number followers that a user must have to follow. Lower bound | 0 |
-| `max_followers` | int | will follow users with less than this amount of followers. Upper bound | 0 |
+| `min_followers` | None or int | minimum number followers that a user must have to follow. Lower bound | 100 |
+| `max_followers` | None or int | will follow users with less than this amount of followers. Upper bound | 7000 |
 | `follow_probability` | float | chance to follow someone while searching, between 0 and 1 | 0.5 |
 | `ignore_users` | array | users not to follow | [] |
 | `follow_per_day` | int | max number of users to follow | 50 |
