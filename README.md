@@ -17,7 +17,7 @@
   - [Supported OS](#supported-os)
   - [Requirements](#requirements)
   - [Installation](#installation)
-  - [Usage](#usage)
+  - [Commands](#usage)
   - [Configuration](#configuration)
     - [Posts](#posts)
     - [Followers](#followers)
@@ -89,23 +89,20 @@ OS X
 
 ```
 python >3.5
-python >2.7
+python >2.7  (not supported officially)
 ```
 
 Remember to create a [virtualenv](https://virtualenv.pypa.io/en/stable/installation/)
 
-
-## Installation
-
-`pip install -r requirements.txt`
-
-
-## Usage
+## Command
 
 | Command | Description |
 | --- | --- |
-| `make init` | Downloads webdriver and creates a new conf based on the default one |
-| `make run-bot` | Starts running the bot (remember to at least set the username and password) |
+| `make init` | downloads webdriver and creates a new conf based on the default one |
+| `make run-bot` | starts running the bot (remember to at least set the username and password) |
+| `install-deps` | install python dependencies |
+| `start-conf` | creates a new configuration file with the template from `default.config.yaml` |
+| `webdriver` | downloads selenium's webdriver |
 
 
 ## Configuration
