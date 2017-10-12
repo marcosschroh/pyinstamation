@@ -23,6 +23,7 @@
     - [Followers](#followers)
     - [Pics](#pics)
       - [Pics > files](#pics-files)
+  - [Daemonization](#daemonization)
   - [Troubleshooting](#troubleshooting)
 
 
@@ -34,7 +35,6 @@
 - [x] Metrics persisted in db
 - [x] Logging
 - [x] Comment generator
-- [ ] Daemonize and upload pics/vids at exact time
 - [ ] Dockerization
 - [ ] Auto update user's description
 
@@ -77,15 +77,16 @@ bot.stop()
 ```
 
 
-## Supported OS
+## Prerequisites
+
+#### OS
 
 ```
 Linux (Tested in debian)
 OS X
 ```
 
-
-## Requirements
+#### Python versions
 
 ```
 python >3.5
@@ -94,15 +95,16 @@ python >2.7  (not supported officially)
 
 Remember to create a [virtualenv](https://virtualenv.pypa.io/en/stable/installation/)
 
-## Command
+
+## Commands
 
 | Command | Description |
 | --- | --- |
 | `make init` | downloads webdriver and creates a new conf based on the default one |
 | `make run-bot` | starts running the bot (remember to at least set the username and password) |
-| `install-deps` | install python dependencies |
-| `start-conf` | creates a new configuration file with the template from `default.config.yaml` |
-| `webdriver` | downloads selenium's webdriver |
+| `make install-deps` | install python dependencies |
+| `make start-conf` | creates a new configuration file with the template from `default.config.yaml` |
+| `make webdriver` | downloads selenium's webdriver |
 
 
 ## Configuration
@@ -171,6 +173,11 @@ For config template check [default.config.yaml](./default.config.yaml)
 
 We told you it was easy.
 
+## Daemonization
+
+Use [Celery](http://docs.celeryproject.org/en/latest/userguide/daemonizing.html) or [supervisord](supervisord.org)
+for this
+
 
 ## Troubleshooting
 
@@ -179,3 +186,5 @@ try installing the missing dependency `sudo apt-get install xvfb xserver-xephyr`
 For more information check [pyvirtualdisplay docs](http://pyvirtualdisplay.readthedocs.io/en/latest/#general)
 * If you have an error similar to `OSError: [Errno 8] Exec format error` try downloading manually
 the chromedriver from [here](https://chromedriver.storage.googleapis.com/index.html?path=2.31/)
+* For Raspberry Pi you need a special chromedriver, check [here](https://www.raspberrypi.org/forums/viewtopic.php?f=63&t=95322)
+or [here](https://stackoverflow.com/questions/31190164/using-selenium-on-raspberry-pi-with-chromium)
