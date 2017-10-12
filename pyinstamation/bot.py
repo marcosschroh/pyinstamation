@@ -95,6 +95,7 @@ class InstaBot:
         """
         :type threshold: float
         """
+        probability = float(probability)
         r = random.uniform(0, 1)
         is_lower = r <= probability
         msg = 'Random ({0:.2}) ' + 'not ' * (not is_lower) + 'lower than probability ({1:.2})'
@@ -389,7 +390,6 @@ class InstaBot:
                 logger.info(msg.format(post_url, ignore_tags))
                 continue
 
-            self.posts_explored += 1
             if self.posts_per_day:
                 logger.info('Post {0}/{1}'.format(self.posts_explored, self.posts_per_day))
             self.scrapper.wait(sleep_time=3)
@@ -401,6 +401,8 @@ class InstaBot:
                 msg = 'Skip. Already following the user "{0}"'.format(username)
                 logger.debug(msg)
                 continue
+
+            self.posts_explored += 1
 
             if self._should_like():
                 self.like(post_url)
