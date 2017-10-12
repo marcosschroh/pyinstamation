@@ -388,6 +388,8 @@ class InstaBot:
             self.posts_explored += 1
             self.scrapper.wait(sleep_time=3)
             username = self.scrapper.username_in_post_page(post_url)
+            if username is None:
+                continue
 
             if self._ignore_followed(username):
                 msg = 'Skip. Already following the user "{0}"'.format(username)
@@ -480,13 +482,16 @@ class InstaBot:
             comment probability
             follow probability
         """
-        self.start_browser()
-        self.login()
-        self.picture_step()
-        self.unfollow_users_step(users_to_unfollow=users_to_unfollow)
+        try:
+            self.start_browser()
+            self.login()
+            self.picture_step()
+            self.unfollow_users_step(users_to_unfollow=users_to_unfollow)
 
-        # set the users that are already followed
-        if users_following:
-            self.users_following_to_ignore = users_following
-        self.explore_hashtags()
-        self.stop()
+            # set the users that are already followed
+            if users_following:
+                self.users_following_to_ignore = users_following
+            self.explore_hashtags()
+            self.stop()
+        except Exception as e:
+            logger.exception('Something happened. Tracking to fix')

@@ -236,7 +236,11 @@ class InstaScrapper(BaseScrapper):
         self.wait(explicit=True)
 
         send_comment_button = self.find('xpath', const.SEND_COMMENT_BUTTON)
-        send_comment_button.click()
+        try:
+            send_comment_button.click()
+        except WebDriverException:
+            logger.info('Could not comment in %s', post_link)
+            return False
         self.wait(explicit=True)
 
         logger.info('Post commented: %s', post_link)
@@ -245,7 +249,10 @@ class InstaScrapper(BaseScrapper):
 
     def username_in_post_page(self, post_url):
         self.get_page(post_url)
-        web_element = self.find('xpath', const.USERNAME_IN_POST_PAGE)
+        try:
+            web_element = self.find('xpath', const.USERNAME_IN_POST_PAGE)
+        except NoSuchElementException:
+            return None
         user_page_link = web_element.get_attribute('href')
 
         # we expect always a format like.. 'https://www.instagram.com/voetbal_in_haarlem/'
