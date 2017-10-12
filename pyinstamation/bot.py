@@ -373,6 +373,10 @@ class InstaBot:
         posts_analyzed = 0
         for i, post in enumerate(posts):
 
+            # if the goal was reached, finish.
+            if not self._should_explore_tags:
+                break
+
             if posts_per_hashtag and posts_per_hashtag <= i:
                 return posts_analyzed
 
@@ -386,6 +390,8 @@ class InstaBot:
                 continue
 
             self.posts_explored += 1
+            if self.posts_per_day:
+                logger.info('Post {0}/{1}'.format(self.posts_explored, self.posts_per_day))
             self.scrapper.wait(sleep_time=3)
             username = self.scrapper.username_in_post_page(post_url)
             if username is None:
@@ -412,10 +418,6 @@ class InstaBot:
                     users_followed_by_hashtag += 1
 
             posts_analyzed += 1
-
-            # If the goal was reached, finish.
-            if not self._should_explore_tags:
-                break
 
         return posts_analyzed
 
@@ -492,6 +494,7 @@ class InstaBot:
             if users_following:
                 self.users_following_to_ignore = users_following
             self.explore_hashtags()
-            self.stop()
         except Exception as e:
             logger.exception('Something happened. Tracking to fix')
+        finally:
+            self.stop()
