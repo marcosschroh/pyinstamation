@@ -1,6 +1,7 @@
 username: yourusername
 password: yourpassword
 hide_browser: false
+browser_type: chrome
 
 posts:
   search_tags: []
