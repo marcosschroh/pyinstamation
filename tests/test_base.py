@@ -1,4 +1,3 @@
-import os
 import unittest
 from unittest.mock import patch
 
@@ -23,13 +22,6 @@ class BaseScrapperTest(unittest.TestCase):
 
     def setUp(self):
         CONFIG.update({'hide_browser': True})
-
-        # patch time.sleep
-        # self.patcher = patch('time.sleep')
-        # r = self.patcher.start()
-        # r.return_value = None
-        # self.addCleanup(self.patcher.stop)
-
         self.base = BaseScrapper()
         self.base.open_browser()
 
@@ -86,10 +78,3 @@ class BaseScrapperTest(unittest.TestCase):
         sec = self.base.random_seconds()
         self.assertIsInstance(sec, int)
         self.assertIn(sec, range(1, 11))
-
-    def test_to_mobile_dimension(self):
-        CONFIG.update({'hide_browser': True})
-        self.base.to_mobile_dimension()
-        size = self.base.browser.get_window_size()
-        self.assertTrue(size.get('width') >= self.base.MOBILE_WIDTH)
-        self.assertTrue(size.get('height') >= self.base.MOBILE_HEIGTH)

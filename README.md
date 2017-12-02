@@ -4,7 +4,7 @@
 
 [![Build Status](https://travis-ci.org/dscovr/pyinstamation.svg?branch=master)](https://travis-ci.org/dscovr/pyinstamation)
 [![codecov](https://codecov.io/gh/dscovr/pyinstamation/branch/master/graph/badge.svg)](https://codecov.io/gh/dscovr/pyinstamation)
-
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 ![](./docs/demo.gif)
 
@@ -14,16 +14,14 @@
   - [Features](#features)
   - [Quickstart](#quickstart)
   - [API Example](#api-example)
-  - [Supported OS](#supported-os)
-  - [Requirements](#requirements)
-  - [Installation](#installation)
+  - [Prerequisites](#prerequisites)
   - [Commands](#usage)
   - [Configuration](#configuration)
     - [Posts](#posts)
     - [Followers](#followers)
     - [Pics](#pics)
       - [Pics > files](#pics-files)
-  - [Daemonization](#daemonization)
+  - [Running periodically](#running-periodically)
   - [Troubleshooting](#troubleshooting)
 
 
@@ -53,9 +51,17 @@ make run-bot
 ## API Example
 
 If you want to check how to use the bot in depth check the [examples](./examples) or read the
-source. Do not run the examples from the folder, copy them to the root folder.
+source.
 
-Example
+To run the examples just type, but remember to update the constants (user, pass, post url):
+
+`python examples/bot_like_and_comment.py`
+
+`python examples/bot_upload_picture.py`
+
+
+Simple example
+
 ```python
 from pyinstamation.bot import InstaBot
 from pyinstamation.scrapper import InstaScrapper
@@ -86,6 +92,15 @@ Linux (Tested in debian)
 OS X
 ```
 
+#### SO Packages
+
+###### Linux
+
+```
+sudo apt-get install xvfb xserver-xephyr
+```
+
+
 #### Python versions
 
 ```
@@ -102,7 +117,7 @@ Remember to create a [virtualenv](https://virtualenv.pypa.io/en/stable/installat
 | --- | --- |
 | `make init` | downloads webdriver and creates a new conf based on the default one |
 | `make run-bot` | starts running the bot (remember to at least set the username and password) |
-| `make install-deps` | install python dependencies |
+| `make install-deps` | installs python dependencies |
 | `make start-conf` | creates a new configuration file with the template from `default.config.yaml` |
 | `make webdriver` | downloads selenium's webdriver |
 
@@ -116,7 +131,7 @@ The options are divided in different sections.
 | --- | --- | --- |
 | `username` * | str | instagram username to operate with |
 | `password` ** | str | username's password |
-| `hide_browser` | bool | does not display the browser |
+| `hide_browser` | bool | do not display the browser |
 
 \*  Required
 
@@ -173,10 +188,11 @@ For config template check [default.config.yaml](./default.config.yaml)
 
 We told you it was easy.
 
-## Daemonization
+## Running periodically
 
-Use [Celery](http://docs.celeryproject.org/en/latest/userguide/daemonizing.html) or [supervisord](supervisord.org)
-for this
+Use [Crontab](http://www.adminschoice.com/crontab-quick-reference)
+Use [Celery](http://docs.celeryproject.org/en/latest/userguide/daemonizing.html) and
+[Celery Beat](http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html) (with [supervisord](supervisord.org))
 
 
 ## Troubleshooting

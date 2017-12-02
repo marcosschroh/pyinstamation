@@ -105,12 +105,6 @@ class BaseScrapper:
             self.browser.implicitly_wait(sleep_time)
         return sleep_time
 
-    def resize_window(self, width, heigth):
-        self.browser.set_window_size(width, heigth)
-
-    def to_mobile_dimension(self):
-        self.resize_window(self.MOBILE_WIDTH, self.MOBILE_HEIGTH)
-
     @staticmethod
     def get_network_script():
         script = "var performance = window.performance || window.mozPerformance ||" \
