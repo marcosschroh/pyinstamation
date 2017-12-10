@@ -1,4 +1,7 @@
-"""Do not run this here, it won't work, it must be in the root project."""
+import sys
+
+sys.path.insert(0, '../pyinstamation')  # noqa
+
 from pyinstamation.bot import InstaBot
 from pyinstamation.scrapper import InstaScrapper
 
