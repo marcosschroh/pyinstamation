@@ -1,6 +1,7 @@
 username: discovrar
 password: discorvd
 hide_browser: true
+browser_type: chrome
 testing: true
 
 posts:

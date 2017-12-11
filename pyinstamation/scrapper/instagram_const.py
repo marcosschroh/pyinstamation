@@ -1,4 +1,7 @@
-DRIVER_LOCATION = './assets/chromedriver'
+DRIVER_LOCATION_CHROME= './assets/chrome/chromedriver'
+DRIVER_LOCATION_FIREFOX= './assets/firefox/'
+CHROME = 'chrome'
+FIREFOX = 'firefox'
 
 DEPRECATED = 'Deprecated do not use.'
 

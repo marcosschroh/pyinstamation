@@ -127,11 +127,13 @@ Remember to create a [virtualenv](https://virtualenv.pypa.io/en/stable/installat
 Create a `config.yaml` and tune it at will, or use `make init`.
 The options are divided in different sections.
 
-| Option | Type | Description |
-| --- | --- | --- |
-| `username` * | str | instagram username to operate with |
-| `password` ** | str | username's password |
-| `hide_browser` | bool | do not display the browser |
+| Option | Type | Description | Default |
+| --- | --- | --- | --- |
+| `username` * | str | instagram username to operate with | --- |
+| `password` ** | str | username's password | --- |
+| `hide_browser` | bool | do not display the browser | False |
+| `browser_type` | str | browser type (chrome/firefox)| chrome |
+
 
 \*  Required
 
@@ -197,7 +199,7 @@ Use [Celery](http://docs.celeryproject.org/en/latest/userguide/daemonizing.html)
 
 ## Troubleshooting
 
-* If you have an error similar to `FileNotFoundError: [Errno 2] No such file or directory: 'Xephyr'`
+* If you have an error similar to `FileNotFoundError: [Errno 2] No such file or directory: 'Xephyr'` or `WebDriverException: The browser appears to have exited before we could connect?`
 try installing the missing dependency `sudo apt-get install xvfb xserver-xephyr`.
 For more information check [pyvirtualdisplay docs](http://pyvirtualdisplay.readthedocs.io/en/latest/#general)
 * If you have an error similar to `OSError: [Errno 8] Exec format error` try downloading manually

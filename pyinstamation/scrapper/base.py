@@ -25,6 +25,7 @@ class BaseScrapper:
         self.browser = None
         self.display = None
         self.hide_browser = CONFIG.get('hide_browser', hide_browser)
+        self.browser_type = CONFIG.get('browser_type', const.CHROME)
         self.pagination_info = {}
 
     @staticmethod
@@ -38,7 +39,8 @@ class BaseScrapper:
         self.display.start()
         self.browser = self._open_mobile_browser()
 
-    def _open_mobile_browser(self):
+    @staticmethod
+    def _open_chrome_mobile_browser():
         mobile_emulation = {"deviceName": "Nexus 5"}
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument('--dns-prefetch-disable')
@@ -50,8 +52,24 @@ class BaseScrapper:
         }
         chrome_options.add_experimental_option('prefs', chrome_prefs)
         return webdriver.Chrome(
-            const.DRIVER_LOCATION,
+            const.DRIVER_LOCATION_CHROME,
             desired_capabilities=chrome_options.to_capabilities())
+
+    @staticmethod
+    def _open_firefox_mobile_browser():
+        profile = webdriver.FirefoxProfile()
+        useragent = "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) " \
+                    "AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 " \
+                    "Mobile/13B143 Safari/601.1"
+        profile.set_preference("general.useragent.override", useragent)
+        profile.set_preference("intl.accept_languages", "en-us")
+
+        return webdriver.Firefox(firefox_profile=profile, capabilities={"marionette":False})
+
+    def _open_mobile_browser(self):
+        if self.browser_type == const.CHROME:
+            return self._open_chrome_mobile_browser()
+        return self._open_firefox_mobile_browser()
 
     def close_browser(self):
         logger.debug('Closing browser...')
