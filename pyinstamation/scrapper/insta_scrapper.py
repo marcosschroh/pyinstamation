@@ -10,7 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from .base import BaseScrapper
 
 from . import instagram_const as const
-from .utils import save_page_source
+from .utils import save_page_source, posts_parser
 try:
     from urllib.parse import parse_qs
 except ImportError:
@@ -280,11 +280,8 @@ class InstaScrapper(BaseScrapper):
             if r.ok:
                 json_content = r.json()
                 save_page_source(const.URL_TAG.format(hashtag, '?__a=1'), json_content)
-                posts = json_content.get('tag', {}).get('media', {}).get('nodes', [])
-                if len(posts) == 0:
-                    posts = json_content.get('tag', {}).get('top_posts', {}).get('nodes', [])
-
-                return [{'code': p.get('code'), 'caption': p.get('caption')} for p in posts]
+                posts = posts_parser(json_content)
+                return list(posts)
             return []
         else:
             return self._get_next_posts_page(hashtag)
