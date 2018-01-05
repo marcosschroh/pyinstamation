@@ -35,11 +35,16 @@ def format_post(post):
     node = post.get('node', {})
     code = node.get('shortcode')
     captions = node.get('edge_media_to_caption', {}).get('edges', [])
-    c = captions[0]
-    caption = c.get('node', {}).get('text')
+    try:
+        c = captions[0]
+    except IndexError:
+        caption = ''
+    else:
+        caption = c.get('node', {}).get('text')
+
     return {
         'code': code,
-        'caption': caption,
+        'caption': caption
     }
 
 
