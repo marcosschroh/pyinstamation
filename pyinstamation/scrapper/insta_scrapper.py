@@ -3,8 +3,9 @@ import os
 import logging
 import requests
 
-from selenium.common.exceptions import NoSuchElementException, WebDriverException
+from selenium.common.exceptions import NoSuchElementException, WebDriverException, TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from .base import BaseScrapper
@@ -35,6 +36,8 @@ class InstaScrapper(BaseScrapper):
 
         WebDriverWait(self.browser, 5).until(
             lambda _: self.browser.get_cookie('sessionid'))
+        self.skip_instagram_app_pop_up()
+        self.skip_instagram_app_pop_up()
         logger.info('Login successful. Username "%s"', username)
         return bool(self.browser.get_cookie('sessionid'))
 
@@ -88,7 +91,7 @@ class InstaScrapper(BaseScrapper):
 
     def _select_image(self, image_path):
         """Click on the camera logo is required in order to work."""
-        image_input = self.find('class_name', const.UPLOAD_PICTURE_CAMARA_CLASS)
+        image_input = self.find('xpath', const.UPLOAD_PICTURE_CAMARA_CLASS, wait=True)
         image_input.click()
         image_input = self.find('xpath', const.UPLOAD_PICTURE_INPUT_FILE,
                                 wait=False)
@@ -100,6 +103,7 @@ class InstaScrapper(BaseScrapper):
         element = WebDriverWait(self.browser, 10).until(
             EC.presence_of_element_located((
                 By.XPATH, const.UPLOAD_PICTURE_NEXT_LINK)))
+        element.send_keys(Keys.ESCAPE)
         element.click()
         save_page_source(self.current_url.path, self.page_source)
         return True
@@ -122,12 +126,17 @@ class InstaScrapper(BaseScrapper):
 
     def upload_picture(self, image_path, description=None):
         logger.debug('Picture to upload: %s', image_path)
-        self._select_image(image_path)
-        self._format_image()
-        self._add_description(description)
-        self._share_image()
-        logger.info('Upload successful. Picture: %s', image_path)
-        return True
+        try:
+            self._select_image(image_path)
+            self._format_image()
+            self._add_description(description)
+            self._share_image()
+        except (TimeoutException, NoSuchElementException) as e:
+            logger.exception('Could not upload picture... Skipping...')
+            return False
+        else:
+            logger.info('Upload successful. Picture: %s', image_path)
+            return True
 
     @property
     def _is_followed(self):
@@ -399,3 +408,13 @@ class InstaScrapper(BaseScrapper):
                         })
                 return posts
         return []
+
+    def skip_instagram_app_pop_up(self):
+        try:
+            e = self.find('xpath', const.INSTAGRAM_APP_POP_UP, wait=True,
+                          explicit=False, sleep_time=1)
+        except NoSuchElementException:
+            logger.debug('No Instagram Popup found. Good.')
+        else:
+            logger.debug('Found instagram popup, skipping...')
+            e.click()

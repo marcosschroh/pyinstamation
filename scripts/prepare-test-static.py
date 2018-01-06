@@ -12,7 +12,7 @@ FILEPATH = os.path.abspath('tests/static/one_day.jpg')
 
 NOT_FOLLOWED_USER = {
     'user': 'fancyhoustonapartments',
-    'post_to_like_state': 'BY3rdjrH-cr',
+    'post_to_like_state': 'Bdi69MLH90D',
     'post_to_unlike_state': 'BY3Bg4THwNi'
 }
 
@@ -50,7 +50,7 @@ bot = InstaBot(s)
 
 bot.start_browser()
 bot.login()
-bot.upload_picture(FILEPATH, description='New pic next time\n#motivation #go')
+
 bot.scrapper.get_page('/')
 bot.my_profile_info()
 bot.scrapper.user_info_in_post_page(bot.username)
@@ -58,9 +58,11 @@ bot.scrapper.user_info_in_post_page(bot.username)
 to_like(bot, NOT_FOLLOWED_USER['post_to_like_state'])
 to_unlike(bot, NOT_FOLLOWED_USER['post_to_unlike_state'])
 
-to_like(bot, FOLLOWED_USER['post_to_like_state'])
 to_unlike(bot, FOLLOWED_USER['post_to_unlike_state'])
-bot.comment(NOT_FOLLOWED_USER['post_to_like_state'], 'wow!')
+to_like(bot, FOLLOWED_USER['post_to_like_state'])
+
+post_link = '/p/{}'.format(NOT_FOLLOWED_USER['post_to_like_state'])
+bot.comment(post_link, 'wow!')
 
 bot.scrapper.user_page(NOT_FOLLOWED_USER['user'])
 if bot.scrapper._is_followed:
@@ -75,5 +77,8 @@ if not bot.scrapper._is_followed:
 for tag in TAGS:
     bot.scrapper.get_hashtag_page(tag)
     bot.scrapper.get_posts_by_hashtag(tag)
+
+# Hardest part at the end
+bot.upload_picture(FILEPATH, description='New pic next time\n#motivation #go')
 
 bot.stop()

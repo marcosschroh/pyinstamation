@@ -1,5 +1,5 @@
-DRIVER_LOCATION_CHROME= './assets/chrome/chromedriver'
-DRIVER_LOCATION_FIREFOX= './assets/firefox/'
+DRIVER_LOCATION_CHROME = './assets/chrome/chromedriver'
+DRIVER_LOCATION_FIREFOX = './assets/firefox/'
 CHROME = 'chrome'
 FIREFOX = 'firefox'
 
@@ -13,10 +13,10 @@ OPTIONS_BUTTON = "//form/span/button[text()='Options']"
 
 # UPLOAD PICTURE
 UPLOAD_PICTURE_INPUT_FILE = "//input[@type='file']"
-UPLOAD_PICTURE_NEXT_LINK = "//header/div/button[text()='Next']"
+UPLOAD_PICTURE_NEXT_LINK = "//div/button[text()='Next']"
 UPLOAD_PICTURE_TEXTAREA_COMMENT = "//section/div/textarea"
 UPLOAD_PICTURE_SHARE_LINK = "//button[text()='Share']"
-UPLOAD_PICTURE_CAMARA_CLASS = "coreSpriteCameraInactive"
+UPLOAD_PICTURE_CAMARA_CLASS = "//div[contains(@class, 'coreSpriteFeedCreation')]"
 
 # FOLLOW/UNFOLLOW
 FOLLOW_UNFOLLOW_BUTTON = "//*[contains(text(), 'Follow')]"
@@ -45,6 +45,9 @@ USER_FOLLOWERS = "//a[@href='/{0}/followers/']/span"
 
 # TAG PAGE
 LOAD_MORE_POSTS = "//*[contains(text(), 'Load more')]"
+
+INSTAGRAM_APP_POP_UP = "//*[contains(text(), 'Not Now')]"
+
 
 # URLS
 HOSTNAME = 'https://www.instagram.com/'
