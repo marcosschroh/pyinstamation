@@ -76,7 +76,7 @@ class InstaBot:
         # represent the users that you are already following
         # this result comes from the Controller
         self.users_following_to_ignore = []
-
+        self.explored_posts_in_this_run = set()
         self.scrapper = scrapper
 
     @staticmethod
@@ -346,6 +346,9 @@ class InstaBot:
         if not ignore_tags:
             return True
 
+        if post.get('code') in self.explored_posts_in_this_run:
+            return False
+
         caption = post.get('caption')
         if caption:
             tags_in_post = self.parse_caption(caption)
@@ -370,6 +373,8 @@ class InstaBot:
             logger.info('No posts were found for HASHTAG "{0}"'.format(hashtag))
             return 0
 
+        logger.info('Found %s posts for hashtag: %s', len(posts), hashtag)
+
         users_followed_by_hashtag = 0
         posts_analyzed = 0
         for i, post in enumerate(posts):
@@ -389,6 +394,9 @@ class InstaBot:
                 msg = 'Ignoring post "{0}". Has at least one hashtag of "{1}"'
                 logger.info(msg.format(post_url, ignore_tags))
                 continue
+
+            # We are gonna explore this post after validating it
+            self.explored_posts_in_this_run.add(post_code)
 
             if self.posts_per_day:
                 logger.info('Post {0}/{1}'.format(self.posts_explored, self.posts_per_day))

@@ -21,3 +21,6 @@ webdriver:
 	@echo "Retrieving selenium webdriver..."
 	./scripts/get-driver
 	@echo "Done.\n"
+
+prepare-statics:
+	python scripts/prepare-test-static.py

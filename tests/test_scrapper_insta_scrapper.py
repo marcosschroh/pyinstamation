@@ -39,7 +39,7 @@ class InstaScrapperTest(unittest.TestCase):
         self.user_to_follow = 'fancyhoustonapartments'
         self.user_to_unfollow = 'celine_legallic'
 
-        self.post_path_no_like = 'BY3rdjrH-cr'
+        self.post_path_no_like = 'Bdi69MLH90D'
         self.post_link_no_like = 'p/{0}/'.format(self.post_path_no_like)
 
         self.post_path_liked = 'BY3Bg4THwNi'

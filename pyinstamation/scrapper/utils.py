@@ -29,3 +29,29 @@ def save_page_source(path, source, location=None):
         f.write(source)
 
     return filepath
+
+
+def format_post(post):
+    node = post.get('node', {})
+    code = node.get('shortcode')
+    captions = node.get('edge_media_to_caption', {}).get('edges', [])
+    try:
+        c = captions[0]
+    except IndexError:
+        caption = ''
+    else:
+        caption = c.get('node', {}).get('text')
+
+    return {
+        'code': code,
+        'caption': caption
+    }
+
+
+def posts_parser(json_content):
+    hashtag = json_content.get('graphql', {}).get('hashtag', {})
+    posts = hashtag.get('edge_hashtag_to_top_posts', {}).get('edges', [])
+    posts += hashtag.get('edge_hashtag_to_media', {}).get('edges', [])
+    if len(posts) == 0:
+        return []
+    return map(format_post, posts)
