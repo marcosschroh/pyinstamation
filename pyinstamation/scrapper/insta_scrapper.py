@@ -3,7 +3,12 @@ import os
 import logging
 import requests
 
-from selenium.common.exceptions import NoSuchElementException, WebDriverException, TimeoutException
+from selenium.common.exceptions import (
+    NoSuchElementException,
+    StaleElementReferenceException,
+    TimeoutException,
+    WebDriverException
+)
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -158,8 +163,10 @@ class InstaScrapper(BaseScrapper):
         element = WebDriverWait(self.browser, 5).until(
             EC.presence_of_element_located((
                 By.XPATH, const.FOLLOW_UNFOLLOW_BUTTON)))
-
-        return element.text == _text[operation]
+        try:
+            return element.text == _text[operation]
+        except StaleElementReferenceException:
+            return None
 
     def follow(self, username):
         self.user_page(username)
@@ -170,7 +177,9 @@ class InstaScrapper(BaseScrapper):
         self._click_follow_button()
 
         is_ok = self._validate_follow_click(operation='follow')
-        if not is_ok:
+        if is_ok is None:
+            logger.info('could not retrieve info about "%s" status', username)
+        elif not is_ok:
             msg = 'Could not follow "%s", instagram may be blocking'
             logger.info(msg, username)
             return False
@@ -187,7 +196,9 @@ class InstaScrapper(BaseScrapper):
         self._click_follow_button()
 
         is_ok = self._validate_follow_click(operation='unfollow')
-        if not is_ok:
+        if is_ok is None:
+            logger.info('could not retrieve info about "%s" status', username)
+        elif not is_ok:
             msg = 'Could not unfollow "%s", instagram may be blocking'
             logger.info(msg, username)
             return False
