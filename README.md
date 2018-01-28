@@ -39,7 +39,9 @@
 
 ## Quickstart
 
-Check [pyvirtualdisplay is installed properly](http://pyvirtualdisplay.readthedocs.io/en/latest/#general)
+1. Check [pyvirtualdisplay is installed properly](http://pyvirtualdisplay.readthedocs.io/en/latest/#general)
+2. Create [virtualenv](https://virtualenv.pypa.io/en/stable/installation/)
+3. Run:
 
 ```
 make init
