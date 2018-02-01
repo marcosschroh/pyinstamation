@@ -88,7 +88,6 @@ class InstaScrapper(BaseScrapper):
         total_followers = int(total_followers)
 
         # TODO: get friends/following list
-
         return {
             'total_followers': total_followers,
             'total_following': total_following,

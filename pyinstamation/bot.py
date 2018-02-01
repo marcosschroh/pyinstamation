@@ -5,7 +5,6 @@ from datetime import datetime
 from collections import namedtuple
 
 from pyinstamation.config import CONFIG
-from pyinstamation.scrapper import instagram_const
 from pyinstamation import comments
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -136,6 +135,8 @@ class InstaBot:
             my_profile = self.user_info(self.username)
             self.total_followers = my_profile.get('total_followers')
             self.total_following = my_profile.get('total_following')
+            logger.debug('Followers for user %s: %s', self.username, self.total_followers)
+            logger.debug('Following for user %s: %s', self.username, self.total_following)
 
     def upload_picture(self, image_path, description=None):
         self.scrapper.upload_picture(image_path, description)
@@ -504,6 +505,7 @@ class InstaBot:
             if users_following:
                 self.users_following_to_ignore = users_following
             self.explore_hashtags()
+            self.my_profile_info()
         except Exception as e:
             logger.exception('Something happened. Tracking to fix')
         finally:

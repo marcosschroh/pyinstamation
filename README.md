@@ -131,7 +131,7 @@ The options are divided in different sections.
 
 | Option | Type | Description | Default |
 | --- | --- | --- | --- |
-| `username` * | str | instagram username to operate with | --- |
+| `username` * | str | instagram username to operate. Only username works with statistics, not email | --- |
 | `password` ** | str | username's password | --- |
 | `hide_browser` | bool | do not display the browser | False |
 | `browser_type` | str | browser type (chrome/firefox)| chrome |
