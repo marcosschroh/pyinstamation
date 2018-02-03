@@ -37,3 +37,14 @@ class Follower(BaseModel):
     unfollow_date = orm.DateTimeField(default=future_rand_date)
     following = orm.BooleanField(default=True)
     times_followed = orm.IntegerField(default=1)
+
+
+class Statistics(BaseModel):
+    user = orm.ForeignKeyField(User)
+    likes = orm.IntegerField(default=0)
+    followers = orm.IntegerField(default=0)
+    following = orm.IntegerField(default=0)
+    followed = orm.IntegerField(default=0)
+    unfollowed = orm.IntegerField(default=0)
+    commented = orm.IntegerField(default=0)
+    timestamp = orm.DateTimeField(default=datetime.datetime.now)

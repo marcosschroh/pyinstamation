@@ -1,6 +1,6 @@
 import datetime
 import peewee
-from pyinstamation.models import User, Follower, future_rand_date
+from pyinstamation.models import User, Follower, Statistics, future_rand_date
 from tests import DBTestCase
 
 
@@ -31,3 +31,29 @@ class ModelTest(DBTestCase):
     def test_already_exist_username(self):
         with self.assertRaises(peewee.IntegrityError):
             User.create(username='darude')
+
+    def test_statistics_multiple_ok(self):
+        stat = Statistics.create(
+            user=self.user,
+            likes=1,
+            followed=1,
+            unfollowed=1,
+            commented=1
+        )
+        stat2 = Statistics.create(
+            user=self.user,
+            likes=2,
+            followed=3,
+            unfollowed=5,
+            commented=4
+        )
+        stat3 = Statistics.create(
+            user=self.user,
+            likes=2,
+            followed=3,
+            unfollowed=4,
+            commented=5
+        )
+        self.assertNotEqual(stat.timestamp, stat2.timestamp)
+        self.assertNotEqual(stat2.timestamp, stat3.timestamp)
+        self.assertEqual(Statistics.select.count(), 3)

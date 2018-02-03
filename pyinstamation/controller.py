@@ -1,7 +1,6 @@
 import datetime
 import logging
-import peewee
-from pyinstamation.models import User, Follower, future_rand_date, db
+from pyinstamation.models import User, Follower, Statistics, future_rand_date, db
 
 
 logger = logging.getLogger(__name__)
@@ -9,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 def create_tables(database):
     database.connect()
-    database.create_tables([User, Follower], safe=True)
+    database.create_tables([User, Follower, Statistics], safe=True)
 
 
 create_tables(db)
@@ -56,18 +55,30 @@ class Controller:
         modified_rows = query.execute()
         return modified_rows
 
-    def set_user_stats(self, likes=0, comments=0, followed=0, unfollowed=0, posts=0):
+    def set_user_stats(self, likes=0, comments=0, followed=0, unfollowed=0,
+                       posts=0, followers=0, following=0):
         self.user.likes += likes
         self.user.commented += comments
         self.user.followed += followed
         self.user.unfollowed += unfollowed
         self.user.save()
+        Statistics.create(
+            user=self.user,
+            likes=likes,
+            followers=followers,
+            following=following,
+            followed=followed,
+            unfollowed=unfollowed,
+            commented=comments
+        )
         logger.info('FINAL STATS')
         logger.info('Posts explored: %s', posts)
         logger.info('Likes: %s', likes)
         logger.info('Comments: %s', comments)
         logger.info('Followed: %s', followed)
         logger.info('Unfollowed: %s', unfollowed)
+        logger.info('Total followers: %s', followers)
+        logger.info('Total following: %s', following)
 
     def set_stats(self, bot):
         self.set_users_followed(bot.users_followed_by_bot)
@@ -76,6 +87,8 @@ class Controller:
                             comments=bot.commented_post,
                             followed=len(bot.users_followed_by_bot),
                             unfollowed=len(bot.users_unfollowed_by_bot),
+                            followers=bot.total_followers,
+                            following=bot.total_following,
                             posts=bot.posts_explored)
         return True
 
