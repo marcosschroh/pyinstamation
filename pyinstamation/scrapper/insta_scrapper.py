@@ -285,9 +285,6 @@ class InstaScrapper(BaseScrapper):
         self.get_page(url, sleep_time=2)
         self._load_more_posts()
 
-        if not self.pagination_info.get(hashtag):
-            self._set_pagination_info(hashtag)
-
     def get_posts_by_hashtag(self, hashtag):
         pagination_info = self.pagination_info.get(hashtag, {})
 
@@ -322,53 +319,6 @@ class InstaScrapper(BaseScrapper):
         except WebDriverException:
             self._scroll()
         self.wait(explicit=True)
-
-    def _set_pagination_info(self, hashtag):
-        network_activity = self.get_network_activity()
-        graphql_activity = list(filter(lambda n: const.URL_GRAPHQL in n.get('name'),
-                                network_activity))
-
-        if graphql_activity:
-            activity = graphql_activity[0]
-            url = activity.get('name')
-
-            # now we have the get with the querystring.
-            # we need to get the query string parameters.
-            # example: 'https://www.instagram.com/graphql/query/?query_id=17875800862117404& \
-            # variables=%7B%22tag_name%22%3A%22haarlem%22%2C%22first%22%3A8%2C%22after%22%3A%22J0HWaVb3gAAAF0HWaVMDAAAAFkIA%22%7D'
-            qs = parse_qs(url)
-
-            # expect the following dictionaty:
-            #    {
-            #        'https://www.instagram.com/graphql/query/?query_id': ['17875800862117404'],
-            #        'variables': ['{"tag_name":"haarlem","first":8,"after":"J0HWaVb3gAAAF0HWaVMDAAAAFkIA"}']
-            #    }
-
-            query_id = qs['https://www.instagram.com/graphql/query/?query_id'][0]
-            variables = json.loads(qs['variables'][0])
-            page_size = variables.get('first')
-
-            self.pagination_info[hashtag] = {
-                'query_id': query_id,
-                'page_size': page_size
-            }
-
-            # we should get the latest token page.
-            r = requests.get(url)
-
-            if r.ok:
-                json_content = r.json()
-                save_page_source(url, json_content)
-                page_info = json_content.get(
-                    'data', {}).get(
-                    'hashtag', {}).get(
-                    'edge_hashtag_to_media', {}).get(
-                    'page_info', {})
-
-                self.pagination_info[hashtag].update({
-                    'has_next_page': page_info.get('has_next_page'),
-                    'next_token': page_info.get('end_cursor')
-                })
 
     def _get_next_posts_page(self, hashtag, first=10):
         if self.pagination_info.get(hashtag, {}).get('has_next_page'):
