@@ -170,14 +170,6 @@ class InstaScrapperTest(unittest.TestCase):
         result = self.scrapper._get_next_posts_page(self.hashtag)
         self.assertEqual(len(result), 11)
 
-    @patch('requests.get', return_value=response(True, RESPONSE_SET_PAGINATION_INFO))
-    @patch('pyinstamation.scrapper.insta_scrapper.InstaScrapper.get_network_activity', return_value=NETWORK_ACTIVITY)
-    def test_set_pagination_info(self, get_network_activity_fn, requests_get_fn):
-        self.scrapper._set_pagination_info(self.hashtag)
-        expected_result = {'has_next_page': True, 'page_size': 8, 'next_token': 'J0HWc_PjAAAAF0HWc-jYQAAAFj4A', 'query_id': '17875800862117404'}
-        result = self.scrapper.pagination_info
-        self.assertEqual(result.get(self.hashtag), expected_result)
-
     @patch('requests.get', return_value=response(False, '{}'))
     def test_get_posts_by_hashtag_fail(self, requests_get_fn):
         result = self.scrapper.get_posts_by_hashtag(self.hashtag)

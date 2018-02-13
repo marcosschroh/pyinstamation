@@ -3,6 +3,7 @@ import logging
 import random
 from datetime import datetime
 from collections import namedtuple
+from selenium.common.exceptions import WebDriverException
 
 from pyinstamation.config import CONFIG
 from pyinstamation import comments
@@ -71,6 +72,7 @@ class InstaBot:
         self.users_followed_by_bot = []
         self.users_unfollowed_by_bot = []
         self.total_user_followed_by_bot = 0
+        self.failed_posts = 0
 
         # represent the users that you are already following
         # this result comes from the Controller
@@ -387,49 +389,52 @@ class InstaBot:
             if posts_per_hashtag and posts_per_hashtag <= i:
                 return posts_analyzed
 
-            # if there is a post there is a code....
-            post_code = post.get('code')
-            post_url = self.scrapper.generate_post_link_by_code(post_code)
-            logger.info('Current post: {0}'.format(post_url))
-            if not self._validate_post(post, ignore_tags=ignore_tags):
-                msg = 'Ignoring post "{0}". Has at least one hashtag of "{1}"'
-                logger.info(msg.format(post_url, ignore_tags))
+            try:
+                # if there is a post there is a code....
+                post_code = post.get('code')
+                post_url = self.scrapper.generate_post_link_by_code(post_code)
+                logger.info('Current post: {0}'.format(post_url))
+                if not self._validate_post(post, ignore_tags=ignore_tags):
+                    msg = 'Ignoring post "{0}". Has at least one hashtag of "{1}"'
+                    logger.info(msg.format(post_url, ignore_tags))
+                    continue
+
+                # We are gonna explore this post after validating it
+                self.explored_posts_in_this_run.add(post_code)
+
+                if self.posts_per_day:
+                    logger.info('Post {0}/{1}'.format(self.posts_explored, self.posts_per_day))
+                self.scrapper.wait(sleep_time=3)
+                username = self.scrapper.username_in_post_page(post_url)
+                if username is None:
+                    continue
+
+                if self._ignore_followed(username):
+                    msg = 'Skip. Already following the user "{0}"'.format(username)
+                    logger.debug(msg)
+                    continue
+
+                self.posts_explored += 1
+
+                if self._should_like():
+                    self.like(post_url)
+
+                if self._should_comment():
+                    comment = self.comment_issuer()
+
+                    if comment:
+                        self.comment(post_url, comment)
+                        logger.info('Comment: "{0}"'.format(comment))
+
+                if self._should_follow(username, ignore_users=ignore_users):
+                    if self.follow(username):
+                        logger.info('Followed: "{0}"'.format(username))
+                        users_followed_by_hashtag += 1
+
+                posts_analyzed += 1
+            except WebDriverException:
+                self.failed_posts += 1
                 continue
-
-            # We are gonna explore this post after validating it
-            self.explored_posts_in_this_run.add(post_code)
-
-            if self.posts_per_day:
-                logger.info('Post {0}/{1}'.format(self.posts_explored, self.posts_per_day))
-            self.scrapper.wait(sleep_time=3)
-            username = self.scrapper.username_in_post_page(post_url)
-            if username is None:
-                continue
-
-            if self._ignore_followed(username):
-                msg = 'Skip. Already following the user "{0}"'.format(username)
-                logger.debug(msg)
-                continue
-
-            self.posts_explored += 1
-
-            if self._should_like():
-                self.like(post_url)
-
-            if self._should_comment():
-                comment = self.comment_issuer()
-
-                if comment:
-                    self.comment(post_url, comment)
-                    logger.info('Comment: "{0}"'.format(comment))
-
-            if self._should_follow(username, ignore_users=ignore_users):
-                if self.follow(username):
-                    logger.info('Followed: "{0}"'.format(username))
-                    users_followed_by_hashtag += 1
-
-            posts_analyzed += 1
-
         return posts_analyzed
 
     @property
@@ -505,8 +510,8 @@ class InstaBot:
             if users_following:
                 self.users_following_to_ignore = users_following
             self.explore_hashtags()
-            self.my_profile_info()
         except Exception as e:
             logger.exception('Something happened. Tracking to fix')
         finally:
+            self.my_profile_info()
             self.stop()

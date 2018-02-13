@@ -71,14 +71,17 @@ class Controller:
             unfollowed=unfollowed,
             commented=comments
         )
+
+    def final_log(self, bot):
         logger.info('FINAL STATS')
-        logger.info('Posts explored: %s', posts)
-        logger.info('Likes: %s', likes)
-        logger.info('Comments: %s', comments)
-        logger.info('Followed: %s', followed)
-        logger.info('Unfollowed: %s', unfollowed)
-        logger.info('Total followers: %s', followers)
-        logger.info('Total following: %s', following)
+        logger.info('Failed posts: %s', bot.failed_posts)
+        logger.info('Posts explored: %s', bot.posts)
+        logger.info('Likes: %s', bot.likes)
+        logger.info('Comments: %s', bot.comments)
+        logger.info('Followed: %s', bot.followed)
+        logger.info('Unfollowed: %s', bot.unfollowed)
+        logger.info('Total followers: %s', bot.followers)
+        logger.info('Total following: %s', bot.following)
 
     def set_stats(self, bot):
         self.set_users_followed(bot.users_followed_by_bot)
@@ -98,6 +101,6 @@ class Controller:
 
         bot.run(users_to_unfollow=unfollow_users,
                 users_following=users_following)
-
         self.set_stats(bot)
+        self.final_log(bot)
         db.close()
