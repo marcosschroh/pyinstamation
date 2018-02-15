@@ -75,7 +75,7 @@ class Controller:
     def final_log(self, bot):
         logger.info('FINAL STATS')
         logger.info('Failed posts: %s', bot.failed_posts)
-        logger.info('Posts explored: %s', bot.posts)
+        logger.info('Posts explored: %s', bot.posts_explored)
         logger.info('Likes: %s', bot.likes)
         logger.info('Comments: %s', bot.comments)
         logger.info('Followed: %s', bot.followed)
