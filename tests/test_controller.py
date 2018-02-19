@@ -5,7 +5,7 @@ from pyinstamation.controller import Controller
 from tests import DBTestCase
 
 
-class MockUpBot:
+class BotMockUp:
 
     def __init__(self):
         self.users_followed_by_bot = 1
@@ -13,6 +13,9 @@ class MockUpBot:
         self.likes_given_by_bot = 1
         self.commented_post = 1
         self.posts_explored = 1
+        self.total_followers = 1
+        self.total_following = 1
+        self.failed_posts = 0
         self.users_followed_by_bot = [
             FollowedUser('mock_juan', datetime.datetime.now()),
             FollowedUser('mock_pepe', datetime.datetime.now()),
@@ -33,7 +36,7 @@ class ControllerTest(DBTestCase):
     def setUp(self):
         self.user = User.create(username='darude')
         self.followers = ['user1', 'user2', 'user3']
-        self.bot = MockUpBot()
+        self.bot = BotMockUp()
 
         for username in self.followers:
             Follower.create(user=self.user, username=username)
