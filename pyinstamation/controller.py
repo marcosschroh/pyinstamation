@@ -76,12 +76,12 @@ class Controller:
         logger.info('FINAL STATS')
         logger.info('Failed posts: %s', bot.failed_posts)
         logger.info('Posts explored: %s', bot.posts_explored)
-        logger.info('Likes: %s', bot.likes)
-        logger.info('Comments: %s', bot.comments)
-        logger.info('Followed: %s', bot.followed)
-        logger.info('Unfollowed: %s', bot.unfollowed)
-        logger.info('Total followers: %s', bot.followers)
-        logger.info('Total following: %s', bot.following)
+        logger.info('Likes: %s', bot.likes_given_by_bot)
+        logger.info('Comments: %s', bot.commented_post)
+        logger.info('Followed: %s', len(bot.users_followed_by_bot))
+        logger.info('Unfollowed: %s', len(bot.users_unfollowed_by_bot))
+        logger.info('Total followers: %s', bot.total_followers)
+        logger.info('Total following: %s', bot.total_following)
 
     def set_stats(self, bot):
         self.set_users_followed(bot.users_followed_by_bot)
