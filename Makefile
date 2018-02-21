@@ -14,7 +14,7 @@ run-bot:
 	python -m pyinstamation
 
 run-tests-coverage:
-	coverage run --source=pyinstamation -m unittest discover -s tests/
+	coverage run --source=pyinstamation --omit="*/scrapper*" -m unittest discover -s tests/
 	coverage report -m
 
 webdriver:

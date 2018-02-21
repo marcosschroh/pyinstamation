@@ -19,7 +19,7 @@ class DBTestCase(unittest.TestCase):
     TEST_DB = peewee.SqliteDatabase(':memory:')
 
     def run(self, result=None):
-        with test_database(self.TEST_DB, (models.User, models.Follower)):
+        with test_database(self.TEST_DB, (models.User, models.Follower, models.Statistics)):
             super().run(result)
 
 

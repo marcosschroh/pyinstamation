@@ -56,4 +56,4 @@ class ModelTest(DBTestCase):
         )
         self.assertNotEqual(stat.timestamp, stat2.timestamp)
         self.assertNotEqual(stat2.timestamp, stat3.timestamp)
-        self.assertEqual(Statistics.select.count(), 3)
+        self.assertEqual(Statistics.select().count(), 3)
