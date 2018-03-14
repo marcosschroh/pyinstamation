@@ -30,7 +30,7 @@ class InstaScrapper(BaseScrapper):
     def login(self, username, password):
         self.get_page(const.URL_LOGIN)
         logger.debug('Attempting to login user "%s"', username)
-
+        self.wait()
         username_input = self.find('xpath', const.LOGIN_INPUT_USERNAME, wait=False)
         password_input = self.find('xpath', const.LOGIN_INPUT_PASSWORD, wait=False)
 
