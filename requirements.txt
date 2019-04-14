@@ -1,5 +1,5 @@
 selenium==3.5.0
-PyYAML==3.12
+PyYAML==5.1
 peewee==2.10.1
 requests==2.21.0
 coverage==4.4.1
